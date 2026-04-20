@@ -64,6 +64,10 @@ const tastingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    moodTags: {
+      type: [String],
+      default: [],
+    },
     personalThoughts: {
       type: String,
       maxlength: 500,

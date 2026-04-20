@@ -14,24 +14,21 @@ const wineSchema = new mongoose.Schema({
   country: {
     type: String,
     required: true,
+    trim: true,
   },
   region: {
     type: String,
-    required: true,
+    default: "",
+    trim: true,
   },
   grape: {
     type: String,
     required: true,
+    trim: true,
   },
   vintage: {
     type: Number,
-    min: 1900,
-    max: 2100,
-  },
-  type: {
-    type: String,
     required: true,
-    enum: ["Red", "White", "Rose", "Sparkling", "Dessert"],
   },
 });
 

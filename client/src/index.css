@@ -1,14 +1,20 @@
 :root {
-  --hero-pink: #5b0f22;
-  --sparkle-pink: #7a1832;
-  --line: rgba(255, 220, 226, 0.12);
-  --line-strong: rgba(255, 220, 226, 0.22);
+  --hero-pink: #51101e;
+  --sparkle-pink: #761b30;
+  --page-top: #320711;
+  --page-bottom: #1f030a;
+  --panel-dark: #561122;
+  --panel-mid: #6c1830;
+  --panel-light: #842442;
+  --line: rgba(255, 228, 233, 0.12);
+  --line-strong: rgba(255, 228, 233, 0.24);
   --text: #fff7f8;
-  --text-soft: #f1d7dc;
+  --text-soft: #f3d8de;
   --berry-dark: #fff8f9;
-  --berry-mid: #f4c9d3;
-  --accent: #b11f48;
-  --font-heading: "Trebuchet MS", "Avenir Next", sans-serif;
+  --berry-mid: #f7ccd5;
+  --accent: #ca4f73;
+  --accent-strong: #e16c90;
+  --font-heading: "Georgia", "Times New Roman", serif;
   --font-body: "Avenir Next", "Segoe UI", sans-serif;
   font-family: var(--font-body);
   color: var(--text);
@@ -31,10 +37,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 10%, rgba(255, 221, 228, 0.1) 0 7px, transparent 8px),
-    radial-gradient(circle at 82% 18%, rgba(255, 221, 228, 0.08) 0 6px, transparent 7px),
-    radial-gradient(circle at 70% 72%, rgba(255, 221, 228, 0.08) 0 5px, transparent 6px),
-    linear-gradient(180deg, #4c0b1b 0%, #2d0410 100%);
+    radial-gradient(circle at 10% 12%, rgba(255, 225, 232, 0.08) 0 7px, transparent 8px),
+    radial-gradient(circle at 84% 16%, rgba(255, 225, 232, 0.08) 0 6px, transparent 7px),
+    radial-gradient(circle at 76% 74%, rgba(255, 225, 232, 0.06) 0 5px, transparent 6px),
+    linear-gradient(180deg, var(--page-top) 0%, var(--page-bottom) 100%);
+  background-attachment: fixed;
 }
 
 button,
@@ -53,6 +60,7 @@ h2,
 h3 {
   font-family: var(--font-heading);
   margin: 0;
+  letter-spacing: -0.03em;
 }
 
 p {

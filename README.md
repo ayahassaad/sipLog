@@ -134,7 +134,7 @@ sipLog/
 │
 └── README.md
 
-### Data Model Summary
+Data Model Summary
 -----------------------
 -Wine
 Each wine entry stores:

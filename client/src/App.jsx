@@ -5,80 +5,14 @@ import FilterBar from "./components/FilterBar";
 import HeroPanel from "./components/HeroPanel";
 import TastingForm from "./components/TastingForm";
 import TastingTimeline from "./components/TastingTimeline";
-
-const TASTINGS_API_URL = "http://localhost:5001/api/tastings";
-const WINES_API_URL = "http://localhost:5001/api/wines";
-
-const MOOD_TAGS = [
-  "Date night",
-  "Cozy night",
-  "Dinner party",
-  "Girls night",
-  "Celebration",
-  "Gift-worthy",
-  "Weeknight",
-  "Summer patio",
-];
-
-const initialWineForm = {
-  name: "",
-  producer: "",
-  country: "",
-  region: "",
-  grape: "",
-  vintage: 2020,
-};
-
-const initialTastingForm = {
-  userId: "69e681b2b977676391c086f2",
-  wineId: "",
-  appearance: "",
-  noseNotes: "",
-  palateNotes: "",
-  sweetness: 1,
-  acidity: 1,
-  body: 1,
-  tannin: 1,
-  rating: 1,
-  price: 0,
-  wouldBuyAgain: false,
-  moodTags: [],
-  personalThoughts: "",
-  imageUrl: "",
-};
-
-function compressImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const image = new Image();
-
-      image.onload = () => {
-        const maxWidth = 1200;
-        const scale = Math.min(1, maxWidth / image.width);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(image.width * scale);
-        canvas.height = Math.round(image.height * scale);
-
-        const context = canvas.getContext("2d");
-        if (!context) {
-          reject(new Error("Could not process image"));
-          return;
-        }
-
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
-      };
-
-      image.onerror = () => reject(new Error("Could not read image"));
-      image.src = typeof reader.result === "string" ? reader.result : "";
-    };
-
-    reader.onerror = () => reject(new Error("Could not load file"));
-    reader.readAsDataURL(file);
-  });
-}
+import {
+  initialTastingForm,
+  initialWineForm,
+  MOOD_TAGS,
+  TASTINGS_API_URL,
+  WINES_API_URL,
+} from "./constants";
+import { compressImage } from "./utils/compressImage";
 
 function App() {
   const [tastings, setTastings] = useState([]);

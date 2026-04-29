@@ -8,6 +8,8 @@ function TastingForm({
   tastingForm,
   moodTags,
   submitting,
+  error,
+  successMessage,
   onSubmit,
   onWineModeChange,
   onWineChange,
@@ -22,6 +24,11 @@ function TastingForm({
         <p className="section-kicker">{editingId ? "Update entry" : "New entry"}</p>
         <h2>{editingId ? "Edit Tasting" : "Add a Tasting"}</h2>
       </div>
+
+      {error && <p className="status-message error form-status">{error}</p>}
+      {!error && successMessage && (
+        <p className="status-message success form-status">{successMessage}</p>
+      )}
 
       {!editingId && (
         <div className="mode-toggle">

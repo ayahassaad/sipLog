@@ -3,21 +3,37 @@ import BottleRating from "./BottleRating";
 function TastingTimeline({
   loading,
   error,
+  successMessage,
   filteredCount,
   timelineGroups,
+  lastUpdatedAt,
   deletingId,
   onEdit,
   onDelete,
 }) {
+  const lastUpdatedLabel = lastUpdatedAt
+    ? new Intl.DateTimeFormat(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }).format(lastUpdatedAt)
+    : "Waiting for first sync";
+
   return (
     <>
-      <div className="section-heading timeline-heading">
+      <div className="section-heading timeline-heading" id="timeline-section">
         <p className="section-kicker">Journal View</p>
         <h2>Tasting Timeline</h2>
+        <p className="timeline-refresh-note">
+          Auto-refreshes every 30 seconds. Last updated: {lastUpdatedLabel}
+        </p>
       </div>
 
       {loading && <p className="status-message">Loading tastings...</p>}
       {error && <p className="status-message error">{error}</p>}
+      {!loading && !error && successMessage && (
+        <p className="status-message success">{successMessage}</p>
+      )}
       {!loading && !error && filteredCount === 0 && (
         <p className="status-message">No entries match your current filters.</p>
       )}
@@ -32,11 +48,13 @@ function TastingTimeline({
                   <div className="card-top">
                     <div>
                       <p className="card-vintage">
-                        {tasting.wineId.vintage} {tasting.wineId.country}
+                        {tasting.wineId?.vintage || "Unknown vintage"}{" "}
+                        {tasting.wineId?.country || "Unknown country"}
                       </p>
-                      <h3>{tasting.wineId.name}</h3>
+                      <h3>{tasting.wineId?.name || "Untitled wine"}</h3>
                       <p className="card-subtitle">
-                        {tasting.wineId.producer} · {tasting.wineId.grape}
+                        {tasting.wineId?.producer || "Unknown producer"} ·{" "}
+                        {tasting.wineId?.grape || "Unknown grape"}
                       </p>
                     </div>
                     <BottleRating rating={tasting.rating} />
@@ -46,7 +64,7 @@ function TastingTimeline({
                     <img
                       className="card-photo"
                       src={tasting.imageUrl}
-                      alt={tasting.wineId.name}
+                      alt={tasting.wineId?.name || "Wine tasting"}
                     />
                   )}
 

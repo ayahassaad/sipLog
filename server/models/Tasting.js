@@ -77,10 +77,6 @@ const tastingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    tastedAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   { timestamps: true }
 );

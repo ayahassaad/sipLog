@@ -233,6 +233,10 @@
   margin-top: 18px;
 }
 
+.form-status {
+  margin-top: 16px;
+}
+
 .subpanel {
   padding: 18px;
   background: rgba(127, 27, 54, 0.94);
@@ -434,6 +438,12 @@ textarea:focus {
   margin-top: 12px;
 }
 
+.timeline-refresh-note {
+  margin-top: 8px;
+  color: var(--berry-mid);
+  font-size: 0.92rem;
+}
+
 .timeline-date {
   padding-left: 14px;
   color: #f2bfd0;
@@ -527,6 +537,11 @@ textarea:focus {
 
 .status-message.error {
   border: 1px solid rgba(255, 221, 228, 0.16);
+}
+
+.status-message.success {
+  border: 1px solid rgba(255, 226, 233, 0.18);
+  background: rgba(120, 31, 54, 0.96);
 }
 
 @media (max-width: 980px) {

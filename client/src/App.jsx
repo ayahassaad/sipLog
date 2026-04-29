@@ -16,14 +16,12 @@ import { compressImage } from "./utils/compressImage";
 
 function App() {
   const [tastings, setTastings] = useState([]);
-  const [hiddenBrokenTastings, setHiddenBrokenTastings] = useState([]);
   const [wines, setWines] = useState([]);
   const [tastingForm, setTastingForm] = useState(initialTastingForm);
   const [wineForm, setWineForm] = useState(initialWineForm);
   const [createNewWine, setCreateNewWine] = useState(true);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [cleaning, setCleaning] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [editingId, setEditingId] = useState("");
   const [error, setError] = useState("");
@@ -32,6 +30,8 @@ function App() {
   const [grapeFilter, setGrapeFilter] = useState("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [saveSplash, setSaveSplash] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const resetForms = useCallback(() => {
     setEditingId("");
@@ -39,6 +39,35 @@ function App() {
     setWineForm(initialWineForm);
     setTastingForm(initialTastingForm);
     setError("");
+  }, []);
+
+  const hydrateTastingWine = useCallback((tasting, winesData) => {
+    if (!tasting) {
+      return tasting;
+    }
+
+    const wineLookup = new Map(winesData.map((wine) => [wine._id, wine]));
+    const currentWine = tasting.wineId;
+
+    if (currentWine && typeof currentWine === "object" && currentWine.name) {
+      return tasting;
+    }
+
+    const wineId =
+      typeof currentWine === "string"
+        ? currentWine
+        : currentWine && typeof currentWine === "object"
+          ? currentWine._id
+          : null;
+
+    if (!wineId) {
+      return { ...tasting, wineId: null };
+    }
+
+    return {
+      ...tasting,
+      wineId: wineLookup.get(wineId) || null,
+    };
   }, []);
 
   const loadData = useCallback(async () => {
@@ -58,16 +87,17 @@ function App() {
         winesRes.json(),
       ]);
 
-      const validTastings = tastingsData
-        .filter((tasting) => tasting.wineId && tasting.wineId.name)
-        .sort((a, b) => new Date(b.tastedAt) - new Date(a.tastedAt));
-      const brokenTastings = tastingsData.filter(
-        (tasting) => !tasting.wineId || !tasting.wineId.name
+      const hydratedTastings = tastingsData.map((tasting) =>
+        hydrateTastingWine(tasting, winesData)
       );
 
-      setTastings(validTastings);
-      setHiddenBrokenTastings(brokenTastings);
+      const sortedTastings = hydratedTastings.sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      );
+
+      setTastings(sortedTastings);
       setWines(winesData);
+      setLastUpdatedAt(new Date());
       setError("");
 
       setTastingForm((prev) => {
@@ -81,7 +111,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [createNewWine]);
+  }, [createNewWine, hydrateTastingWine]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -93,8 +123,23 @@ function App() {
       loadData();
     }, 30000);
 
+    const handleWindowFocus = () => {
+      loadData();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadData();
+      }
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [loadData]);
 
@@ -102,6 +147,14 @@ function App() {
     setSaveSplash(true);
     window.setTimeout(() => setSaveSplash(false), 1400);
   };
+
+  const mergeTastingIntoState = useCallback((savedTasting) => {
+    setTastings((prev) =>
+      [savedTasting, ...prev.filter((tasting) => tasting._id !== savedTasting._id)].sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      )
+    );
+  }, []);
 
   const handleTastingChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -180,13 +233,15 @@ function App() {
     event.preventDefault();
     setSubmitting(true);
     setError("");
+    setSuccessMessage("");
 
     try {
       let wineId = tastingForm.wineId;
+      let createdWine = null;
 
       if (!editingId && createNewWine) {
-        const savedWine = await createWine();
-        wineId = savedWine._id;
+        createdWine = await createWine();
+        wineId = createdWine._id;
       }
 
       const payload = {
@@ -220,9 +275,49 @@ function App() {
         );
       }
 
+      const savedTastingResponse = await tastingRes.json();
+      const selectedWine =
+        createNewWine && !editingId
+          ? createdWine
+          : wines.find((wine) => wine._id === wineId) || null;
+
+      let populatedTasting = {
+        ...savedTastingResponse,
+        wineId: selectedWine,
+      };
+
+      if (!populatedTasting?.wineId?.name) {
+        const populatedTastingRes = await fetch(
+          `${TASTINGS_API_URL}/${savedTastingResponse._id}`
+        );
+
+        if (!populatedTastingRes.ok) {
+          throw new Error("Tasting saved, but failed to refresh the timeline entry");
+        }
+
+        populatedTasting = await populatedTastingRes.json();
+      }
+
       resetForms();
+      setSearchTerm("");
+      setRatingFilter("all");
+      setGrapeFilter("all");
+      setFavoritesOnly(false);
       flashSplash();
       await loadData();
+      mergeTastingIntoState(populatedTasting);
+      setLastUpdatedAt(new Date());
+      setSuccessMessage(
+        editingId
+          ? "Tasting updated successfully. It has been refreshed in the timeline."
+          : "Wine and tasting saved successfully. Scroll down to see it at the top of the timeline."
+      );
+      window.setTimeout(() => {
+        document.getElementById("timeline-section")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -245,7 +340,9 @@ function App() {
         const data = await res.json();
         throw new Error(data.message || "Failed to delete tasting");
       }
+      setTastings((prev) => prev.filter((tasting) => tasting._id !== tastingId));
       await loadData();
+      setLastUpdatedAt(new Date());
     } catch (err) {
       setError(err.message);
     } finally {
@@ -275,35 +372,6 @@ function App() {
       imageUrl: tasting.imageUrl || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCleanupBrokenTastings = async () => {
-    if (hiddenBrokenTastings.length === 0) {
-      return;
-    }
-
-    if (
-      !window.confirm(
-        `Delete ${hiddenBrokenTastings.length} hidden broken tasting entries?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setCleaning(true);
-      setError("");
-      await Promise.all(
-        hiddenBrokenTastings.map((tasting) =>
-          fetch(`${TASTINGS_API_URL}/${tasting._id}`, { method: "DELETE" })
-        )
-      );
-      await loadData();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCleaning(false);
-    }
   };
 
   const grapes = useMemo(
@@ -350,7 +418,8 @@ function App() {
 
   const timelineGroups = useMemo(() => {
     return filteredTastings.reduce((groups, tasting) => {
-      const label = new Date(tasting.tastedAt).toLocaleDateString(undefined, {
+      const timelineDate = tasting.createdAt || tasting.updatedAt;
+      const label = new Date(timelineDate).toLocaleDateString(undefined, {
         month: "long",
         day: "numeric",
         year: "numeric",
@@ -375,27 +444,6 @@ function App() {
         averageRating={averageRating}
       />
 
-      {hiddenBrokenTastings.length > 0 && (
-        <section className="notice-card">
-          <div>
-            <p className="notice-title">Cleanup available</p>
-            <p className="notice-text">
-              {hiddenBrokenTastings.length} older test tasting
-              {hiddenBrokenTastings.length > 1 ? "s are" : " is"} hidden because the
-              linked wine data is incomplete.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={handleCleanupBrokenTastings}
-            disabled={cleaning}
-          >
-            {cleaning ? "Cleaning..." : "Remove Hidden Test Data"}
-          </button>
-        </section>
-      )}
-
       <FilterBar
         grapes={grapes}
         searchTerm={searchTerm}
@@ -417,6 +465,8 @@ function App() {
           tastingForm={tastingForm}
           moodTags={MOOD_TAGS}
           submitting={submitting}
+          error={error}
+          successMessage={successMessage}
           onSubmit={handleSubmit}
           onWineModeChange={handleWineModeChange}
           onWineChange={handleWineChange}
@@ -431,8 +481,10 @@ function App() {
           <TastingTimeline
             loading={loading}
             error={error}
+            successMessage={successMessage}
             filteredCount={filteredTastings.length}
             timelineGroups={timelineGroups}
+            lastUpdatedAt={lastUpdatedAt}
             deletingId={deletingId}
             onEdit={handleEdit}
             onDelete={handleDelete}

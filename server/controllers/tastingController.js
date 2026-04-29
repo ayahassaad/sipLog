@@ -118,15 +118,6 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.tastedAt !== undefined) {
-    const parsedDate = new Date(body.tastedAt);
-    if (Number.isNaN(parsedDate.getTime())) {
-      errors.push("tastedAt must be a valid date");
-    } else {
-      payload.tastedAt = parsedDate;
-    }
-  }
-
   return { errors, payload };
 }
 
@@ -189,7 +180,7 @@ exports.getAllTastings = async (req, res) => {
     }
 
     const tastings = await Tasting.find(query)
-      .sort({ tastedAt: -1, createdAt: -1 })
+      .sort({ createdAt: -1, updatedAt: -1 })
       .populate("userId")
       .populate({
         path: "wineId",

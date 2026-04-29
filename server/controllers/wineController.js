@@ -82,7 +82,7 @@ exports.getTastingsForWine = async (req, res) => {
     }
 
     const tastings = await Tasting.find({ wineId: req.params.id })
-      .sort({ tastedAt: -1, createdAt: -1 })
+      .sort({ createdAt: -1, updatedAt: -1 })
       .populate("userId")
       .populate("wineId");
 

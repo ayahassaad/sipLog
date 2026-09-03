@@ -1,6 +1,3 @@
-export const TASTINGS_API_URL = "http://localhost:5001/api/tastings";
-export const WINES_API_URL = "http://localhost:5001/api/wines";
-
 export const MOOD_TAGS = [
   "Date night",
   "Cozy night",
@@ -21,8 +18,9 @@ export const initialWineForm = {
   vintage: 2020,
 };
 
+// No userId here anymore - the backend always stamps tastings with the logged
+// in user's id from their session, never from client input.
 export const initialTastingForm = {
-  userId: "69e681b2b977676391c086f2",
   wineId: "",
   appearance: "",
   noseNotes: "",

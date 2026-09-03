@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Tasting = require("../models/Tasting");
-const User = require("../models/User");
 const Wine = require("../models/Wine");
 
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
@@ -32,17 +31,12 @@ function normalizeNotes(value, fieldName, errors) {
   return value.map((item) => item.trim()).filter(Boolean);
 }
 
+// Note: userId is intentionally never read from the request body. It is always
+// taken from the authenticated session (req.user.id) by the caller, so a user
+// can never create or claim a tasting on someone else's behalf.
 function buildValidatedPayload(body, { partial = false } = {}) {
   const errors = [];
   const payload = {};
-
-  if (!partial || body.userId !== undefined) {
-    if (!isValidObjectId(body.userId)) {
-      errors.push("userId must be a valid MongoDB ObjectId");
-    } else {
-      payload.userId = body.userId;
-    }
-  }
 
   if (!partial || body.wineId !== undefined) {
     if (!isValidObjectId(body.wineId)) {
@@ -74,7 +68,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   });
 
-  if (!partial || body.price !== undefined) {
+  if (body.price !== undefined) {
     const numericPrice = Number(body.price);
     if (Number.isNaN(numericPrice) || numericPrice < 0) {
       errors.push("price must be a non-negative number");
@@ -83,7 +77,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.wouldBuyAgain !== undefined) {
+  if (body.wouldBuyAgain !== undefined) {
     if (typeof body.wouldBuyAgain !== "boolean") {
       errors.push("wouldBuyAgain must be a boolean");
     } else {
@@ -91,7 +85,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.moodTags !== undefined) {
+  if (body.moodTags !== undefined) {
     if (!Array.isArray(body.moodTags) || body.moodTags.some((tag) => typeof tag !== "string")) {
       errors.push("moodTags must be an array of strings");
     } else {
@@ -99,7 +93,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.personalThoughts !== undefined) {
+  if (body.personalThoughts !== undefined) {
     if (
       typeof body.personalThoughts !== "string" ||
       body.personalThoughts.trim().length > 500
@@ -110,7 +104,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.imageUrl !== undefined) {
+  if (body.imageUrl !== undefined) {
     if (typeof body.imageUrl !== "string") {
       errors.push("imageUrl must be a string");
     } else {
@@ -121,15 +115,8 @@ function buildValidatedPayload(body, { partial = false } = {}) {
   return { errors, payload };
 }
 
-async function validateLinkedDocuments(payload) {
+async function validateWineExists(payload) {
   const errors = [];
-
-  if (payload.userId) {
-    const userExists = await User.exists({ _id: payload.userId });
-    if (!userExists) {
-      errors.push("Referenced user was not found");
-    }
-  }
 
   if (payload.wineId) {
     const wineExists = await Wine.exists({ _id: payload.wineId });
@@ -143,14 +130,9 @@ async function validateLinkedDocuments(payload) {
 
 exports.getAllTastings = async (req, res) => {
   try {
-    const query = {};
-
-    if (req.query.userId) {
-      if (!isValidObjectId(req.query.userId)) {
-        return res.status(400).json({ message: "userId query must be a valid MongoDB ObjectId" });
-      }
-      query.userId = req.query.userId;
-    }
+    // Tastings are private: always scoped to the logged-in user, regardless of
+    // any userId a client might try to pass in the query string.
+    const query = { userId: req.user._id };
 
     if (req.query.wineId) {
       if (!isValidObjectId(req.query.wineId)) {
@@ -179,8 +161,15 @@ exports.getAllTastings = async (req, res) => {
       wineMatch.country = req.query.country;
     }
 
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+
+    const total = await Tasting.countDocuments(query);
+
     const tastings = await Tasting.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
       .populate("userId")
       .populate({
         path: "wineId",
@@ -188,15 +177,25 @@ exports.getAllTastings = async (req, res) => {
       });
 
     const filteredTastings = tastings.filter((tasting) => tasting.wineId);
-    res.json(filteredTastings);
+
+    res.json({
+      tastings: filteredTastings,
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.getTastingStats = async (_req, res) => {
+exports.getTastingStats = async (req, res) => {
   try {
+    const matchStage = { userId: req.user._id };
+
     const [summary] = await Tasting.aggregate([
+      { $match: matchStage },
       {
         $group: {
           _id: null,
@@ -213,6 +212,7 @@ exports.getTastingStats = async (_req, res) => {
     ]);
 
     const topMoodTags = await Tasting.aggregate([
+      { $match: matchStage },
       { $unwind: "$moodTags" },
       {
         $group: {
@@ -225,6 +225,7 @@ exports.getTastingStats = async (_req, res) => {
     ]);
 
     const topGrapes = await Tasting.aggregate([
+      { $match: matchStage },
       {
         $lookup: {
           from: "wines",
@@ -275,7 +276,7 @@ exports.getTastingById = async (req, res) => {
       return res.status(400).json({ message: "Invalid tasting id" });
     }
 
-    const tasting = await Tasting.findById(req.params.id)
+    const tasting = await Tasting.findOne({ _id: req.params.id, userId: req.user._id })
       .populate("userId")
       .populate("wineId");
 
@@ -292,7 +293,7 @@ exports.getTastingById = async (req, res) => {
 exports.createTasting = async (req, res) => {
   try {
     const { errors, payload } = buildValidatedPayload(req.body);
-    const relationErrors = await validateLinkedDocuments(payload);
+    const relationErrors = await validateWineExists(payload);
 
     if (errors.length > 0 || relationErrors.length > 0) {
       return res.status(400).json({
@@ -300,8 +301,9 @@ exports.createTasting = async (req, res) => {
       });
     }
 
-    const tasting = new Tasting(payload);
+    const tasting = new Tasting({ ...payload, userId: req.user._id });
     const savedTasting = await tasting.save();
+    await savedTasting.populate(["userId", "wineId"]);
     res.status(201).json(savedTasting);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -314,8 +316,13 @@ exports.updateTasting = async (req, res) => {
       return res.status(400).json({ message: "Invalid tasting id" });
     }
 
+    const existing = await Tasting.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!existing) {
+      return res.status(404).json({ message: "Tasting not found" });
+    }
+
     const { errors, payload } = buildValidatedPayload(req.body, { partial: false });
-    const relationErrors = await validateLinkedDocuments(payload);
+    const relationErrors = await validateWineExists(payload);
 
     if (errors.length > 0 || relationErrors.length > 0) {
       return res.status(400).json({
@@ -323,15 +330,13 @@ exports.updateTasting = async (req, res) => {
       });
     }
 
-    const updatedTasting = await Tasting.findByIdAndUpdate(
-      req.params.id,
+    const updatedTasting = await Tasting.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
       payload,
       { new: true, runValidators: true }
-    );
-
-    if (!updatedTasting) {
-      return res.status(404).json({ message: "Tasting not found" });
-    }
+    )
+      .populate("userId")
+      .populate("wineId");
 
     res.json(updatedTasting);
   } catch (error) {
@@ -345,7 +350,10 @@ exports.deleteTasting = async (req, res) => {
       return res.status(400).json({ message: "Invalid tasting id" });
     }
 
-    const deletedTasting = await Tasting.findByIdAndDelete(req.params.id);
+    const deletedTasting = await Tasting.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
 
     if (!deletedTasting) {
       return res.status(404).json({ message: "Tasting not found" });

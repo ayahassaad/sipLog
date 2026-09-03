@@ -81,7 +81,9 @@ exports.getTastingsForWine = async (req, res) => {
       return res.status(404).json({ message: "Wine not found" });
     }
 
-    const tastings = await Tasting.find({ wineId: req.params.id })
+    // Tastings are private, so this only ever returns the current user's own
+    // notes on this wine, never anyone else's.
+    const tastings = await Tasting.find({ wineId: req.params.id, userId: req.user._id })
       .sort({ createdAt: -1, updatedAt: -1 })
       .populate("userId")
       .populate("wineId");

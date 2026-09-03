@@ -7,6 +7,7 @@ import TastingForm from "../components/TastingForm";
 import TastingTimeline from "../components/TastingTimeline";
 import { initialTastingForm, initialWineForm, MOOD_TAGS } from "../constants";
 import { compressImage } from "../utils/compressImage";
+import { uploadImage } from "../services/uploadService";
 import { fetchWines, createWine as createWineRequest } from "../services/wineService";
 import {
   fetchTastings,
@@ -25,6 +26,7 @@ function JournalPage() {
   const [createNewWine, setCreateNewWine] = useState(true);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [editingId, setEditingId] = useState("");
   const [error, setError] = useState("");
@@ -147,11 +149,18 @@ function JournalPage() {
     }
 
     try {
+      setUploadingPhoto(true);
+      // Compress locally first (keeps the upload small and fast), then upload
+      // the compressed image straight to Cloudinary - only the resulting URL
+      // is ever stored, never the image bytes in MongoDB.
       const compressedImage = await compressImage(file);
-      setTastingForm((prev) => ({ ...prev, imageUrl: compressedImage }));
+      const uploadedUrl = await uploadImage(compressedImage);
+      setTastingForm((prev) => ({ ...prev, imageUrl: uploadedUrl }));
       setError("");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -342,7 +351,7 @@ function JournalPage() {
           wineForm={wineForm}
           tastingForm={tastingForm}
           moodTags={MOOD_TAGS}
-          submitting={submitting}
+          submitting={submitting || uploadingPhoto}
           error={error}
           successMessage={successMessage}
           onSubmit={handleSubmit}

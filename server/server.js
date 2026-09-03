@@ -10,6 +10,7 @@ const { requireAuth } = require("./middleware/auth");
 const authRoutes = require("./routes/authRoutes");
 const tastingRoutes = require("./routes/tastingRoutes");
 const wineRoutes = require("./routes/wineRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -29,6 +30,7 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/tastings", requireAuth, tastingRoutes);
 app.use("/api/wines", requireAuth, wineRoutes);
+app.use("/api/uploads", requireAuth, uploadRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

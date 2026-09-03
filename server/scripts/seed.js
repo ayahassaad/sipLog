@@ -4,6 +4,10 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const Wine = require("../models/Wine");
 const Tasting = require("../models/Tasting");
+const { hashPassword } = require("../utils/password");
+
+// Dev-only password for every seeded account. Never used in production data.
+const SEED_PASSWORD = "Password123!";
 
 const userIds = {
   ayah: new mongoose.Types.ObjectId("69e681b2b977676391c086f2"),
@@ -21,13 +25,17 @@ const wineIds = {
   chianti: new mongoose.Types.ObjectId("69e800000000000000000014"),
 };
 
-const users = [
-  { _id: userIds.ayah, name: "Ayah Assaad", email: "ayah@siplog.app" },
-  { _id: userIds.sara, name: "Sara Nilsson", email: "sara@siplog.app" },
-  { _id: userIds.leila, name: "Leila Haddad", email: "leila@siplog.app" },
-  { _id: userIds.emma, name: "Emma Berg", email: "emma@siplog.app" },
-  { _id: userIds.nora, name: "Nora Lind", email: "nora@siplog.app" },
-];
+async function buildUsers() {
+  const passwordHash = await hashPassword(SEED_PASSWORD);
+
+  return [
+    { _id: userIds.ayah, name: "Ayah Assaad", email: "ayah@siplog.app", passwordHash },
+    { _id: userIds.sara, name: "Sara Nilsson", email: "sara@siplog.app", passwordHash },
+    { _id: userIds.leila, name: "Leila Haddad", email: "leila@siplog.app", passwordHash },
+    { _id: userIds.emma, name: "Emma Berg", email: "emma@siplog.app", passwordHash },
+    { _id: userIds.nora, name: "Nora Lind", email: "nora@siplog.app", passwordHash },
+  ];
+}
 
 const wines = [
   {
@@ -168,6 +176,8 @@ const tastings = [
 async function main() {
   await mongoose.connect(process.env.MONGO_URI);
 
+  const users = await buildUsers();
+
   await User.deleteMany({});
   await Wine.deleteMany({});
   await Tasting.deleteMany({});
@@ -180,6 +190,8 @@ async function main() {
   console.log(`- users: ${users.length}`);
   console.log(`- wines: ${wines.length}`);
   console.log(`- tastings: ${tastings.length}`);
+  console.log(`\nAll seeded users share the dev password: ${SEED_PASSWORD}`);
+  console.log("e.g. ayah@siplog.app / " + SEED_PASSWORD);
 
   await mongoose.disconnect();
 }

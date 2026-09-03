@@ -563,3 +563,32 @@ textarea:focus {
     flex-direction: column;
   }
 }
+
+.auth-shell {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 12vh;
+}
+
+.auth-panel {
+  width: min(420px, 100%);
+}
+
+.auth-switch {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--text-soft, inherit);
+}
+
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.top-bar .user-name {
+  font-weight: 600;
+}

@@ -68,7 +68,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   });
 
-  if (!partial || body.price !== undefined) {
+  if (body.price !== undefined) {
     const numericPrice = Number(body.price);
     if (Number.isNaN(numericPrice) || numericPrice < 0) {
       errors.push("price must be a non-negative number");
@@ -77,7 +77,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.wouldBuyAgain !== undefined) {
+  if (body.wouldBuyAgain !== undefined) {
     if (typeof body.wouldBuyAgain !== "boolean") {
       errors.push("wouldBuyAgain must be a boolean");
     } else {
@@ -85,7 +85,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.moodTags !== undefined) {
+  if (body.moodTags !== undefined) {
     if (!Array.isArray(body.moodTags) || body.moodTags.some((tag) => typeof tag !== "string")) {
       errors.push("moodTags must be an array of strings");
     } else {
@@ -93,7 +93,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.personalThoughts !== undefined) {
+  if (body.personalThoughts !== undefined) {
     if (
       typeof body.personalThoughts !== "string" ||
       body.personalThoughts.trim().length > 500
@@ -104,7 +104,7 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
-  if (!partial || body.imageUrl !== undefined) {
+  if (body.imageUrl !== undefined) {
     if (typeof body.imageUrl !== "string") {
       errors.push("imageUrl must be a string");
     } else {

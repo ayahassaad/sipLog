@@ -161,8 +161,15 @@ exports.getAllTastings = async (req, res) => {
       wineMatch.country = req.query.country;
     }
 
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+
+    const total = await Tasting.countDocuments(query);
+
     const tastings = await Tasting.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
       .populate("userId")
       .populate({
         path: "wineId",
@@ -170,7 +177,14 @@ exports.getAllTastings = async (req, res) => {
       });
 
     const filteredTastings = tastings.filter((tasting) => tasting.wineId);
-    res.json(filteredTastings);
+
+    res.json({
+      tastings: filteredTastings,
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

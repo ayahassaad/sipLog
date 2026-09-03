@@ -4,9 +4,9 @@ function extractMessage(error, fallback) {
   return error.response?.data?.message || fallback;
 }
 
-export async function fetchTastings() {
+export async function fetchTastings({ page = 1, limit = 50 } = {}) {
   try {
-    const res = await api.get("/tastings");
+    const res = await api.get("/tastings", { params: { page, limit } });
     return res.data;
   } catch (error) {
     throw new Error(extractMessage(error, "Failed to load tastings"));

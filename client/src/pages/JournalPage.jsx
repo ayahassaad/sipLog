@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTastings } from "../hooks/useTastings";
+import { useWines } from "../hooks/useWines";
 import FavoritesShelf from "../components/FavoritesShelf";
 import FilterBar from "../components/FilterBar";
 import HeroPanel from "../components/HeroPanel";
@@ -8,104 +10,76 @@ import TastingTimeline from "../components/TastingTimeline";
 import { initialTastingForm, initialWineForm, MOOD_TAGS } from "../constants";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
-import { fetchWines, createWine as createWineRequest } from "../services/wineService";
-import {
-  fetchTastings,
-  createTasting as createTastingRequest,
-  updateTasting as updateTastingRequest,
-  deleteTasting as deleteTastingRequest,
-} from "../services/tastingService";
+
+const AUTO_REFRESH_MS = 30000;
 
 function JournalPage() {
   const { user, logout } = useAuth();
+  const tastings = useTastings();
+  const wines = useWines();
 
-  const [tastings, setTastings] = useState([]);
-  const [wines, setWines] = useState([]);
   const [tastingForm, setTastingForm] = useState(initialTastingForm);
   const [wineForm, setWineForm] = useState(initialWineForm);
   const [createNewWine, setCreateNewWine] = useState(true);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [editingId, setEditingId] = useState("");
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
   const [grapeFilter, setGrapeFilter] = useState("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [saveSplash, setSaveSplash] = useState(false);
-  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
 
-  const resetForms = useCallback(() => {
-    setEditingId("");
-    setCreateNewWine(true);
-    setWineForm(initialWineForm);
-    setTastingForm(initialTastingForm);
-    setError("");
-  }, []);
+  const loading = tastings.loading || wines.loading;
+  const error = formError || tastings.error || wines.error;
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [tastingsData, winesData] = await Promise.all([fetchTastings(), fetchWines()]);
-
-      const sortedTastings = [...tastingsData].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      );
-
-      setTastings(sortedTastings);
-      setWines(winesData);
-      setLastUpdatedAt(new Date());
-      setError("");
-
-      setTastingForm((prev) => {
-        if (!createNewWine && winesData.length > 0 && !prev.wineId) {
-          return { ...prev, wineId: winesData[0]._id };
-        }
-        return prev;
-      });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [createNewWine]);
-
+  // Default the "existing wine" picker to the first wine once wines load.
   useEffect(() => {
-    loadData();
-    const intervalId = window.setInterval(loadData, 30000);
+    if (!createNewWine && wines.wines.length > 0 && !tastingForm.wineId) {
+      setTastingForm((prev) => ({ ...prev, wineId: wines.wines[0]._id }));
+    }
+  }, [createNewWine, wines.wines, tastingForm.wineId]);
 
-    const handleWindowFocus = () => loadData();
+  // Keep the journal reasonably fresh if it's left open in a background tab.
+  useEffect(() => {
+    const refreshAll = () => {
+      tastings.refresh();
+      wines.loadWines();
+    };
+
+    const intervalId = window.setInterval(refreshAll, AUTO_REFRESH_MS);
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        loadData();
+        refreshAll();
       }
     };
 
-    window.addEventListener("focus", handleWindowFocus);
+    window.addEventListener("focus", refreshAll);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.clearInterval(intervalId);
-      window.removeEventListener("focus", handleWindowFocus);
+      window.removeEventListener("focus", refreshAll);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [loadData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const resetForms = () => {
+    setEditingId("");
+    setCreateNewWine(true);
+    setWineForm(initialWineForm);
+    setTastingForm(initialTastingForm);
+    setFormError("");
+  };
 
   const flashSplash = () => {
     setSaveSplash(true);
     window.setTimeout(() => setSaveSplash(false), 1400);
   };
-
-  const mergeTastingIntoState = useCallback((savedTasting) => {
-    setTastings((prev) =>
-      [savedTasting, ...prev.filter((tasting) => tasting._id !== savedTasting._id)].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      )
-    );
-  }, []);
 
   const handleTastingChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -125,8 +99,8 @@ function JournalPage() {
 
   const handleWineModeChange = (useNewWine) => {
     setCreateNewWine(useNewWine);
-    if (!useNewWine && wines.length > 0) {
-      setTastingForm((prev) => ({ ...prev, wineId: wines[0]._id }));
+    if (!useNewWine && wines.wines.length > 0) {
+      setTastingForm((prev) => ({ ...prev, wineId: wines.wines[0]._id }));
     }
     if (useNewWine) {
       setTastingForm((prev) => ({ ...prev, wineId: "" }));
@@ -156,9 +130,9 @@ function JournalPage() {
       const compressedImage = await compressImage(file);
       const uploadedUrl = await uploadImage(compressedImage);
       setTastingForm((prev) => ({ ...prev, imageUrl: uploadedUrl }));
-      setError("");
+      setFormError("");
     } catch (err) {
-      setError(err.message);
+      setFormError(err.message);
     } finally {
       setUploadingPhoto(false);
     }
@@ -167,14 +141,14 @@ function JournalPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
-    setError("");
+    setFormError("");
     setSuccessMessage("");
 
     try {
       let wineId = tastingForm.wineId;
 
       if (!editingId && createNewWine) {
-        const createdWine = await createWineRequest(wineForm);
+        const createdWine = await wines.addWine(wineForm);
         wineId = createdWine._id;
       }
 
@@ -191,9 +165,15 @@ function JournalPage() {
           .filter(Boolean),
       };
 
-      const savedTasting = editingId
-        ? await updateTastingRequest(editingId, payload)
-        : await createTastingRequest(payload);
+      if (editingId) {
+        await tastings.update(editingId, payload);
+        setSuccessMessage("Tasting updated successfully. It has been refreshed in the timeline.");
+      } else {
+        await tastings.create(payload);
+        setSuccessMessage(
+          "Wine and tasting saved successfully. Scroll down to see it at the top of the timeline."
+        );
+      }
 
       resetForms();
       setSearchTerm("");
@@ -201,13 +181,6 @@ function JournalPage() {
       setGrapeFilter("all");
       setFavoritesOnly(false);
       flashSplash();
-      mergeTastingIntoState(savedTasting);
-      setLastUpdatedAt(new Date());
-      setSuccessMessage(
-        editingId
-          ? "Tasting updated successfully. It has been refreshed in the timeline."
-          : "Wine and tasting saved successfully. Scroll down to see it at the top of the timeline."
-      );
       window.setTimeout(() => {
         document.getElementById("timeline-section")?.scrollIntoView({
           behavior: "smooth",
@@ -215,7 +188,7 @@ function JournalPage() {
         });
       }, 150);
     } catch (err) {
-      setError(err.message);
+      setFormError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -228,12 +201,10 @@ function JournalPage() {
 
     try {
       setDeletingId(tastingId);
-      setError("");
-      await deleteTastingRequest(tastingId);
-      setTastings((prev) => prev.filter((tasting) => tasting._id !== tastingId));
-      setLastUpdatedAt(new Date());
+      setFormError("");
+      await tastings.remove(tastingId);
     } catch (err) {
-      setError(err.message);
+      setFormError(err.message);
     } finally {
       setDeletingId("");
     }
@@ -242,7 +213,7 @@ function JournalPage() {
   const handleEdit = (tasting) => {
     setEditingId(tasting._id);
     setCreateNewWine(false);
-    setError("");
+    setFormError("");
     setTastingForm({
       wineId: tasting.wineId?._id || "",
       appearance: tasting.appearance || "",
@@ -263,12 +234,12 @@ function JournalPage() {
   };
 
   const grapes = useMemo(
-    () => [...new Set(tastings.map((tasting) => tasting.wineId?.grape).filter(Boolean))],
-    [tastings]
+    () => [...new Set(tastings.tastings.map((tasting) => tasting.wineId?.grape).filter(Boolean))],
+    [tastings.tastings]
   );
 
   const filteredTastings = useMemo(() => {
-    return tastings.filter((tasting) => {
+    return tastings.tastings.filter((tasting) => {
       const matchesSearch =
         searchTerm.trim() === "" ||
         [
@@ -291,7 +262,7 @@ function JournalPage() {
 
       return matchesSearch && matchesRating && matchesGrape && matchesFavorites;
     });
-  }, [favoritesOnly, grapeFilter, ratingFilter, searchTerm, tastings]);
+  }, [favoritesOnly, grapeFilter, ratingFilter, searchTerm, tastings.tastings]);
 
   const favoriteTastings = useMemo(
     () => filteredTastings.filter((tasting) => tasting.wouldBuyAgain || tasting.rating >= 4),
@@ -312,8 +283,11 @@ function JournalPage() {
     }, {});
   }, [filteredTastings]);
 
-  const averageRating = tastings.length
-    ? (tastings.reduce((sum, tasting) => sum + tasting.rating, 0) / tastings.length).toFixed(1)
+  const averageRating = tastings.tastings.length
+    ? (
+        tastings.tastings.reduce((sum, tasting) => sum + tasting.rating, 0) /
+        tastings.tastings.length
+      ).toFixed(1)
     : "0.0";
 
   return (
@@ -326,8 +300,8 @@ function JournalPage() {
       </div>
 
       <HeroPanel
-        tastingsCount={tastings.length}
-        winesCount={wines.length}
+        tastingsCount={tastings.tastings.length}
+        winesCount={wines.wines.length}
         averageRating={averageRating}
       />
 
@@ -347,7 +321,7 @@ function JournalPage() {
         <TastingForm
           editingId={editingId}
           createNewWine={createNewWine}
-          wines={wines}
+          wines={wines.wines}
           wineForm={wineForm}
           tastingForm={tastingForm}
           moodTags={MOOD_TAGS}
@@ -371,11 +345,18 @@ function JournalPage() {
             successMessage={successMessage}
             filteredCount={filteredTastings.length}
             timelineGroups={timelineGroups}
-            lastUpdatedAt={lastUpdatedAt}
+            lastUpdatedAt={tastings.lastUpdatedAt}
             deletingId={deletingId}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
+          {tastings.hasMore && (
+            <div className="button-row">
+              <button type="button" className="button-secondary" onClick={tastings.loadMore}>
+                Load more tastings
+              </button>
+            </div>
+          )}
         </section>
       </main>
     </div>

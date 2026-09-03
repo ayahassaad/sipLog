@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { useTastings } from "../hooks/useTastings";
 import { useWines } from "../hooks/useWines";
 import FavoritesShelf from "../components/FavoritesShelf";
@@ -37,11 +37,11 @@ function JournalPage() {
   const error = formError || tastings.error || wines.error;
 
   // Default the "existing wine" picker to the first wine once wines load.
-  useEffect(() => {
-    if (!createNewWine && wines.wines.length > 0 && !tastingForm.wineId) {
-      setTastingForm((prev) => ({ ...prev, wineId: wines.wines[0]._id }));
-    }
-  }, [createNewWine, wines.wines, tastingForm.wineId]);
+  // Derived during render instead of an effect, so there's no extra setState render.
+  const effectiveWineId = useMemo(() => {
+    if (createNewWine) return tastingForm.wineId;
+    return tastingForm.wineId || wines.wines[0]?._id || "";
+  }, [createNewWine, tastingForm.wineId, wines.wines]);
 
   // Keep the journal reasonably fresh if it's left open in a background tab.
   useEffect(() => {
@@ -145,7 +145,7 @@ function JournalPage() {
     setSuccessMessage("");
 
     try {
-      let wineId = tastingForm.wineId;
+      let wineId = effectiveWineId;
 
       if (!editingId && createNewWine) {
         const createdWine = await wines.addWine(wineForm);
@@ -323,7 +323,7 @@ function JournalPage() {
           createNewWine={createNewWine}
           wines={wines.wines}
           wineForm={wineForm}
-          tastingForm={tastingForm}
+          tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
           moodTags={MOOD_TAGS}
           submitting={submitting || uploadingPhoto}
           error={error}

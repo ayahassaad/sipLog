@@ -19,8 +19,15 @@ export function useWines() {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    loadWines().finally(() => setLoading(false));
+    let ignore = false;
+    loadWines().finally(() => {
+      if (!ignore) {
+        setLoading(false);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
   }, [loadWines]);
 
   const addWine = useCallback(async (payload) => {

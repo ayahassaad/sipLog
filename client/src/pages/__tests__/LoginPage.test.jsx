@@ -2,9 +2,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import LoginPage from "../LoginPage";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
-vi.mock("../../context/AuthContext", () => ({
+vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 

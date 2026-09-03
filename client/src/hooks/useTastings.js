@@ -35,8 +35,15 @@ export function useTastings() {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    loadFirstPage().finally(() => setLoading(false));
+    let ignore = false;
+    loadFirstPage().finally(() => {
+      if (!ignore) {
+        setLoading(false);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
   }, [loadFirstPage]);
 
   const loadMore = useCallback(async () => {

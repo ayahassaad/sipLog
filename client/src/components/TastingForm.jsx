@@ -21,7 +21,6 @@ function TastingForm({
   return (
     <section className="panel form-panel">
       <div className="section-heading">
-        <p className="section-kicker">{editingId ? "Update entry" : "New entry"}</p>
         <h2>{editingId ? "Edit Tasting" : "Add a Tasting"}</h2>
       </div>
 

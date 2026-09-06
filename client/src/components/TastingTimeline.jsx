@@ -22,7 +22,6 @@ function TastingTimeline({
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">
-        <p className="section-kicker">Journal View</p>
         <h2>Tasting Timeline</h2>
         <p className="timeline-refresh-note">
           Auto-refreshes every 30 seconds. Last updated: {lastUpdatedLabel}

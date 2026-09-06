@@ -4,7 +4,6 @@ function FavoritesShelf({ tastings }) {
   return (
     <>
       <div className="section-heading">
-        <p className="section-kicker">Top Shelf</p>
         <h2>Favorites Shelf</h2>
       </div>
 

@@ -12,7 +12,6 @@ function FilterBar({
   return (
     <section className="panel filter-bar">
       <div className="section-heading">
-        <p className="section-kicker">Explore</p>
         <h2>Search &amp; Filter</h2>
       </div>
       <div className="filter-grid">

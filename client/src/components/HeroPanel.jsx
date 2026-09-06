@@ -5,7 +5,6 @@ function HeroPanel({ tastingsCount, winesCount, averageRating }) {
     <header className="hero-panel">
       <div className="hero-copy">
         <RoseGlassLogo />
-        <p className="eyebrow">Digital Wine Journal</p>
         <h1>SipLog</h1>
         <p className="hero-text">
           Build your own tasting timeline, collect bottles you loved, and make

@@ -50,7 +50,6 @@
 }
 
 .section-heading h2,
-.subpanel h3,
 .tasting-card h3 {
   margin: 0;
   color: var(--berry-dark);
@@ -80,7 +79,6 @@
 .stat-card,
 .notice-card,
 .panel,
-.subpanel,
 .tasting-card,
 .favorite-card,
 .wheel-card {
@@ -159,7 +157,6 @@
   gap: 12px;
 }
 
-.toggle-chip,
 .tag-pill,
 .mood-chip {
   display: inline-flex;
@@ -174,18 +171,46 @@
   transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
-.toggle-chip.active,
 .tag-pill.selected,
 .wheel-note:hover {
   background: var(--accent);
   color: var(--berry-dark);
 }
 
-.toggle-chip:hover,
 .tag-pill:hover,
 .mood-chip:hover {
   transform: translateY(-1px);
   border-color: rgba(255, 235, 239, 0.3);
+}
+
+/* A flat tab switch instead of bordered pill buttons - one of the fewer
+   "boxes" the form now uses. */
+.mode-toggle {
+  gap: 22px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+}
+
+.toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.toggle-chip.active {
+  color: var(--berry-dark);
+  border-bottom-color: var(--accent);
+}
+
+.toggle-chip:hover {
+  color: var(--berry-dark);
 }
 
 .toggle-chip input,
@@ -200,11 +225,6 @@
 
 .form-status {
   margin-top: 16px;
-}
-
-.subpanel {
-  padding: 18px;
-  background: rgba(127, 27, 54, 0.94);
 }
 
 .form-grid {
@@ -242,7 +262,6 @@ textarea {
   background: #f6e2e7;
   color: #4e1023;
   padding: 13px 15px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 textarea { resize: vertical; min-height: 110px; }

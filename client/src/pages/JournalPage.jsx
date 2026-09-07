@@ -149,7 +149,6 @@ function JournalPage() {
 
       if (editingId) {
         await tastings.update(editingId, payload);
-        setSuccessMessage("Tasting updated successfully. It has been refreshed in the timeline.");
       } else {
         await tastings.create(payload);
       }

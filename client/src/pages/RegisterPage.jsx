@@ -33,7 +33,6 @@ function RegisterPage() {
     <div className="app-shell auth-shell">
       <section className="auth-panel">
         <div className="section-heading">
-          <p className="section-kicker">Start your journal</p>
           <h2>
             Create your <span className="brand-highlight">SipLog</span> account
           </h2>

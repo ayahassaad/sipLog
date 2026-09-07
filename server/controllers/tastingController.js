@@ -13,7 +13,7 @@ function isValidObjectId(value) {
 // posted it, so "favorited" state lives on the viewer (req.user.favorites),
 // not on the Tasting document itself.
 function buildFavoriteIdSet(user) {
-  return new Set((user.favorites || []).map((favoriteId) => favoriteId.toString()));
+  return new Set((user?.favorites || []).map((favoriteId) => favoriteId.toString()));
 }
 
 function attachFavoriteFlag(tastings, favoriteIdSet) {
@@ -208,10 +208,10 @@ exports.getAllTastings = async (req, res) => {
 
 exports.getCommunityFeed = async (req, res) => {
   try {
-    // The community feed shows everyone else's tastings (never your own -
-    // that's what "My Journal" is for), still respecting the same pagination
-    // shape as the private timeline.
-    const query = { userId: { $ne: req.user._id } };
+    // The community feed is public -- anyone can browse it without logging
+    // in. Logged-in users never see their own tastings here (that's what
+    // "My Journal" is for); a logged-out visitor sees everyone's.
+    const query = req.user ? { userId: { $ne: req.user._id } } : {};
 
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));

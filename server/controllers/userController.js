@@ -16,8 +16,12 @@ function toDirectoryUser(user, followingIds) {
 
 exports.listUsers = async (req, res) => {
   try {
-    const users = await User.find({ _id: { $ne: req.user._id } }).sort({ name: 1 });
-    const followingIds = new Set(req.user.following.map((id) => id.toString()));
+    // The user directory is public -- browsing "People to Follow" doesn't
+    // require an account, only actually following someone does. A logged-out
+    // visitor sees everyone (no self to exclude, nothing followed yet).
+    const query = req.user ? { _id: { $ne: req.user._id } } : {};
+    const users = await User.find(query).sort({ name: 1 });
+    const followingIds = new Set((req.user?.following || []).map((id) => id.toString()));
 
     res.json(users.map((user) => toDirectoryUser(user, followingIds)));
   } catch (error) {

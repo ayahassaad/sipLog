@@ -49,15 +49,21 @@ const baseTasting = {
   rating: 4,
 };
 
-describe("Auth is required", () => {
-  it("blocks the user directory and follow routes without a session", async () => {
+describe("Public browsing vs. auth-required actions", () => {
+  it("lets a logged-out visitor browse the user directory and community feed", async () => {
     const list = await request(app).get("/api/users");
-    const follow = await request(app).post("/api/users/000000000000000000000000/follow");
     const feed = await request(app).get("/api/tastings/feed");
 
-    expect(list.status).toBe(401);
+    expect(list.status).toBe(200);
+    expect(feed.status).toBe(200);
+  });
+
+  it("still blocks follow/unfollow without a session", async () => {
+    const follow = await request(app).post("/api/users/000000000000000000000000/follow");
+    const unfollow = await request(app).post("/api/users/000000000000000000000000/unfollow");
+
     expect(follow.status).toBe(401);
-    expect(feed.status).toBe(401);
+    expect(unfollow.status).toBe(401);
   });
 });
 
@@ -72,6 +78,17 @@ describe("User directory", () => {
     expect(res.body).toHaveLength(1);
     expect(res.body[0].name).toBe("Taster 2");
     expect(res.body[0]).not.toHaveProperty("email");
+  });
+
+  it("shows everyone (with isFollowing false) to a logged-out visitor", async () => {
+    await registerAgent();
+    await registerAgent();
+
+    const res = await request(app).get("/api/users");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+    expect(res.body.every((user) => user.isFollowing === false)).toBe(true);
   });
 });
 
@@ -207,6 +224,23 @@ describe("Community feed", () => {
     expect(feed.body.tastings[0].userId.name).toBe(bobUser.name);
     expect(feed.body).toHaveProperty("page");
     expect(feed.body).toHaveProperty("totalPages");
+  });
+
+  it("shows every tasting (with isFavorited false) to a logged-out visitor", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob } = await registerAgent();
+
+    const aliceWine = await createWine(alice, { name: "Alice's Wine" });
+    const bobWine = await createWine(bob, { name: "Bob's Wine" });
+
+    await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: bobWine._id });
+
+    const feed = await request(app).get("/api/tastings/feed");
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(2);
+    expect(feed.body.tastings.every((tasting) => tasting.isFavorited === false)).toBe(true);
   });
 
   it("returns an empty feed when no one else has posted", async () => {

@@ -666,21 +666,33 @@ textarea:focus {
   border-bottom-color: var(--gold);
 }
 
-.site-header .button-secondary {
+.logout-button {
   justify-self: end;
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 8px 2px;
+  color: var(--text-soft);
   font-family: var(--font-body);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   font-size: 0.78rem;
-  padding: 10px 20px;
+  cursor: pointer;
+  transition: color 0.16s ease;
 }
 
-.site-header .button-secondary:hover {
-  background: var(--gold);
-  color: var(--page-top);
+.logout-button svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+}
+
+.logout-button:hover {
+  color: var(--gold);
 }
 
 .people-row {

@@ -841,6 +841,7 @@ textarea:focus {
 }
 
 .logout-button {
+  position: relative;
   justify-self: end;
   display: inline-flex;
   align-items: center;
@@ -867,6 +868,61 @@ textarea:focus {
 
 .logout-button:hover {
   color: var(--gold);
+}
+
+/* A cute little tooltip that pleads with you not to log out. */
+.logout-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  background: var(--page-top);
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  color: var(--gold);
+  font-family: var(--font-body);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+  padding: 6px 14px;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.9);
+  transform-origin: top right;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 50;
+}
+
+.logout-button::before {
+  content: "";
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  background: var(--page-top);
+  border-left: 1px solid var(--gold);
+  border-top: 1px solid var(--gold);
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+  z-index: 49;
+}
+
+.logout-button:hover::after,
+.logout-button:focus-visible::after,
+.logout-button:hover::before,
+.logout-button:focus-visible::before {
+  opacity: 1;
+}
+
+.logout-button:hover::after,
+.logout-button:focus-visible::after {
+  transform: translateY(0) scale(1);
 }
 
 .people-row {

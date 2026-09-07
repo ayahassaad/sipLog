@@ -11,7 +11,6 @@ function renderForm(overrides = {}) {
     wines: [],
     wineForm: initialWineForm,
     tastingForm: initialTastingForm,
-    moodTags: ["Date night", "Cozy night"],
     submitting: false,
     error: "",
     successMessage: "",
@@ -20,7 +19,6 @@ function renderForm(overrides = {}) {
     onWineChange: vi.fn(),
     onTastingChange: vi.fn(),
     onPhotoUpload: vi.fn(),
-    onToggleMoodTag: vi.fn(),
     onCancelEdit: vi.fn(),
     ...overrides,
   };
@@ -44,12 +42,6 @@ describe("TastingForm", () => {
 
     expect(screen.queryByLabelText(/wine name/i)).not.toBeInTheDocument();
     expect(screen.getByText(/Rioja - Riscal \(2020\)/)).toBeInTheDocument();
-  });
-
-  it("calls onToggleMoodTag when a mood tag is clicked", () => {
-    const { onToggleMoodTag } = renderForm();
-    fireEvent.click(screen.getByRole("button", { name: "Date night" }));
-    expect(onToggleMoodTag).toHaveBeenCalledWith("Date night");
   });
 
   it("submits the form", () => {

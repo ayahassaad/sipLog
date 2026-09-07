@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const tastingRoutes = require("./routes/tastingRoutes");
 const wineRoutes = require("./routes/wineRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tastings", requireAuth, tastingRoutes);
 app.use("/api/wines", requireAuth, wineRoutes);
 app.use("/api/uploads", requireAuth, uploadRoutes);
+app.use("/api/users", requireAuth, userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

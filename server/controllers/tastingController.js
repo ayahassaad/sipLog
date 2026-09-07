@@ -190,6 +190,37 @@ exports.getAllTastings = async (req, res) => {
   }
 };
 
+exports.getCommunityFeed = async (req, res) => {
+  try {
+    // The community feed shows everyone else's tastings (never your own -
+    // that's what "My Journal" is for), still respecting the same pagination
+    // shape as the private timeline.
+    const query = { userId: { $ne: req.user._id } };
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+
+    const total = await Tasting.countDocuments(query);
+
+    const tastings = await Tasting.find(query)
+      .sort({ createdAt: -1, updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("userId")
+      .populate("wineId");
+
+    res.json({
+      tastings,
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.getTastingStats = async (req, res) => {
   try {
     const matchStage = { userId: req.user._id };

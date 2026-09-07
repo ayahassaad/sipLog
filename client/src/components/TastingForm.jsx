@@ -6,7 +6,6 @@ function TastingForm({
   wines,
   wineForm,
   tastingForm,
-  moodTags,
   submitting,
   error,
   successMessage,
@@ -15,13 +14,12 @@ function TastingForm({
   onWineChange,
   onTastingChange,
   onPhotoUpload,
-  onToggleMoodTag,
   onCancelEdit,
 }) {
   return (
     <section className="panel form-panel">
       <div className="section-heading">
-        <h2>{editingId ? "Edit Tasting" : "Add a Tasting"}</h2>
+        <h2>{editingId ? "Edit Wine" : "Add a Wine"}</h2>
       </div>
 
       {error && <p className="status-message error form-status">{error}</p>}
@@ -51,10 +49,9 @@ function TastingForm({
       )}
 
       <form className="tasting-form" onSubmit={onSubmit}>
-        {!editingId && createNewWine ? (
-          <div className="subpanel">
-            <h3>Wine Details</h3>
-            <div className="form-grid">
+        <div className="form-grid">
+          {!editingId && createNewWine ? (
+            <>
               <label>
                 Wine Name
                 <input
@@ -114,147 +111,116 @@ function TastingForm({
                   required
                 />
               </label>
-            </div>
-          </div>
-        ) : (
-          <label>
-            {editingId ? "Wine" : "Choose a Wine"}
-            <select
-              name="wineId"
-              value={tastingForm.wineId}
-              onChange={onTastingChange}
-              required
-            >
-              <option value="">Select a wine</option>
-              {wines.map((wine) => (
-                <option key={wine._id} value={wine._id}>
-                  {wine.name} - {wine.producer} ({wine.vintage})
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        <div className="subpanel">
-          <h3>Tasting Notes</h3>
-          <div className="form-grid">
+            </>
+          ) : (
             <label className="full-width">
-              Appearance
-              <input
-                type="text"
-                name="appearance"
-                value={tastingForm.appearance}
+              {editingId ? "Wine" : "Choose a Wine"}
+              <select
+                name="wineId"
+                value={tastingForm.wineId}
                 onChange={onTastingChange}
                 required
-              />
+              >
+                <option value="">Select a wine</option>
+                {wines.map((wine) => (
+                  <option key={wine._id} value={wine._id}>
+                    {wine.name} - {wine.producer} ({wine.vintage})
+                  </option>
+                ))}
+              </select>
             </label>
-
-            <label className="full-width">
-              Nose Notes
-              <input
-                type="text"
-                name="noseNotes"
-                value={tastingForm.noseNotes}
-                onChange={onTastingChange}
-                placeholder="Cherry, vanilla, cedar..."
-              />
-            </label>
-
-            <label className="full-width">
-              Palate Notes
-              <input
-                type="text"
-                name="palateNotes"
-                value={tastingForm.palateNotes}
-                onChange={onTastingChange}
-                placeholder="Red fruit, spice, plum..."
-              />
-            </label>
-
-            {["sweetness", "acidity", "body", "tannin", "rating"].map((field) => (
-              <label key={field}>
-                {field.charAt(0).toUpperCase() + field.slice(1)}
-                <select
-                  name={field}
-                  value={tastingForm[field]}
-                  onChange={onTastingChange}
-                >
-                  {scoreOptions.map((score) => (
-                    <option key={score} value={score}>
-                      {score}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-
-            <label>
-              Price
-              <input
-                type="number"
-                name="price"
-                min="0"
-                value={tastingForm.price}
-                onChange={onTastingChange}
-              />
-            </label>
-
-            <label className="full-width">
-              Photo Upload
-              <input type="file" accept="image/*" onChange={onPhotoUpload} />
-            </label>
-
-            <label className="full-width">
-              Personal Thoughts
-              <textarea
-                name="personalThoughts"
-                value={tastingForm.personalThoughts}
-                onChange={onTastingChange}
-                rows="4"
-              />
-            </label>
-          </div>
-
-          {tastingForm.imageUrl && (
-            <div className="photo-preview-wrap">
-              <img
-                src={tastingForm.imageUrl}
-                alt="Wine upload preview"
-                className="photo-preview"
-              />
-            </div>
           )}
 
-          <div className="tag-section">
-            <span className="mini-heading">Wine mood tags</span>
-            <div className="tag-cloud">
-              {moodTags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-pill ${tastingForm.moodTags.includes(tag) ? "selected" : ""}`}
-                  onClick={() => onToggleMoodTag(tag)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <label className="checkbox-row">
+          <label className="full-width">
+            Appearance
             <input
-              type="checkbox"
-              name="wouldBuyAgain"
-              checked={tastingForm.wouldBuyAgain}
+              type="text"
+              name="appearance"
+              value={tastingForm.appearance}
+              onChange={onTastingChange}
+              required
+            />
+          </label>
+
+          <label className="full-width">
+            Nose Notes
+            <input
+              type="text"
+              name="noseNotes"
+              value={tastingForm.noseNotes}
+              onChange={onTastingChange}
+              placeholder="Cherry, vanilla, cedar..."
+            />
+          </label>
+
+          <label className="full-width">
+            Palate Notes
+            <input
+              type="text"
+              name="palateNotes"
+              value={tastingForm.palateNotes}
+              onChange={onTastingChange}
+              placeholder="Red fruit, spice, plum..."
+            />
+          </label>
+
+          {["sweetness", "acidity", "body", "tannin", "rating"].map((field) => (
+            <label key={field}>
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+              <select
+                name={field}
+                value={tastingForm[field]}
+                onChange={onTastingChange}
+              >
+                {scoreOptions.map((score) => (
+                  <option key={score} value={score}>
+                    {score}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+
+          <label>
+            Price
+            <input
+              type="number"
+              name="price"
+              min="0"
+              value={tastingForm.price}
               onChange={onTastingChange}
             />
-            Would buy again
+          </label>
+
+          <label className="full-width">
+            Photo Upload
+            <input type="file" accept="image/*" onChange={onPhotoUpload} />
+          </label>
+
+          <label className="full-width">
+            Personal Thoughts
+            <textarea
+              name="personalThoughts"
+              value={tastingForm.personalThoughts}
+              onChange={onTastingChange}
+              rows="4"
+            />
           </label>
         </div>
 
+        {tastingForm.imageUrl && (
+          <div className="photo-preview-wrap">
+            <img
+              src={tastingForm.imageUrl}
+              alt="Wine upload preview"
+              className="photo-preview"
+            />
+          </div>
+        )}
+
         <div className="button-row">
           <button type="submit" className="button-primary" disabled={submitting}>
-            {submitting ? "Saving..." : editingId ? "Save Changes" : "Save Wine + Tasting"}
+            {submitting ? "Saving..." : editingId ? "Save Changes" : "Save Wine"}
           </button>
           {editingId && (
             <button type="button" className="button-secondary" onClick={onCancelEdit}>

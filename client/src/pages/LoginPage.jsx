@@ -35,7 +35,6 @@ function LoginPage() {
     <div className="app-shell auth-shell">
       <section className="panel form-panel auth-panel">
         <div className="section-heading">
-          <p className="section-kicker">Welcome back</p>
           <h2>Log in to SipLog</h2>
         </div>
 

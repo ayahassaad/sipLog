@@ -1,20 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/useAuth";
+import SiteHeader from "../components/SiteHeader";
 import { useTastings } from "../hooks/useTastings";
 import { useWines } from "../hooks/useWines";
 import FavoritesShelf from "../components/FavoritesShelf";
 import FilterBar from "../components/FilterBar";
-import HeroPanel from "../components/HeroPanel";
 import TastingForm from "../components/TastingForm";
 import TastingTimeline from "../components/TastingTimeline";
-import { initialTastingForm, initialWineForm, MOOD_TAGS } from "../constants";
+import { initialTastingForm, initialWineForm } from "../constants";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
 
 const AUTO_REFRESH_MS = 30000;
 
 function JournalPage() {
-  const { user, logout } = useAuth();
   const tastings = useTastings();
   const wines = useWines();
 
@@ -28,9 +26,6 @@ function JournalPage() {
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [ratingFilter, setRatingFilter] = useState("all");
-  const [grapeFilter, setGrapeFilter] = useState("all");
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [saveSplash, setSaveSplash] = useState(false);
 
   const loading = tastings.loading || wines.loading;
@@ -107,15 +102,6 @@ function JournalPage() {
     }
   };
 
-  const toggleMoodTag = (tag) => {
-    setTastingForm((prev) => ({
-      ...prev,
-      moodTags: prev.moodTags.includes(tag)
-        ? prev.moodTags.filter((item) => item !== tag)
-        : [...prev.moodTags, tag],
-    }));
-  };
-
   const handlePhotoUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -177,9 +163,6 @@ function JournalPage() {
 
       resetForms();
       setSearchTerm("");
-      setRatingFilter("all");
-      setGrapeFilter("all");
-      setFavoritesOnly(false);
       flashSplash();
       window.setTimeout(() => {
         document.getElementById("timeline-section")?.scrollIntoView({
@@ -233,11 +216,6 @@ function JournalPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const grapes = useMemo(
-    () => [...new Set(tastings.tastings.map((tasting) => tasting.wineId?.grape).filter(Boolean))],
-    [tastings.tastings]
-  );
-
   const filteredTastings = useMemo(() => {
     return tastings.tastings.filter((tasting) => {
       const matchesSearch =
@@ -246,6 +224,8 @@ function JournalPage() {
           tasting.wineId?.name,
           tasting.wineId?.producer,
           tasting.wineId?.grape,
+          tasting.wineId?.country,
+          tasting.wineId?.vintage,
           tasting.appearance,
           tasting.personalThoughts,
           ...(tasting.noseNotes || []),
@@ -256,13 +236,9 @@ function JournalPage() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
-      const matchesRating = ratingFilter === "all" || tasting.rating >= Number(ratingFilter);
-      const matchesGrape = grapeFilter === "all" || tasting.wineId?.grape === grapeFilter;
-      const matchesFavorites = !favoritesOnly || tasting.wouldBuyAgain || tasting.rating >= 4;
-
-      return matchesSearch && matchesRating && matchesGrape && matchesFavorites;
+      return matchesSearch;
     });
-  }, [favoritesOnly, grapeFilter, ratingFilter, searchTerm, tastings.tastings]);
+  }, [searchTerm, tastings.tastings]);
 
   const favoriteTastings = useMemo(
     () => filteredTastings.filter((tasting) => tasting.wouldBuyAgain || tasting.rating >= 4),
@@ -283,83 +259,54 @@ function JournalPage() {
     }, {});
   }, [filteredTastings]);
 
-  const averageRating = tastings.tastings.length
-    ? (
-        tastings.tastings.reduce((sum, tasting) => sum + tasting.rating, 0) /
-        tastings.tastings.length
-      ).toFixed(1)
-    : "0.0";
-
   return (
-    <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-      <div className="top-bar">
-        <span className="user-name">Hi, {user?.name}</span>
-        <button type="button" className="button-secondary" onClick={logout}>
-          Log out
-        </button>
-      </div>
+    <>
+      <SiteHeader />
+        <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
+        <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
-      <HeroPanel
-        tastingsCount={tastings.tastings.length}
-        winesCount={wines.wines.length}
-        averageRating={averageRating}
-      />
-
-      <FilterBar
-        grapes={grapes}
-        searchTerm={searchTerm}
-        ratingFilter={ratingFilter}
-        grapeFilter={grapeFilter}
-        favoritesOnly={favoritesOnly}
-        onSearchTermChange={setSearchTerm}
-        onRatingFilterChange={setRatingFilter}
-        onGrapeFilterChange={setGrapeFilter}
-        onFavoritesOnlyChange={setFavoritesOnly}
-      />
-
-      <main className="content-grid">
-        <TastingForm
-          editingId={editingId}
-          createNewWine={createNewWine}
-          wines={wines.wines}
-          wineForm={wineForm}
-          tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
-          moodTags={MOOD_TAGS}
-          submitting={submitting || uploadingPhoto}
-          error={error}
-          successMessage={successMessage}
-          onSubmit={handleSubmit}
-          onWineModeChange={handleWineModeChange}
-          onWineChange={handleWineChange}
-          onTastingChange={handleTastingChange}
-          onPhotoUpload={handlePhotoUpload}
-          onToggleMoodTag={toggleMoodTag}
-          onCancelEdit={resetForms}
-        />
-
-        <section className="panel list-panel">
-          <FavoritesShelf tastings={favoriteTastings} />
-          <TastingTimeline
-            loading={loading}
+        <main className="content-grid">
+          <TastingForm
+            editingId={editingId}
+            createNewWine={createNewWine}
+            wines={wines.wines}
+            wineForm={wineForm}
+            tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
+            submitting={submitting || uploadingPhoto}
             error={error}
             successMessage={successMessage}
-            filteredCount={filteredTastings.length}
-            timelineGroups={timelineGroups}
-            lastUpdatedAt={tastings.lastUpdatedAt}
-            deletingId={deletingId}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onSubmit={handleSubmit}
+            onWineModeChange={handleWineModeChange}
+            onWineChange={handleWineChange}
+            onTastingChange={handleTastingChange}
+            onPhotoUpload={handlePhotoUpload}
+            onCancelEdit={resetForms}
           />
-          {tastings.hasMore && (
-            <div className="button-row">
-              <button type="button" className="button-secondary" onClick={tastings.loadMore}>
-                Load more tastings
-              </button>
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
+
+          <section className="panel list-panel">
+            <FavoritesShelf tastings={favoriteTastings} />
+            <TastingTimeline
+              loading={loading}
+              error={error}
+              successMessage={successMessage}
+              filteredCount={filteredTastings.length}
+              timelineGroups={timelineGroups}
+              lastUpdatedAt={tastings.lastUpdatedAt}
+              deletingId={deletingId}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+            {tastings.hasMore && (
+              <div className="button-row">
+                <button type="button" className="button-secondary" onClick={tastings.loadMore}>
+                  Load more tastings
+                </button>
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
+    </>
   );
 }
 

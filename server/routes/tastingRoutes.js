@@ -3,6 +3,7 @@ const router = express.Router();
 const tastingController = require("../controllers/tastingController");
 
 router.get("/stats/summary", tastingController.getTastingStats);
+router.get("/feed", tastingController.getCommunityFeed);
 router.get("/", tastingController.getAllTastings);
 router.get("/:id", tastingController.getTastingById);
 router.post("/", tastingController.createTasting);

@@ -31,7 +31,7 @@ function RegisterPage() {
 
   return (
     <div className="app-shell auth-shell">
-      <section className="panel form-panel auth-panel">
+      <section className="auth-panel">
         <div className="section-heading">
           <p className="section-kicker">Start your journal</p>
           <h2>

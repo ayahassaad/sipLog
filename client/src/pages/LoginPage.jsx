@@ -33,7 +33,7 @@ function LoginPage() {
 
   return (
     <div className="app-shell auth-shell">
-      <section className="panel form-panel auth-panel">
+      <section className="auth-panel">
         <div className="section-heading">
           <h2 className="brand-highlight">Log in to SipLog</h2>
         </div>

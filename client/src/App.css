@@ -651,6 +651,39 @@ textarea:focus {
   transform: scale(1.5);
 }
 
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  padding: 8px 2px;
+  color: var(--gold);
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: opacity 0.16s ease;
+}
+
+.card-action svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+
+.card-action:hover {
+  opacity: 0.75;
+}
+
+.card-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .thoughts-block {
   margin: 16px 0 18px;
   padding: 18px;

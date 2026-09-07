@@ -29,10 +29,16 @@ function SiteHeader() {
     };
 
     syncHeaderHeight();
+    document.fonts?.ready?.then(syncHeaderHeight);
+
+    // jsdom (used by the component tests) doesn't implement
+    // ResizeObserver, so guard against it instead of assuming it exists.
+    if (typeof ResizeObserver === "undefined") {
+      return undefined;
+    }
 
     const resizeObserver = new ResizeObserver(syncHeaderHeight);
     resizeObserver.observe(header);
-    document.fonts?.ready?.then(syncHeaderHeight);
 
     return () => resizeObserver.disconnect();
   }, []);

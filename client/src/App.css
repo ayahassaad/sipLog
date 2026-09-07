@@ -820,6 +820,12 @@ textarea:focus {
   color: var(--gold);
 }
 
+/* .section-heading h2 sets its own color, so beat it here when the
+   whole heading (not just an inline word) should be gold. */
+.section-heading h2.brand-highlight {
+  color: var(--gold);
+}
+
 .main-nav {
   display: flex;
   gap: 24px;

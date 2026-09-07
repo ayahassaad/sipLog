@@ -792,6 +792,10 @@ textarea:focus {
   text-align: center;
 }
 
+.auth-panel .button-row {
+  justify-content: center;
+}
+
 .auth-switch {
   margin-top: 18px;
   text-align: center;

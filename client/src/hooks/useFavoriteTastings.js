@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  favoriteTasting as favoriteTastingRequest,
-  fetchCommunityFeed,
-  unfavoriteTasting as unfavoriteTastingRequest,
-} from "../services/tastingService";
+import { fetchFavoriteTastings } from "../services/tastingService";
 
 const PAGE_SIZE = 20;
 
-export function useCommunityFeed() {
+export function useFavoriteTastings() {
   const [tastings, setTastings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,7 +13,7 @@ export function useCommunityFeed() {
 
   const loadFirstPage = useCallback(async () => {
     try {
-      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE });
+      const data = await fetchFavoriteTastings({ page: 1, limit: PAGE_SIZE });
       setTastings(data.tastings);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -47,7 +43,7 @@ export function useCommunityFeed() {
     loadingMoreRef.current = true;
     try {
       const nextPage = page + 1;
-      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE });
+      const data = await fetchFavoriteTastings({ page: nextPage, limit: PAGE_SIZE });
       setTastings((prev) => [...prev, ...data.tastings]);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -58,28 +54,21 @@ export function useCommunityFeed() {
     }
   }, [page, totalPages]);
 
-  // Optimistic toggle: flip the star instantly, roll back if the request fails.
-  const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
+  // Pure local update, no network call -- this view is exactly "everything
+  // you've favorited", so unfavoriting removes the wine from the list
+  // entirely rather than just flipping a flag. The actual favorite/
+  // unfavorite request and cross-list sync are orchestrated in JournalPage.
+  const setFavoriteFlag = useCallback((tastingId, isFavorited) => {
+    if (!isFavorited) {
+      setTastings((prev) => prev.filter((tasting) => tasting._id !== tastingId));
+      return;
+    }
+
     setTastings((prev) =>
       prev.map((tasting) =>
-        tasting._id === tastingId ? { ...tasting, isFavorited: !currentlyFavorited } : tasting
+        tasting._id === tastingId ? { ...tasting, isFavorited } : tasting
       )
     );
-
-    try {
-      if (currentlyFavorited) {
-        await unfavoriteTastingRequest(tastingId);
-      } else {
-        await favoriteTastingRequest(tastingId);
-      }
-    } catch (err) {
-      setTastings((prev) =>
-        prev.map((tasting) =>
-          tasting._id === tastingId ? { ...tasting, isFavorited: currentlyFavorited } : tasting
-        )
-      );
-      setError(err.message);
-    }
   }, []);
 
   return {
@@ -89,6 +78,6 @@ export function useCommunityFeed() {
     hasMore: page < totalPages,
     refresh: loadFirstPage,
     loadMore,
-    toggleFavorite,
+    setFavoriteFlag,
   };
 }

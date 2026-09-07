@@ -100,6 +100,17 @@ export function useTastings() {
     setLastUpdatedAt(new Date());
   }, []);
 
+  // Pure local update, no network call -- My Wines and My Favorites share
+  // the same underlying tastings, so the actual favorite/unfavorite request
+  // and cross-list sync are orchestrated one level up, in JournalPage.
+  const setFavoriteFlag = useCallback((tastingId, isFavorited) => {
+    setTastings((prev) =>
+      prev.map((tasting) =>
+        tasting._id === tastingId ? { ...tasting, isFavorited } : tasting
+      )
+    );
+  }, []);
+
   return {
     tastings,
     loading,
@@ -111,5 +122,6 @@ export function useTastings() {
     create,
     update,
     remove,
+    setFavoriteFlag,
   };
 }

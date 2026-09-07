@@ -1,11 +1,26 @@
 const mongoose = require("mongoose");
 const Tasting = require("../models/Tasting");
 const Wine = require("../models/Wine");
+const User = require("../models/User");
 
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
 
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
+}
+
+// A tasting can be favorited by any logged-in user, regardless of who
+// posted it, so "favorited" state lives on the viewer (req.user.favorites),
+// not on the Tasting document itself.
+function buildFavoriteIdSet(user) {
+  return new Set((user.favorites || []).map((favoriteId) => favoriteId.toString()));
+}
+
+function attachFavoriteFlag(tastings, favoriteIdSet) {
+  return tastings.map((tasting) => {
+    const plain = typeof tasting.toObject === "function" ? tasting.toObject() : tasting;
+    return { ...plain, isFavorited: favoriteIdSet.has(String(plain._id)) };
+  });
 }
 
 function parseScore(value, fieldName, errors) {
@@ -177,9 +192,10 @@ exports.getAllTastings = async (req, res) => {
       });
 
     const filteredTastings = tastings.filter((tasting) => tasting.wineId);
+    const favoriteIdSet = buildFavoriteIdSet(req.user);
 
     res.json({
-      tastings: filteredTastings,
+      tastings: attachFavoriteFlag(filteredTastings, favoriteIdSet),
       page,
       limit,
       total,
@@ -209,13 +225,85 @@ exports.getCommunityFeed = async (req, res) => {
       .populate("userId")
       .populate("wineId");
 
+    const favoriteIdSet = buildFavoriteIdSet(req.user);
+
     res.json({
-      tastings,
+      tastings: attachFavoriteFlag(tastings, favoriteIdSet),
       page,
       limit,
       total,
       totalPages: Math.max(1, Math.ceil(total / limit)),
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getFavoriteTastings = async (req, res) => {
+  try {
+    // Everything the current user has favorited, regardless of who posted
+    // it -- their own tastings or anyone else's.
+    const favoriteIds = req.user.favorites || [];
+    const query = { _id: { $in: favoriteIds } };
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+
+    const total = await Tasting.countDocuments(query);
+
+    const tastings = await Tasting.find(query)
+      .sort({ createdAt: -1, updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("userId")
+      .populate("wineId");
+
+    const favoriteIdSet = buildFavoriteIdSet(req.user);
+
+    res.json({
+      tastings: attachFavoriteFlag(tastings, favoriteIdSet),
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.favoriteTasting = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid tasting id" });
+    }
+
+    const tastingExists = await Tasting.exists({ _id: id });
+    if (!tastingExists) {
+      return res.status(404).json({ message: "Tasting not found" });
+    }
+
+    await User.updateOne({ _id: req.user._id }, { $addToSet: { favorites: id } });
+
+    res.json({ message: "Favorited successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.unfavoriteTasting = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid tasting id" });
+    }
+
+    await User.updateOne({ _id: req.user._id }, { $pull: { favorites: id } });
+
+    res.json({ message: "Unfavorited successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -335,7 +423,7 @@ exports.createTasting = async (req, res) => {
     const tasting = new Tasting({ ...payload, userId: req.user._id });
     const savedTasting = await tasting.save();
     await savedTasting.populate(["userId", "wineId"]);
-    res.status(201).json(savedTasting);
+    res.status(201).json(attachFavoriteFlag([savedTasting], buildFavoriteIdSet(req.user))[0]);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -369,7 +457,7 @@ exports.updateTasting = async (req, res) => {
       .populate("userId")
       .populate("wineId");
 
-    res.json(updatedTasting);
+    res.json(attachFavoriteFlag([updatedTasting], buildFavoriteIdSet(req.user))[0]);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -22,6 +22,33 @@ export async function fetchCommunityFeed({ page = 1, limit = 50 } = {}) {
   }
 }
 
+export async function fetchFavoriteTastings({ page = 1, limit = 50 } = {}) {
+  try {
+    const res = await api.get("/tastings/favorites", { params: { page, limit } });
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to load your favorites"));
+  }
+}
+
+export async function favoriteTasting(id) {
+  try {
+    const res = await api.post(`/tastings/${id}/favorite`);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to favorite tasting"));
+  }
+}
+
+export async function unfavoriteTasting(id) {
+  try {
+    const res = await api.post(`/tastings/${id}/unfavorite`);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to unfavorite tasting"));
+  }
+}
+
 export async function fetchTastingById(id) {
   try {
     const res = await api.get(`/tastings/${id}`);

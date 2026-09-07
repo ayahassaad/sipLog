@@ -1,24 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import { useTastings } from "../hooks/useTastings";
+import { useFavoriteTastings } from "../hooks/useFavoriteTastings";
 import { useWines } from "../hooks/useWines";
-import FavoritesShelf from "../components/FavoritesShelf";
 import FilterBar from "../components/FilterBar";
 import TastingForm from "../components/TastingForm";
 import TastingTimeline from "../components/TastingTimeline";
 import { initialTastingForm, initialWineForm } from "../constants";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
+import {
+  favoriteTasting as favoriteTastingRequest,
+  unfavoriteTasting as unfavoriteTastingRequest,
+} from "../services/tastingService";
 
 const AUTO_REFRESH_MS = 30000;
 
 function JournalPage() {
   const tastings = useTastings();
+  const favorites = useFavoriteTastings();
   const wines = useWines();
+  const [view, setView] = useState("mine");
 
   const [tastingForm, setTastingForm] = useState(initialTastingForm);
   const [wineForm, setWineForm] = useState(initialWineForm);
-  const [createNewWine, setCreateNewWine] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deletingId, setDeletingId] = useState("");
@@ -28,15 +33,16 @@ function JournalPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [saveSplash, setSaveSplash] = useState(false);
 
-  const loading = tastings.loading || wines.loading;
-  const error = formError || tastings.error || wines.error;
+  const activeTastingsSource = view === "favorites" ? favorites : tastings;
+  const loading = activeTastingsSource.loading || wines.loading;
+  const error = formError || activeTastingsSource.error || wines.error;
 
   // Default the "existing wine" picker to the first wine once wines load.
   // Derived during render instead of an effect, so there's no extra setState render.
   const effectiveWineId = useMemo(() => {
-    if (createNewWine) return tastingForm.wineId;
+    if (!editingId) return tastingForm.wineId;
     return tastingForm.wineId || wines.wines[0]?._id || "";
-  }, [createNewWine, tastingForm.wineId, wines.wines]);
+  }, [editingId, tastingForm.wineId, wines.wines]);
 
   // Keep the journal reasonably fresh if it's left open in a background tab.
   useEffect(() => {
@@ -65,10 +71,10 @@ function JournalPage() {
 
   const resetForms = () => {
     setEditingId("");
-    setCreateNewWine(true);
     setWineForm(initialWineForm);
     setTastingForm(initialTastingForm);
     setFormError("");
+    setView("mine");
   };
 
   const flashSplash = () => {
@@ -90,16 +96,6 @@ function JournalPage() {
       ...prev,
       [name]: type === "number" ? Number(value) : value,
     }));
-  };
-
-  const handleWineModeChange = (useNewWine) => {
-    setCreateNewWine(useNewWine);
-    if (!useNewWine && wines.wines.length > 0) {
-      setTastingForm((prev) => ({ ...prev, wineId: wines.wines[0]._id }));
-    }
-    if (useNewWine) {
-      setTastingForm((prev) => ({ ...prev, wineId: "" }));
-    }
   };
 
   const handlePhotoUpload = async (event) => {
@@ -133,7 +129,7 @@ function JournalPage() {
     try {
       let wineId = effectiveWineId;
 
-      if (!editingId && createNewWine) {
+      if (!editingId) {
         const createdWine = await wines.addWine(wineForm);
         wineId = createdWine._id;
       }
@@ -153,12 +149,8 @@ function JournalPage() {
 
       if (editingId) {
         await tastings.update(editingId, payload);
-        setSuccessMessage("Tasting updated successfully. It has been refreshed in the timeline.");
       } else {
         await tastings.create(payload);
-        setSuccessMessage(
-          "Wine and tasting saved successfully. Scroll down to see it at the top of the timeline."
-        );
       }
 
       resetForms();
@@ -195,8 +187,8 @@ function JournalPage() {
 
   const handleEdit = (tasting) => {
     setEditingId(tasting._id);
-    setCreateNewWine(false);
     setFormError("");
+    setView("add");
     setTastingForm({
       wineId: tasting.wineId?._id || "",
       appearance: tasting.appearance || "",
@@ -216,8 +208,32 @@ function JournalPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // My Wines and My Favorites are two separate lists holding overlapping
+  // data, so a favorite/unfavorite here has to update both of them locally
+  // (not just whichever one is currently showing) or switching tabs shows
+  // stale state.
+  const handleToggleFavorite = async (tastingId, currentlyFavorited) => {
+    tastings.setFavoriteFlag(tastingId, !currentlyFavorited);
+    favorites.setFavoriteFlag(tastingId, !currentlyFavorited);
+
+    try {
+      if (currentlyFavorited) {
+        await unfavoriteTastingRequest(tastingId);
+      } else {
+        await favoriteTastingRequest(tastingId);
+        // Newly favorited tastings aren't in favorites' local state yet --
+        // refetch so "My Favorites" has it next time it's viewed.
+        favorites.refresh();
+      }
+    } catch (err) {
+      tastings.setFavoriteFlag(tastingId, currentlyFavorited);
+      favorites.refresh();
+      setFormError(err.message);
+    }
+  };
+
   const filteredTastings = useMemo(() => {
-    return tastings.tastings.filter((tasting) => {
+    return activeTastingsSource.tastings.filter((tasting) => {
       const matchesSearch =
         searchTerm.trim() === "" ||
         [
@@ -238,37 +254,42 @@ function JournalPage() {
 
       return matchesSearch;
     });
-  }, [searchTerm, tastings.tastings]);
-
-  const favoriteTastings = useMemo(
-    () => filteredTastings.filter((tasting) => tasting.wouldBuyAgain || tasting.rating >= 4),
-    [filteredTastings]
-  );
-
-  const timelineGroups = useMemo(() => {
-    return filteredTastings.reduce((groups, tasting) => {
-      const timelineDate = tasting.createdAt || tasting.updatedAt;
-      const label = new Date(timelineDate).toLocaleDateString(undefined, {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-      groups[label] ??= [];
-      groups[label].push(tasting);
-      return groups;
-    }, {});
-  }, [filteredTastings]);
+  }, [searchTerm, activeTastingsSource.tastings]);
 
   return (
     <>
       <SiteHeader />
         <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-        <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+        <div className="mode-toggle">
+          <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "mine"}
+              onChange={() => setView("mine")}
+            />
+            My Wines
+          </label>
+          <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "favorites"}
+              onChange={() => setView("favorites")}
+            />
+            My Favorites
+          </label>
+          <label className={`toggle-chip ${view === "add" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "add"}
+              onChange={() => setView("add")}
+            />
+            Add New Wine
+          </label>
+        </div>
 
-        <main className="content-grid">
+        {view === "add" ? (
           <TastingForm
             editingId={editingId}
-            createNewWine={createNewWine}
             wines={wines.wines}
             wineForm={wineForm}
             tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
@@ -276,35 +297,41 @@ function JournalPage() {
             error={error}
             successMessage={successMessage}
             onSubmit={handleSubmit}
-            onWineModeChange={handleWineModeChange}
             onWineChange={handleWineChange}
             onTastingChange={handleTastingChange}
             onPhotoUpload={handlePhotoUpload}
             onCancelEdit={resetForms}
           />
-
+        ) : (
           <section className="panel list-panel">
-            <FavoritesShelf tastings={favoriteTastings} />
             <TastingTimeline
               loading={loading}
               error={error}
               successMessage={successMessage}
               filteredCount={filteredTastings.length}
-              timelineGroups={timelineGroups}
-              lastUpdatedAt={tastings.lastUpdatedAt}
+              tastings={filteredTastings}
               deletingId={deletingId}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onEdit={view === "mine" ? handleEdit : undefined}
+              onDelete={view === "mine" ? handleDelete : undefined}
+              onToggleFavorite={handleToggleFavorite}
+              showAuthor={view === "favorites"}
+              heading={view === "mine" ? "My Wines" : "My Favorites"}
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
             />
-            {tastings.hasMore && (
+            {activeTastingsSource.hasMore && (
               <div className="button-row">
-                <button type="button" className="button-secondary" onClick={tastings.loadMore}>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={activeTastingsSource.loadMore}
+                >
                   Load more tastings
                 </button>
               </div>
             )}
           </section>
-        </main>
+        )}
       </div>
     </>
   );

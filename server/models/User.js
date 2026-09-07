@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },
+    favorites: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tasting" }],
+      default: [],
+    },
   },
   { timestamps: true }
 );

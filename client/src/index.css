@@ -14,8 +14,10 @@
   --berry-mid: #f7ccd5;
   --accent: #ca4f73;
   --accent-strong: #e16c90;
-  --font-heading: "Georgia", "Times New Roman", serif;
-  --font-body: "Avenir Next", "Segoe UI", sans-serif;
+  --font-heading: "Cinzel Decorative", "Georgia", "Times New Roman", serif;
+  --font-body: "Josefin Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --gold: #d8ad5f;
+  --header-height: 92px;
   font-family: var(--font-body);
   color: var(--text);
   font-synthesis: none;

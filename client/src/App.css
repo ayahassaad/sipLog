@@ -605,37 +605,49 @@ textarea:focus {
   pointer-events: none;
 }
 
+/* "Vine Curl Pop" -- a soft wobbly blob with a curling vine-like arrow
+   inside, that pops up bigger with a springy overshoot on hover and
+   squishes down on click. */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--gold);
+  width: 46px;
+  height: 46px;
+  border-radius: 44% 56% 60% 40% / 52% 40% 60% 48%;
+  border: 1.5px solid var(--accent-strong);
   background: transparent;
-  color: var(--gold);
+  color: var(--accent-strong);
   display: grid;
   place-items: center;
   cursor: pointer;
   z-index: 20;
-  transition: background 0.16s ease, color 0.16s ease;
+  transition: transform 0.35s cubic-bezier(0.34, 1.8, 0.5, 1),
+    border-radius 0.35s cubic-bezier(0.34, 1.8, 0.5, 1),
+    background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .carousel-arrow:hover {
-  background: var(--gold);
-  color: var(--page-top);
+  transform: translateY(-56%) scale(1.22);
+  border-radius: 58% 42% 46% 54% / 46% 54% 46% 54%;
+  background: rgba(225, 108, 144, 0.16);
+  box-shadow: 0 10px 18px rgba(10, 0, 4, 0.4);
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.92);
+  transition-duration: 0.1s;
 }
 
 .carousel-arrow.left { left: 0; }
 .carousel-arrow.right { right: 0; }
 
 .carousel-arrow svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1.6;
 }
 
 .carousel-dots {

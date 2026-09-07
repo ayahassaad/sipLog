@@ -87,7 +87,7 @@ function TastingTimeline({
               aria-label="Previous wine"
             >
               <svg viewBox="0 0 24 24">
-                <path d="M15 5l-7 7 7 7" />
+                <path d="M15 5c-4 2-7 5-7 7s3 5 7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           )}
@@ -227,7 +227,7 @@ function TastingTimeline({
               aria-label="Next wine"
             >
               <svg viewBox="0 0 24 24">
-                <path d="M9 5l7 7-7 7" />
+                <path d="M9 5c4 2 7 5 7 7s-3 5-7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           )}

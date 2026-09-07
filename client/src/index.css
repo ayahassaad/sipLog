@@ -17,6 +17,7 @@
   --font-heading: "Cinzel Decorative", "Georgia", "Times New Roman", serif;
   --font-body: "Josefin Sans", "Avenir Next", "Segoe UI", sans-serif;
   --gold: #d8ad5f;
+  --header-height: 92px;
   font-family: var(--font-body);
   color: var(--text);
   font-synthesis: none;

@@ -223,7 +223,7 @@
   border-bottom: 1px solid var(--line);
   padding-bottom: 2px;
   position: sticky;
-  top: 92px;
+  top: var(--header-height);
   z-index: 20;
   background: var(--page-top);
 }

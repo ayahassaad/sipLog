@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import RoseGlassLogo from "./RoseGlassLogo";
@@ -8,9 +9,34 @@ function navLinkClassName({ isActive }) {
 
 function SiteHeader() {
   const { logout } = useAuth();
+  const headerRef = useRef(null);
+
+  // Keep --header-height in sync with the header's real rendered height so
+  // the sticky mode-toggle tabs further down the page can pin themselves
+  // flush against it instead of relying on a guessed pixel value (which
+  // also drifts once the heading webfont finishes loading).
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return undefined;
+
+    const syncHeaderHeight = () => {
+      document.documentElement.style.setProperty(
+        "--header-height",
+        `${header.offsetHeight}px`
+      );
+    };
+
+    syncHeaderHeight();
+
+    const resizeObserver = new ResizeObserver(syncHeaderHeight);
+    resizeObserver.observe(header);
+    document.fonts?.ready?.then(syncHeaderHeight);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   return (
-    <header className="site-header">
+    <header className="site-header" ref={headerRef}>
       <nav className="main-nav">
         <NavLink to="/" end className={navLinkClassName}>
           My Journal

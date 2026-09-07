@@ -622,31 +622,49 @@ textarea:focus {
   color: var(--gold);
 }
 
-.site-header .button-secondary {
-  justify-self: end;
-}
-
 .main-nav {
   display: flex;
-  gap: 8px;
+  gap: 24px;
 }
 
 .nav-link {
-  padding: 8px 16px;
+  padding: 8px 2px;
   border-radius: 0;
-  font-weight: 700;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.82rem;
   text-decoration: none;
   color: var(--text-soft);
-  transition: background 0.16s ease, color 0.16s ease;
+  transition: color 0.16s ease, border-color 0.16s ease;
 }
 
 .nav-link:hover {
-  color: var(--berry-dark);
+  color: var(--gold);
 }
 
 .nav-link.active {
-  background: var(--accent);
-  color: var(--berry-dark);
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.site-header .button-secondary {
+  justify-self: end;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  padding: 10px 20px;
+}
+
+.site-header .button-secondary:hover {
+  background: var(--gold);
+  color: var(--page-top);
 }
 
 .people-row {

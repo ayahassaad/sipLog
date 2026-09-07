@@ -583,12 +583,78 @@ textarea:focus {
 
 .top-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.top-bar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .top-bar .user-name {
   font-weight: 600;
+}
+
+.main-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text-soft);
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.nav-link:hover {
+  color: var(--berry-dark);
+}
+
+.nav-link.active {
+  background: var(--accent);
+  color: var(--berry-dark);
+}
+
+.people-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.person-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel-mid);
+}
+
+.person-name {
+  font-weight: 600;
+}
+
+.card-author-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.card-author {
+  font-weight: 600;
+  color: var(--text-soft);
 }

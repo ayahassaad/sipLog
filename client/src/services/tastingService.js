@@ -13,6 +13,15 @@ export async function fetchTastings({ page = 1, limit = 50 } = {}) {
   }
 }
 
+export async function fetchCommunityFeed({ page = 1, limit = 50 } = {}) {
+  try {
+    const res = await api.get("/tastings/feed", { params: { page, limit } });
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to load the community feed"));
+  }
+}
+
 export async function fetchTastingById(id) {
   try {
     const res = await api.get(`/tastings/${id}`);

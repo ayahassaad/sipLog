@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/useAuth";
+import NavBar from "../components/NavBar";
 import { useTastings } from "../hooks/useTastings";
 import { useWines } from "../hooks/useWines";
 import FavoritesShelf from "../components/FavoritesShelf";
@@ -14,7 +14,6 @@ import { uploadImage } from "../services/uploadService";
 const AUTO_REFRESH_MS = 30000;
 
 function JournalPage() {
-  const { user, logout } = useAuth();
   const tastings = useTastings();
   const wines = useWines();
 
@@ -285,12 +284,7 @@ function JournalPage() {
 
   return (
     <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-      <div className="top-bar">
-        <span className="user-name">Hi, {user?.name}</span>
-        <button type="button" className="button-secondary" onClick={logout}>
-          Log out
-        </button>
-      </div>
+      <NavBar />
 
       <HeroPanel />
 

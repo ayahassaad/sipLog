@@ -3,6 +3,7 @@ import "./App.css";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import JournalPage from "./pages/JournalPage";
+import CommunityPage from "./pages/CommunityPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
@@ -17,6 +18,14 @@ function App() {
           element={
             <ProtectedRoute>
               <JournalPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/community"
+          element={
+            <ProtectedRoute>
+              <CommunityPage />
             </ProtectedRoute>
           }
         />

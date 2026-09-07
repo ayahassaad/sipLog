@@ -157,17 +157,36 @@ function TastingForm({
           </label>
 
           <div className="score-row">
+            <div className="score-scale-legend">
+              <span>Least</span>
+              <span>Most</span>
+            </div>
             {scoreFields.map((field) => (
-              <label className="field" key={field}>
+              <div className="field" key={field}>
                 <span>{field.charAt(0).toUpperCase() + field.slice(1)}</span>
-                <select name={field} value={tastingForm[field]} onChange={onTastingChange}>
+                <div className="drop-row" role="radiogroup" aria-label={field}>
                   {scoreOptions.map((score) => (
-                    <option key={score} value={score}>
-                      {score}
-                    </option>
+                    <button
+                      key={score}
+                      type="button"
+                      className={`drop-btn drop-${score} ${
+                        tastingForm[field] >= score ? "filled" : ""
+                      }`}
+                      aria-pressed={tastingForm[field] === score}
+                      aria-label={`${score}`}
+                      onClick={() =>
+                        onTastingChange({
+                          target: { name: field, value: score, type: "number" },
+                        })
+                      }
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3c3.5 4.5 6 8 6 11.2A6 6 0 0 1 6 14.2C6 11 8.5 7.5 12 3Z" />
+                      </svg>
+                    </button>
                   ))}
-                </select>
-              </label>
+                </div>
+              </div>
             ))}
           </div>
 

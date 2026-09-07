@@ -1094,15 +1094,68 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 14px;
+  position: relative;
 }
 
 .score-row .field {
   padding: 10px 0 6px;
 }
 
-.score-row select {
-  text-align: center;
+/* Legend spanning the whole row, so "least to most" only needs to be said once. */
+.score-scale-legend {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+  opacity: 0.6;
+  margin-bottom: -2px;
 }
+
+/* Wine-drop rating selector: five drops per field, growing from small to
+   large left to right so the least-to-most direction reads at a glance,
+   filling gold up to the picked value. */
+.drop-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0 2px;
+}
+
+.drop-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--gold);
+  transition: transform 0.15s ease;
+}
+
+.drop-btn:hover {
+  transform: scale(1.15);
+}
+
+.drop-btn svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  transition: fill 0.15s ease;
+  display: block;
+}
+
+.drop-btn.filled svg {
+  fill: currentColor;
+}
+
+.drop-btn.drop-1 svg { width: 11px; height: 11px; }
+.drop-btn.drop-2 svg { width: 14px; height: 14px; }
+.drop-btn.drop-3 svg { width: 17px; height: 17px; }
+.drop-btn.drop-4 svg { width: 20px; height: 20px; }
+.drop-btn.drop-5 svg { width: 23px; height: 23px; }
 
 .form-buttons {
   margin-top: 8px;

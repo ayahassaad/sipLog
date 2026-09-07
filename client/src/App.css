@@ -485,11 +485,6 @@ textarea:focus {
   gap: 18px;
 }
 
-.wines-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
-}
-
 .tasting-card {
   padding: 24px;
   background:
@@ -534,6 +529,128 @@ textarea:focus {
   color: var(--berry-dark);
 }
 
+.card-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wine-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(216, 173, 95, 0.08);
+}
+
+.wine-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wine-thumb svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.4;
+}
+
+.carousel {
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 54px;
+}
+
+.carousel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 320px;
+  cursor: pointer;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
+}
+
+.carousel-card.is-active {
+  cursor: default;
+}
+
+.carousel-card:not(.is-active) .button-row,
+.carousel-card:not(.is-active) .favorite-star {
+  pointer-events: none;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.carousel-arrow:hover {
+  background: var(--gold);
+  color: var(--page-top);
+}
+
+.carousel-arrow.left { left: 0; }
+.carousel-arrow.right { right: 0; }
+
+.carousel-arrow svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(216, 173, 95, 0.3);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.carousel-dot.is-active {
+  background: var(--gold);
+  transform: scale(1.5);
+}
+
 .thoughts-block {
   margin: 16px 0 18px;
   padding: 18px;
@@ -559,8 +676,7 @@ textarea:focus {
 
 @media (max-width: 980px) {
   .form-grid,
-  .detail-grid,
-  .wines-grid {
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 

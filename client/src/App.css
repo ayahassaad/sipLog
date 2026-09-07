@@ -2,7 +2,7 @@
   width: 100%;
   box-sizing: border-box;
   margin: 0 auto;
-  padding: 34px 32px 72px;
+  padding: 0 32px 72px;
   position: relative;
 }
 
@@ -180,7 +180,7 @@
 }
 
 .mode-toggle {
-  margin: 9px 0;
+  margin: 0 0 9px;
 }
 
 .mode-toggle,
@@ -385,7 +385,6 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-top: 10px;
 }
 
 .card-top-actions {
@@ -472,7 +471,7 @@ textarea:focus {
 }
 
 .timeline-heading {
-  margin-top: 0;
+  margin-top: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;

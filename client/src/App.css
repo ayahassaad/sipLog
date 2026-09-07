@@ -1,7 +1,8 @@
 .app-shell {
-  width: min(1240px, calc(100% - 36px));
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
-  padding: 34px 0 72px;
+  padding: 34px 32px 72px;
   position: relative;
 }
 

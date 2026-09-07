@@ -120,7 +120,7 @@ describe("Following", () => {
 describe("Community feed", () => {
   it("shows other users' tastings but never your own", async () => {
     const { agent: alice } = await registerAgent();
-    const { agent: bob } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
 
     const aliceWine = await createWine(alice, { name: "Alice's Wine" });
     const bobWine = await createWine(bob, { name: "Bob's Wine" });
@@ -132,7 +132,7 @@ describe("Community feed", () => {
 
     expect(feed.status).toBe(200);
     expect(feed.body.tastings).toHaveLength(1);
-    expect(feed.body.tastings[0].userId.name).toBe("Taster 2");
+    expect(feed.body.tastings[0].userId.name).toBe(bobUser.name);
     expect(feed.body).toHaveProperty("page");
     expect(feed.body).toHaveProperty("totalPages");
   });

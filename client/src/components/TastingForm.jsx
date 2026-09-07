@@ -3,7 +3,6 @@ const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
 
 function TastingForm({
   editingId,
-  wines,
   wineForm,
   tastingForm,
   submitting,
@@ -50,108 +49,78 @@ function TastingForm({
           </span>
         </div>
 
-        {!editingId ? (
-          <div className="field-grid cols-3">
-            <label className="field field-full">
-              <span>Wine Name</span>
-              <input
-                type="text"
-                name="name"
-                value={wineForm.name}
-                onChange={onWineChange}
-                required
-              />
-            </label>
-            <label className="field">
-              <span>Producer</span>
-              <input
-                type="text"
-                name="producer"
-                value={wineForm.producer}
-                onChange={onWineChange}
-                required
-              />
-            </label>
-            <label className="field">
-              <span>Country</span>
-              <input
-                type="text"
-                name="country"
-                value={wineForm.country}
-                onChange={onWineChange}
-                required
-              />
-            </label>
-            <label className="field">
-              <span>Region</span>
-              <input
-                type="text"
-                name="region"
-                value={wineForm.region}
-                onChange={onWineChange}
-              />
-            </label>
-            <label className="field">
-              <span>Grape</span>
-              <input
-                type="text"
-                name="grape"
-                value={wineForm.grape}
-                onChange={onWineChange}
-                required
-              />
-            </label>
-            <label className="field">
-              <span>Vintage</span>
-              <input
-                type="number"
-                name="vintage"
-                value={wineForm.vintage}
-                onChange={onWineChange}
-                required
-              />
-            </label>
-            <label className="field">
-              <span>Price</span>
-              <input
-                type="number"
-                name="price"
-                min="0"
-                value={tastingForm.price}
-                onChange={onTastingChange}
-              />
-            </label>
-          </div>
-        ) : (
-          <div className="field-grid cols-3">
-            <label className="field field-full">
-              <span>Wine</span>
-              <select
-                name="wineId"
-                value={tastingForm.wineId}
-                onChange={onTastingChange}
-                required
-              >
-                <option value="">Select a wine</option>
-                {wines.map((wine) => (
-                  <option key={wine._id} value={wine._id}>
-                    {wine.name} - {wine.producer} ({wine.vintage})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span>Price</span>
-              <input
-                type="number"
-                name="price"
-                min="0"
-                value={tastingForm.price}
-                onChange={onTastingChange}
-              />
-            </label>
-          </div>
-        )}
+        <div className="field-grid cols-3">
+          <label className="field field-full">
+            <span>Name</span>
+            <input
+              type="text"
+              name="name"
+              value={wineForm.name}
+              onChange={onWineChange}
+              required
+            />
+          </label>
+          <label className="field">
+            <span>Producer</span>
+            <input
+              type="text"
+              name="producer"
+              value={wineForm.producer}
+              onChange={onWineChange}
+              required
+            />
+          </label>
+          <label className="field">
+            <span>Country</span>
+            <input
+              type="text"
+              name="country"
+              value={wineForm.country}
+              onChange={onWineChange}
+              required
+            />
+          </label>
+          <label className="field">
+            <span>Region</span>
+            <input
+              type="text"
+              name="region"
+              value={wineForm.region}
+              onChange={onWineChange}
+            />
+          </label>
+          <label className="field">
+            <span>Grape</span>
+            <input
+              type="text"
+              name="grape"
+              value={wineForm.grape}
+              onChange={onWineChange}
+              required
+            />
+          </label>
+          <label className="field">
+            <span>Vintage</span>
+            <input
+              type="number"
+              name="vintage"
+              value={wineForm.vintage}
+              onChange={onWineChange}
+              required
+            />
+          </label>
+          <label className="field">
+            <span>Price</span>
+            <input
+              type="number"
+              name="price"
+              min="0"
+              placeholder="0"
+              value={tastingForm.price}
+              onChange={onTastingChange}
+            />
+          </label>
+        </div>
 
         <div className="field-grid">
           <label className="field field-full">

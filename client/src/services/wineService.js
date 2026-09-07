@@ -21,3 +21,12 @@ export async function createWine(payload) {
     throw new Error(extractMessage(error, "Failed to create wine"));
   }
 }
+
+export async function updateWine(id, payload) {
+  try {
+    const res = await api.put(`/wines/${id}`, payload);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to update wine"));
+  }
+}

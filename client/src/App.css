@@ -180,7 +180,7 @@
 }
 
 .mode-toggle {
-  margin: 0 0 9px;
+  margin: 0;
 }
 
 .mode-toggle,
@@ -1074,7 +1074,6 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   padding: 10px 0;
-  border-bottom: 1px solid var(--line);
 }
 
 .field span {
@@ -1087,16 +1086,6 @@ textarea:focus {
 .field textarea {
   border-bottom: none;
   padding: 4px 2px;
-}
-
-.section-label {
-  grid-column: 1 / -1;
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
-  color: var(--gold);
-  text-transform: none;
-  letter-spacing: normal;
-  margin: 22px 0 2px;
 }
 
 /* Score row: all five ratings side by side instead of stacked. */

@@ -153,7 +153,6 @@ function TastingForm({
           </div>
         )}
 
-        <div className="section-label">The Tasting</div>
         <div className="field-grid">
           <label className="field field-full">
             <span>Appearance</span>

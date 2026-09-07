@@ -749,6 +749,42 @@ textarea:focus {
   border-bottom: 2px solid var(--gold);
 }
 
+.wine-form input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.wine-form input[type="number"]::-webkit-outer-spin-button,
+.wine-form input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.wine-form input[type="file"] {
+  border-bottom: none;
+  padding: 4px 0;
+}
+
+.wine-form input[type="file"]::file-selector-button,
+.wine-form input[type="file"]::-webkit-file-upload-button {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  padding: 8px 16px;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.wine-form input[type="file"]:hover::file-selector-button,
+.wine-form input[type="file"]:hover::-webkit-file-upload-button {
+  background: var(--gold);
+  color: var(--page-top);
+}
+
 .wine-form .button-primary,
 .wine-form .button-secondary {
   text-transform: uppercase;

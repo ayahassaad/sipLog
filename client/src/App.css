@@ -760,8 +760,9 @@ textarea:focus {
 .auth-shell {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 12vh;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 32px;
 }
 
 .auth-panel {

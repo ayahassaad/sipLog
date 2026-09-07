@@ -1,15 +1,16 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import RoseGlassLogo from "./RoseGlassLogo";
 
 function navLinkClassName({ isActive }) {
   return isActive ? "nav-link active" : "nav-link";
 }
 
-function NavBar() {
-  const { user, logout } = useAuth();
+function SiteHeader() {
+  const { logout } = useAuth();
 
   return (
-    <div className="top-bar">
+    <header className="site-header">
       <nav className="main-nav">
         <NavLink to="/" end className={navLinkClassName}>
           My Journal
@@ -19,14 +20,15 @@ function NavBar() {
         </NavLink>
       </nav>
 
-      <div className="top-bar-user">
-        <span className="user-name">Hi, {user?.name}</span>
-        <button type="button" className="button-secondary" onClick={logout}>
-          Log out
-        </button>
+      <div className="site-header-logo">
+        <RoseGlassLogo />
       </div>
-    </div>
+
+      <button type="button" className="button-secondary" onClick={logout}>
+        Log out
+      </button>
+    </header>
   );
 }
 
-export default NavBar;
+export default SiteHeader;

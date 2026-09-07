@@ -1,35 +1,35 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import NavBar from "../NavBar";
+import SiteHeader from "../SiteHeader";
 import { useAuth } from "../../context/useAuth";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
-describe("NavBar", () => {
-  it("shows the logged-in user's name and both nav links", () => {
-    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+describe("SiteHeader", () => {
+  it("shows both nav links and the logout button", () => {
+    useAuth.mockReturnValue({ logout: vi.fn() });
 
     render(
       <MemoryRouter>
-        <NavBar />
+        <SiteHeader />
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/hi, ayah/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /my journal/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /community/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
   });
 
   it("calls logout when the log out button is clicked", () => {
     const logout = vi.fn();
-    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout });
+    useAuth.mockReturnValue({ logout });
 
     render(
       <MemoryRouter>
-        <NavBar />
+        <SiteHeader />
       </MemoryRouter>
     );
 

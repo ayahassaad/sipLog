@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import NavBar from "../components/NavBar";
+import SiteHeader from "../components/SiteHeader";
 import { useTastings } from "../hooks/useTastings";
 import { useWines } from "../hooks/useWines";
 import FavoritesShelf from "../components/FavoritesShelf";
 import FilterBar from "../components/FilterBar";
-import HeroPanel from "../components/HeroPanel";
 import TastingForm from "../components/TastingForm";
 import TastingTimeline from "../components/TastingTimeline";
 import { initialTastingForm, initialWineForm, MOOD_TAGS } from "../constants";
@@ -283,66 +282,65 @@ function JournalPage() {
   }, [filteredTastings]);
 
   return (
-    <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-      <NavBar />
-
-      <HeroPanel />
-
-      <FilterBar
-        grapes={grapes}
-        searchTerm={searchTerm}
-        ratingFilter={ratingFilter}
-        grapeFilter={grapeFilter}
-        favoritesOnly={favoritesOnly}
-        onSearchTermChange={setSearchTerm}
-        onRatingFilterChange={setRatingFilter}
-        onGrapeFilterChange={setGrapeFilter}
-        onFavoritesOnlyChange={setFavoritesOnly}
-      />
-
-      <main className="content-grid">
-        <TastingForm
-          editingId={editingId}
-          createNewWine={createNewWine}
-          wines={wines.wines}
-          wineForm={wineForm}
-          tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
-          moodTags={MOOD_TAGS}
-          submitting={submitting || uploadingPhoto}
-          error={error}
-          successMessage={successMessage}
-          onSubmit={handleSubmit}
-          onWineModeChange={handleWineModeChange}
-          onWineChange={handleWineChange}
-          onTastingChange={handleTastingChange}
-          onPhotoUpload={handlePhotoUpload}
-          onToggleMoodTag={toggleMoodTag}
-          onCancelEdit={resetForms}
+    <>
+      <SiteHeader />
+        <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
+        <FilterBar
+          grapes={grapes}
+          searchTerm={searchTerm}
+          ratingFilter={ratingFilter}
+          grapeFilter={grapeFilter}
+          favoritesOnly={favoritesOnly}
+          onSearchTermChange={setSearchTerm}
+          onRatingFilterChange={setRatingFilter}
+          onGrapeFilterChange={setGrapeFilter}
+          onFavoritesOnlyChange={setFavoritesOnly}
         />
 
-        <section className="panel list-panel">
-          <FavoritesShelf tastings={favoriteTastings} />
-          <TastingTimeline
-            loading={loading}
+        <main className="content-grid">
+          <TastingForm
+            editingId={editingId}
+            createNewWine={createNewWine}
+            wines={wines.wines}
+            wineForm={wineForm}
+            tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
+            moodTags={MOOD_TAGS}
+            submitting={submitting || uploadingPhoto}
             error={error}
             successMessage={successMessage}
-            filteredCount={filteredTastings.length}
-            timelineGroups={timelineGroups}
-            lastUpdatedAt={tastings.lastUpdatedAt}
-            deletingId={deletingId}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onSubmit={handleSubmit}
+            onWineModeChange={handleWineModeChange}
+            onWineChange={handleWineChange}
+            onTastingChange={handleTastingChange}
+            onPhotoUpload={handlePhotoUpload}
+            onToggleMoodTag={toggleMoodTag}
+            onCancelEdit={resetForms}
           />
-          {tastings.hasMore && (
-            <div className="button-row">
-              <button type="button" className="button-secondary" onClick={tastings.loadMore}>
-                Load more tastings
-              </button>
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
+
+          <section className="panel list-panel">
+            <FavoritesShelf tastings={favoriteTastings} />
+            <TastingTimeline
+              loading={loading}
+              error={error}
+              successMessage={successMessage}
+              filteredCount={filteredTastings.length}
+              timelineGroups={timelineGroups}
+              lastUpdatedAt={tastings.lastUpdatedAt}
+              deletingId={deletingId}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+            {tastings.hasMore && (
+              <div className="button-row">
+                <button type="button" className="button-secondary" onClick={tastings.loadMore}>
+                  Load more tastings
+                </button>
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
+    </>
   );
 }
 

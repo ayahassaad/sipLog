@@ -1,7 +1,6 @@
 import { useMemo } from "react";
-import NavBar from "../components/NavBar";
+import SiteHeader from "../components/SiteHeader";
 import BottleRating from "../components/BottleRating";
-import HeroPanel from "../components/HeroPanel";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { useUsers } from "../hooks/useUsers";
 
@@ -19,11 +18,10 @@ function CommunityPage() {
   const error = feed.error || people.error;
 
   return (
-    <div className="app-shell">
-      <NavBar />
-      <HeroPanel />
-
-      <section className="panel">
+    <>
+      <SiteHeader />
+      <div className="app-shell">
+        <section className="panel">
         <div className="section-heading">
           <h2>People to Follow</h2>
         </div>
@@ -131,8 +129,9 @@ function CommunityPage() {
             </button>
           </div>
         )}
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }
 

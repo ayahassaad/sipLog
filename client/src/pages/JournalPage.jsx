@@ -26,7 +26,6 @@ function JournalPage() {
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [saveSplash, setSaveSplash] = useState(false);
 
   const loading = tastings.loading || wines.loading;
@@ -173,7 +172,6 @@ function JournalPage() {
 
       resetForms();
       setSearchTerm("");
-      setFavoritesOnly(false);
       flashSplash();
       window.setTimeout(() => {
         document.getElementById("timeline-section")?.scrollIntoView({
@@ -247,11 +245,9 @@ function JournalPage() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
-      const matchesFavorites = !favoritesOnly || tasting.wouldBuyAgain || tasting.rating >= 4;
-
-      return matchesSearch && matchesFavorites;
+      return matchesSearch;
     });
-  }, [favoritesOnly, searchTerm, tastings.tastings]);
+  }, [searchTerm, tastings.tastings]);
 
   const favoriteTastings = useMemo(
     () => filteredTastings.filter((tasting) => tasting.wouldBuyAgain || tasting.rating >= 4),
@@ -276,12 +272,7 @@ function JournalPage() {
     <>
       <SiteHeader />
         <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-        <FilterBar
-          searchTerm={searchTerm}
-          favoritesOnly={favoritesOnly}
-          onSearchTermChange={setSearchTerm}
-          onFavoritesOnlyChange={setFavoritesOnly}
-        />
+        <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
         <main className="content-grid">
           <TastingForm

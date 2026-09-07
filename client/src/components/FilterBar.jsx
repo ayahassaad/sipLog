@@ -1,4 +1,4 @@
-function FilterBar({ searchTerm, favoritesOnly, onSearchTermChange, onFavoritesOnlyChange }) {
+function FilterBar({ searchTerm, onSearchTermChange }) {
   return (
     <section className="panel filter-bar">
       <div className="section-heading">
@@ -12,14 +12,6 @@ function FilterBar({ searchTerm, favoritesOnly, onSearchTermChange, onFavoritesO
             value={searchTerm}
             onChange={(event) => onSearchTermChange(event.target.value)}
           />
-        </label>
-        <label className="checkbox-row favorites-only">
-          <input
-            type="checkbox"
-            checked={favoritesOnly}
-            onChange={(event) => onFavoritesOnlyChange(event.target.checked)}
-          />
-          Favorites only
         </label>
       </div>
     </section>

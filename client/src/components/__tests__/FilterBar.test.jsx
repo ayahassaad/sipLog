@@ -4,9 +4,7 @@ import FilterBar from "../FilterBar";
 
 const baseProps = {
   searchTerm: "",
-  favoritesOnly: false,
   onSearchTermChange: vi.fn(),
-  onFavoritesOnlyChange: vi.fn(),
 };
 
 describe("FilterBar", () => {
@@ -19,14 +17,5 @@ describe("FilterBar", () => {
     });
 
     expect(onSearchTermChange).toHaveBeenCalledWith("rioja");
-  });
-
-  it("reports the favorites-only checkbox toggling", () => {
-    const onFavoritesOnlyChange = vi.fn();
-    render(<FilterBar {...baseProps} onFavoritesOnlyChange={onFavoritesOnlyChange} />);
-
-    fireEvent.click(screen.getByLabelText(/favorites only/i));
-
-    expect(onFavoritesOnlyChange).toHaveBeenCalledWith(true);
   });
 });

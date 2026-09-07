@@ -373,8 +373,6 @@ textarea:focus {
   filter: brightness(1.03);
 }
 
-.photo-preview-wrap { margin-top: 16px; }
-.photo-preview,
 .card-photo {
   width: 100%;
   max-height: 360px;
@@ -738,6 +736,12 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .field-grid,
+  .field-grid.cols-3,
+  .score-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .form-panel { position: static; }
   .timeline-heading {
     align-items: stretch;
@@ -966,35 +970,153 @@ textarea:focus {
   letter-spacing: 0.05em;
 }
 
-/* Ledger-row layout: label on the left, field on the right, a hairline
-   under each row instead of stacked label-above-input or boxed groups. */
 .ledger-form {
   display: flex;
   flex-direction: column;
 }
 
-.ledger-row {
-  display: grid;
-  grid-template-columns: 160px 1fr;
+/* Circular camera-icon photo upload, leading the form. */
+.photo-upload-wrap {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 14px 0;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.photo-upload-wrap input[type="file"] {
+  display: none;
+}
+
+.photo-circle {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--gold);
+  background: rgba(216, 173, 95, 0.06);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.photo-circle:hover {
+  border-color: var(--text);
+  transform: scale(1.03);
+}
+
+.photo-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-circle.has-photo {
+  border-style: solid;
+}
+
+.photo-circle .camera-icon-wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  transition: opacity 0.18s ease, background 0.18s ease;
+}
+
+.photo-circle.has-photo .camera-icon-wrap {
+  opacity: 0;
+}
+
+.photo-circle:hover .camera-icon-wrap {
+  opacity: 1;
+}
+
+.photo-circle.has-photo:hover .camera-icon-wrap {
+  background: rgba(50, 7, 17, 0.55);
+}
+
+.camera-icon-wrap svg {
+  width: 30px;
+  height: 30px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.photo-caption {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-soft);
+  opacity: 0.7;
+}
+
+/* Field grid: uses the form's horizontal space instead of one long
+   single column of stacked rows. */
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 28px;
+}
+
+.field-grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
   border-bottom: 1px solid var(--line);
 }
 
-.ledger-row:last-of-type {
-  border-bottom: none;
+.field span {
+  font-size: 0.66rem;
+  margin-bottom: 6px;
 }
 
-.ledger-row span {
-  font-size: 0.72rem;
-}
-
-.ledger-row input,
-.ledger-row select,
-.ledger-row textarea {
+.field input,
+.field select,
+.field textarea {
   border-bottom: none;
   padding: 4px 2px;
+}
+
+.section-label {
+  grid-column: 1 / -1;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--gold);
+  text-transform: none;
+  letter-spacing: normal;
+  margin: 22px 0 2px;
+}
+
+/* Score row: all five ratings side by side instead of stacked. */
+.score-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.score-row .field {
+  padding: 10px 0 6px;
+}
+
+.score-row select {
+  text-align: center;
+}
+
+.form-buttons {
+  margin-top: 8px;
 }
 
 .wine-form input,
@@ -1032,32 +1154,6 @@ textarea:focus {
 .wine-form input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-
-.wine-form input[type="file"] {
-  border-bottom: none;
-  padding: 4px 0;
-}
-
-.wine-form input[type="file"]::file-selector-button,
-.wine-form input[type="file"]::-webkit-file-upload-button {
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  font-family: var(--font-body);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  padding: 8px 16px;
-  margin-right: 12px;
-  cursor: pointer;
-  transition: background 0.16s ease, color 0.16s ease;
-}
-
-.wine-form input[type="file"]:hover::file-selector-button,
-.wine-form input[type="file"]:hover::-webkit-file-upload-button {
-  background: var(--gold);
-  color: var(--page-top);
 }
 
 .wine-form .button-primary,

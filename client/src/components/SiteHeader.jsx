@@ -22,6 +22,7 @@ function SiteHeader() {
 
       <div className="site-header-logo">
         <RoseGlassLogo />
+        <p className="site-header-title">SipLog</p>
       </div>
 
       <button type="button" className="button-secondary" onClick={logout}>

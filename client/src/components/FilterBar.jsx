@@ -4,7 +4,7 @@ function FilterBar({ searchTerm, onSearchTermChange }) {
       <label aria-label="Search">
         <input
           type="text"
-          placeholder="Search wine, grape, year, notes, moods..."
+          placeholder="Search wine, grape, year, notes, etc."
           value={searchTerm}
           onChange={(event) => onSearchTermChange(event.target.value)}
         />

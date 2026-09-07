@@ -9,6 +9,10 @@ import TastingTimeline from "../components/TastingTimeline";
 import { initialTastingForm, initialWineForm } from "../constants";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
+import {
+  favoriteTasting as favoriteTastingRequest,
+  unfavoriteTasting as unfavoriteTastingRequest,
+} from "../services/tastingService";
 
 const AUTO_REFRESH_MS = 30000;
 
@@ -206,6 +210,30 @@ function JournalPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // My Wines and My Favorites are two separate lists holding overlapping
+  // data, so a favorite/unfavorite here has to update both of them locally
+  // (not just whichever one is currently showing) or switching tabs shows
+  // stale state.
+  const handleToggleFavorite = async (tastingId, currentlyFavorited) => {
+    tastings.setFavoriteFlag(tastingId, !currentlyFavorited);
+    favorites.setFavoriteFlag(tastingId, !currentlyFavorited);
+
+    try {
+      if (currentlyFavorited) {
+        await unfavoriteTastingRequest(tastingId);
+      } else {
+        await favoriteTastingRequest(tastingId);
+        // Newly favorited tastings aren't in favorites' local state yet --
+        // refetch so "My Favorites" has it next time it's viewed.
+        favorites.refresh();
+      }
+    } catch (err) {
+      tastings.setFavoriteFlag(tastingId, currentlyFavorited);
+      favorites.refresh();
+      setFormError(err.message);
+    }
+  };
+
   const filteredTastings = useMemo(() => {
     return activeTastingsSource.tastings.filter((tasting) => {
       const matchesSearch =
@@ -229,20 +257,6 @@ function JournalPage() {
       return matchesSearch;
     });
   }, [searchTerm, activeTastingsSource.tastings]);
-
-  const timelineGroups = useMemo(() => {
-    return filteredTastings.reduce((groups, tasting) => {
-      const timelineDate = tasting.createdAt || tasting.updatedAt;
-      const label = new Date(timelineDate).toLocaleDateString(undefined, {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-      groups[label] ??= [];
-      groups[label].push(tasting);
-      return groups;
-    }, {});
-  }, [filteredTastings]);
 
   return (
     <>
@@ -291,11 +305,11 @@ function JournalPage() {
               error={error}
               successMessage={successMessage}
               filteredCount={filteredTastings.length}
-              timelineGroups={timelineGroups}
+              tastings={filteredTastings}
               deletingId={deletingId}
               onEdit={view === "mine" ? handleEdit : undefined}
               onDelete={view === "mine" ? handleDelete : undefined}
-              onToggleFavorite={activeTastingsSource.toggleFavorite}
+              onToggleFavorite={handleToggleFavorite}
               showAuthor={view === "favorites"}
               heading={view === "mine" ? "My Wines" : "My Favorites"}
             />

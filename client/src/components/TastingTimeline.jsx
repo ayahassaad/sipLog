@@ -5,7 +5,7 @@ function TastingTimeline({
   error,
   successMessage,
   filteredCount,
-  timelineGroups,
+  tastings,
   deletingId,
   onEdit,
   onDelete,
@@ -28,114 +28,89 @@ function TastingTimeline({
         <p className="status-message">No entries match your current filters.</p>
       )}
 
-      <div className="timeline">
-        {Object.entries(timelineGroups).map(([dateLabel, items]) => (
-          <div className="timeline-group" key={dateLabel}>
-            <div className="timeline-date">{dateLabel}</div>
-            <div className="card-stack">
-              {items.map((tasting) => (
-                <article className="tasting-card" key={tasting._id}>
-                  <div className="card-top">
-                    <div>
-                      <p className="card-vintage">
-                        {tasting.wineId?.vintage || "Unknown vintage"}{" "}
-                        {tasting.wineId?.country || "Unknown country"}
-                      </p>
-                      <h3>{tasting.wineId?.name || "Untitled wine"}</h3>
-                      <p className="card-subtitle">
-                        {tasting.wineId?.producer || "Unknown producer"} ·{" "}
-                        {tasting.wineId?.grape || "Unknown grape"}
-                      </p>
-                    </div>
-                    <div className="card-top-actions">
-                      <button
-                        type="button"
-                        className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
-                        onClick={() => onToggleFavorite(tasting._id, tasting.isFavorited)}
-                        aria-pressed={tasting.isFavorited}
-                        aria-label={
-                          tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
-                        }
-                      >
-                        {tasting.isFavorited ? "\u2605" : "\u2606"}
-                      </button>
-                      <BottleRating rating={tasting.rating} />
-                    </div>
-                  </div>
-
-                  {tasting.imageUrl && (
-                    <img
-                      className="card-photo"
-                      src={tasting.imageUrl}
-                      alt={tasting.wineId?.name || "Wine tasting"}
-                    />
-                  )}
-
-                  <div className="mood-row">
-                    {(tasting.moodTags || []).map((tag) => (
-                      <span className="mood-chip" key={`${tasting._id}-${tag}`}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <dl className="detail-grid">
-                    <div>
-                      <dt>Appearance</dt>
-                      <dd>{tasting.appearance}</dd>
-                    </div>
-                    <div>
-                      <dt>Nose</dt>
-                      <dd>{tasting.noseNotes?.join(", ") || "Not recorded"}</dd>
-                    </div>
-                    <div>
-                      <dt>Palate</dt>
-                      <dd>{tasting.palateNotes?.join(", ") || "Not recorded"}</dd>
-                    </div>
-                    <div>
-                      <dt>Structure</dt>
-                      <dd>
-                        S {tasting.sweetness} · A {tasting.acidity} · B {tasting.body} · T{" "}
-                        {tasting.tannin}
-                      </dd>
-                    </div>
-                  </dl>
-
-                  <p className="thoughts-block">
-                    {tasting.personalThoughts || "No written thoughts yet."}
-                  </p>
-
-                  {showAuthor && tasting.userId && (
-                    <p className="card-author">Tasted by {tasting.userId.name}</p>
-                  )}
-
-                  {(onEdit || onDelete) && (
-                    <div className="button-row">
-                      {onEdit && (
-                        <button
-                          type="button"
-                          className="button-secondary"
-                          onClick={() => onEdit(tasting)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                      {onDelete && (
-                        <button
-                          type="button"
-                          className="button-danger"
-                          onClick={() => onDelete(tasting._id)}
-                          disabled={deletingId === tasting._id}
-                        >
-                          {deletingId === tasting._id ? "Deleting..." : "Delete"}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </article>
-              ))}
+      <div className="card-stack">
+        {tastings.map((tasting) => (
+          <article className="tasting-card" key={tasting._id}>
+            <div className="card-top">
+              <div>
+                <p className="card-vintage">
+                  {tasting.wineId?.vintage || "Unknown vintage"}{" "}
+                  {tasting.wineId?.country || "Unknown country"}
+                </p>
+                <h3>{tasting.wineId?.name || "Untitled wine"}</h3>
+                <p className="card-subtitle">
+                  {tasting.wineId?.producer || "Unknown producer"} ·{" "}
+                  {tasting.wineId?.grape || "Unknown grape"}
+                </p>
+              </div>
+              <div className="card-top-actions">
+                <button
+                  type="button"
+                  className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
+                  onClick={() => onToggleFavorite(tasting._id, tasting.isFavorited)}
+                  aria-pressed={tasting.isFavorited}
+                  aria-label={tasting.isFavorited ? "Remove from favorites" : "Add to favorites"}
+                >
+                  {tasting.isFavorited ? "★" : "☆"}
+                </button>
+                <BottleRating rating={tasting.rating} />
+              </div>
             </div>
-          </div>
+
+            {tasting.imageUrl && (
+              <img
+                className="card-photo"
+                src={tasting.imageUrl}
+                alt={tasting.wineId?.name || "Wine tasting"}
+              />
+            )}
+
+            <dl className="detail-grid">
+              <div>
+                <dt>Appearance</dt>
+                <dd>{tasting.appearance}</dd>
+              </div>
+              <div>
+                <dt>Nose</dt>
+                <dd>{tasting.noseNotes?.join(", ") || "Not recorded"}</dd>
+              </div>
+              <div>
+                <dt>Palate</dt>
+                <dd>{tasting.palateNotes?.join(", ") || "Not recorded"}</dd>
+              </div>
+              <div>
+                <dt>Structure</dt>
+                <dd>
+                  S {tasting.sweetness} · A {tasting.acidity} · B {tasting.body} · T{" "}
+                  {tasting.tannin}
+                </dd>
+              </div>
+            </dl>
+
+            {showAuthor && tasting.userId && (
+              <p className="card-author">Tasted by {tasting.userId.name}</p>
+            )}
+
+            {(onEdit || onDelete) && (
+              <div className="button-row">
+                {onEdit && (
+                  <button type="button" className="button-secondary" onClick={() => onEdit(tasting)}>
+                    Edit
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    type="button"
+                    className="button-danger"
+                    onClick={() => onDelete(tasting._id)}
+                    disabled={deletingId === tasting._id}
+                  >
+                    {deletingId === tasting._id ? "Deleting..." : "Delete"}
+                  </button>
+                )}
+              </div>
+            )}
+          </article>
         ))}
       </div>
     </>

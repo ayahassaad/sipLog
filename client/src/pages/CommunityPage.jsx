@@ -106,18 +106,6 @@ function CommunityPage() {
                   />
                 )}
 
-                <div className="mood-row">
-                  {(tasting.moodTags || []).map((tag) => (
-                    <span className="mood-chip" key={`${tasting._id}-${tag}`}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <p className="thoughts-block">
-                  {tasting.personalThoughts || "No written thoughts yet."}
-                </p>
-
                 {author && (
                   <div className="card-author-row">
                     <span className="card-author">Tasted by {author.name}</span>

@@ -2,9 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createTasting as createTastingRequest,
   deleteTasting as deleteTastingRequest,
-  favoriteTasting as favoriteTastingRequest,
   fetchTastings,
-  unfavoriteTasting as unfavoriteTastingRequest,
   updateTasting as updateTastingRequest,
 } from "../services/tastingService";
 
@@ -102,28 +100,15 @@ export function useTastings() {
     setLastUpdatedAt(new Date());
   }, []);
 
-  // Optimistic toggle: flip the star instantly, roll back if the request fails.
-  const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
+  // Pure local update, no network call -- My Wines and My Favorites share
+  // the same underlying tastings, so the actual favorite/unfavorite request
+  // and cross-list sync are orchestrated one level up, in JournalPage.
+  const setFavoriteFlag = useCallback((tastingId, isFavorited) => {
     setTastings((prev) =>
       prev.map((tasting) =>
-        tasting._id === tastingId ? { ...tasting, isFavorited: !currentlyFavorited } : tasting
+        tasting._id === tastingId ? { ...tasting, isFavorited } : tasting
       )
     );
-
-    try {
-      if (currentlyFavorited) {
-        await unfavoriteTastingRequest(tastingId);
-      } else {
-        await favoriteTastingRequest(tastingId);
-      }
-    } catch (err) {
-      setTastings((prev) =>
-        prev.map((tasting) =>
-          tasting._id === tastingId ? { ...tasting, isFavorited: currentlyFavorited } : tasting
-        )
-      );
-      setError(err.message);
-    }
   }, []);
 
   return {
@@ -137,6 +122,6 @@ export function useTastings() {
     create,
     update,
     remove,
-    toggleFavorite,
+    setFavoriteFlag,
   };
 }

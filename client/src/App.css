@@ -41,15 +41,21 @@
 .eyebrow,
 .section-kicker,
 .stat-label,
-.card-vintage,
 .notice-title,
-.mini-heading,
-.timeline-date {
+.mini-heading {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 0.74rem;
   font-weight: 700;
   color: var(--berry-mid);
+}
+
+.card-vintage {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--gold);
 }
 
 .section-heading h2,
@@ -185,15 +191,13 @@
 
 .mode-toggle,
 .button-row,
-.tag-cloud,
-.mood-row {
+.tag-cloud {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.tag-pill,
-.mood-chip {
+.tag-pill {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -212,8 +216,7 @@
   color: var(--berry-dark);
 }
 
-.tag-pill:hover,
-.mood-chip:hover {
+.tag-pill:hover {
   transform: translateY(-1px);
   border-color: rgba(255, 235, 239, 0.3);
 }
@@ -473,59 +476,21 @@ textarea:focus {
   font-weight: 700;
 }
 
-.timeline {
-  display: grid;
-  gap: 26px;
-}
-
-.timeline-group {
-  display: grid;
-  gap: 12px;
-}
-
 .timeline-heading {
   margin-top: 12px;
-}
-
-.timeline-date {
-  padding-left: 14px;
-  color: #f2bfd0;
 }
 
 .card-stack {
   display: grid;
   gap: 18px;
-  position: relative;
-}
-
-.card-stack::before {
-  content: "";
-  position: absolute;
-  left: 17px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgba(255, 221, 228, 0.14);
 }
 
 .tasting-card {
-  padding: 24px 24px 24px 38px;
+  padding: 24px;
   background:
     linear-gradient(180deg, rgba(255, 236, 241, 0.04), transparent 34%),
     #6a132a;
   position: relative;
-}
-
-.tasting-card::before {
-  content: "";
-  position: absolute;
-  left: 11px;
-  top: 30px;
-  width: 13px;
-  height: 13px;
-  border-radius: 0;
-  background: var(--accent-strong);
-  box-shadow: 0 0 0 5px rgba(225, 108, 144, 0.18);
 }
 
 .card-top {
@@ -556,7 +521,7 @@ textarea:focus {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--berry-mid);
+  color: var(--gold);
 }
 
 .detail-grid dd {
@@ -567,7 +532,7 @@ textarea:focus {
 .thoughts-block {
   margin: 16px 0 18px;
   padding: 18px;
-  border-left: 4px solid var(--accent-strong);
+  border-left: 4px solid var(--gold);
   background: rgba(132, 32, 58, 0.94);
   border-radius: 0;
 }

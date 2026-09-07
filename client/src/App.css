@@ -602,7 +602,7 @@ textarea:focus {
   gap: 16px;
   padding: 10px 32px;
   background: var(--page-top);
-  border-bottom: 2px solid var(--line-strong);
+  border-bottom: 2px solid var(--gold);
 }
 
 .site-header-logo {

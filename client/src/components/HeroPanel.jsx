@@ -1,6 +1,6 @@
 import RoseGlassLogo from "./RoseGlassLogo";
 
-function HeroPanel({ tastingsCount, winesCount, averageRating }) {
+function HeroPanel() {
   return (
     <header className="hero-panel">
       <div className="hero-copy">
@@ -10,21 +10,6 @@ function HeroPanel({ tastingsCount, winesCount, averageRating }) {
           Build your own tasting timeline, collect bottles you loved, and make
           every sip feel like part of your story.
         </p>
-      </div>
-
-      <div className="stats-grid">
-        <article className="stat-card">
-          <span className="stat-label">Saved Tastings</span>
-          <strong>{tastingsCount}</strong>
-        </article>
-        <article className="stat-card">
-          <span className="stat-label">Wine Entries</span>
-          <strong>{winesCount}</strong>
-        </article>
-        <article className="stat-card">
-          <span className="stat-label">Average Rating</span>
-          <strong>{averageRating}</strong>
-        </article>
       </div>
     </header>
   );

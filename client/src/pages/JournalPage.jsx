@@ -283,13 +283,6 @@ function JournalPage() {
     }, {});
   }, [filteredTastings]);
 
-  const averageRating = tastings.tastings.length
-    ? (
-        tastings.tastings.reduce((sum, tasting) => sum + tasting.rating, 0) /
-        tastings.tastings.length
-      ).toFixed(1)
-    : "0.0";
-
   return (
     <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
       <div className="top-bar">
@@ -299,11 +292,7 @@ function JournalPage() {
         </button>
       </div>
 
-      <HeroPanel
-        tastingsCount={tastings.tastings.length}
-        winesCount={wines.wines.length}
-        averageRating={averageRating}
-      />
+      <HeroPanel />
 
       <FilterBar
         grapes={grapes}

@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   favoriteTasting as favoriteTastingRequest,
-  fetchCommunityFeed,
+  fetchFavoriteTastings,
   unfavoriteTasting as unfavoriteTastingRequest,
 } from "../services/tastingService";
 
 const PAGE_SIZE = 20;
 
-export function useCommunityFeed() {
+export function useFavoriteTastings() {
   const [tastings, setTastings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,7 +17,7 @@ export function useCommunityFeed() {
 
   const loadFirstPage = useCallback(async () => {
     try {
-      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE });
+      const data = await fetchFavoriteTastings({ page: 1, limit: PAGE_SIZE });
       setTastings(data.tastings);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -47,7 +47,7 @@ export function useCommunityFeed() {
     loadingMoreRef.current = true;
     try {
       const nextPage = page + 1;
-      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE });
+      const data = await fetchFavoriteTastings({ page: nextPage, limit: PAGE_SIZE });
       setTastings((prev) => [...prev, ...data.tastings]);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -58,29 +58,31 @@ export function useCommunityFeed() {
     }
   }, [page, totalPages]);
 
-  // Optimistic toggle: flip the star instantly, roll back if the request fails.
-  const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
-    setTastings((prev) =>
-      prev.map((tasting) =>
-        tasting._id === tastingId ? { ...tasting, isFavorited: !currentlyFavorited } : tasting
-      )
-    );
+  // Unfavoriting here removes the wine from this list entirely -- this view
+  // is exactly "everything you've favorited". Rolls back to what the list
+  // looked like before if the request fails.
+  const toggleFavorite = useCallback(
+    async (tastingId, currentlyFavorited) => {
+      const previousTastings = tastings;
 
-    try {
       if (currentlyFavorited) {
-        await unfavoriteTastingRequest(tastingId);
-      } else {
-        await favoriteTastingRequest(tastingId);
+        setTastings((prev) => prev.filter((tasting) => tasting._id !== tastingId));
       }
-    } catch (err) {
-      setTastings((prev) =>
-        prev.map((tasting) =>
-          tasting._id === tastingId ? { ...tasting, isFavorited: currentlyFavorited } : tasting
-        )
-      );
-      setError(err.message);
-    }
-  }, []);
+
+      try {
+        if (currentlyFavorited) {
+          await unfavoriteTastingRequest(tastingId);
+        } else {
+          await favoriteTastingRequest(tastingId);
+          loadFirstPage();
+        }
+      } catch (err) {
+        setTastings(previousTastings);
+        setError(err.message);
+      }
+    },
+    [tastings, loadFirstPage]
+  );
 
   return {
     tastings,

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createTasting as createTastingRequest,
   deleteTasting as deleteTastingRequest,
+  favoriteTasting as favoriteTastingRequest,
   fetchTastings,
+  unfavoriteTasting as unfavoriteTastingRequest,
   updateTasting as updateTastingRequest,
 } from "../services/tastingService";
 
@@ -100,6 +102,30 @@ export function useTastings() {
     setLastUpdatedAt(new Date());
   }, []);
 
+  // Optimistic toggle: flip the star instantly, roll back if the request fails.
+  const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
+    setTastings((prev) =>
+      prev.map((tasting) =>
+        tasting._id === tastingId ? { ...tasting, isFavorited: !currentlyFavorited } : tasting
+      )
+    );
+
+    try {
+      if (currentlyFavorited) {
+        await unfavoriteTastingRequest(tastingId);
+      } else {
+        await favoriteTastingRequest(tastingId);
+      }
+    } catch (err) {
+      setTastings((prev) =>
+        prev.map((tasting) =>
+          tasting._id === tastingId ? { ...tasting, isFavorited: currentlyFavorited } : tasting
+        )
+      );
+      setError(err.message);
+    }
+  }, []);
+
   return {
     tastings,
     loading,
@@ -111,5 +137,6 @@ export function useTastings() {
     create,
     update,
     remove,
+    toggleFavorite,
   };
 }

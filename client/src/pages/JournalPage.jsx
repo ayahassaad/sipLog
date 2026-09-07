@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import { useTastings } from "../hooks/useTastings";
+import { useFavoriteTastings } from "../hooks/useFavoriteTastings";
 import { useWines } from "../hooks/useWines";
 import FilterBar from "../components/FilterBar";
 import TastingForm from "../components/TastingForm";
@@ -13,7 +14,9 @@ const AUTO_REFRESH_MS = 30000;
 
 function JournalPage() {
   const tastings = useTastings();
+  const favorites = useFavoriteTastings();
   const wines = useWines();
+  const [view, setView] = useState("mine");
 
   const [tastingForm, setTastingForm] = useState(initialTastingForm);
   const [wineForm, setWineForm] = useState(initialWineForm);
@@ -27,8 +30,9 @@ function JournalPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [saveSplash, setSaveSplash] = useState(false);
 
-  const loading = tastings.loading || wines.loading;
-  const error = formError || tastings.error || wines.error;
+  const activeTastingsSource = view === "mine" ? tastings : favorites;
+  const loading = activeTastingsSource.loading || wines.loading;
+  const error = formError || activeTastingsSource.error || wines.error;
 
   // Default the "existing wine" picker to the first wine once wines load.
   // Derived during render instead of an effect, so there's no extra setState render.
@@ -216,7 +220,7 @@ function JournalPage() {
   };
 
   const filteredTastings = useMemo(() => {
-    return tastings.tastings.filter((tasting) => {
+    return activeTastingsSource.tastings.filter((tasting) => {
       const matchesSearch =
         searchTerm.trim() === "" ||
         [
@@ -237,7 +241,7 @@ function JournalPage() {
 
       return matchesSearch;
     });
-  }, [searchTerm, tastings.tastings]);
+  }, [searchTerm, activeTastingsSource.tastings]);
 
   const timelineGroups = useMemo(() => {
     return filteredTastings.reduce((groups, tasting) => {
@@ -278,6 +282,25 @@ function JournalPage() {
           />
 
           <section className="panel list-panel">
+            <div className="mode-toggle">
+              <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
+                <input
+                  type="radio"
+                  checked={view === "mine"}
+                  onChange={() => setView("mine")}
+                />
+                My Wines
+              </label>
+              <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
+                <input
+                  type="radio"
+                  checked={view === "favorites"}
+                  onChange={() => setView("favorites")}
+                />
+                My Favorites
+              </label>
+            </div>
+
             <TastingTimeline
               loading={loading}
               error={error}
@@ -285,12 +308,19 @@ function JournalPage() {
               filteredCount={filteredTastings.length}
               timelineGroups={timelineGroups}
               deletingId={deletingId}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onEdit={view === "mine" ? handleEdit : undefined}
+              onDelete={view === "mine" ? handleDelete : undefined}
+              onToggleFavorite={activeTastingsSource.toggleFavorite}
+              showAuthor={view === "favorites"}
+              heading={view === "mine" ? "My Wines" : "My Favorites"}
             />
-            {tastings.hasMore && (
+            {activeTastingsSource.hasMore && (
               <div className="button-row">
-                <button type="button" className="button-secondary" onClick={tastings.loadMore}>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={activeTastingsSource.loadMore}
+                >
                   Load more tastings
                 </button>
               </div>

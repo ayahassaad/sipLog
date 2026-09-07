@@ -9,11 +9,14 @@ function TastingTimeline({
   deletingId,
   onEdit,
   onDelete,
+  onToggleFavorite,
+  showAuthor = false,
+  heading = "My Wines",
 }) {
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">
-        <h2>My Wines</h2>
+        <h2>{heading}</h2>
       </div>
 
       {loading && <p className="status-message">Loading tastings...</p>}
@@ -44,7 +47,20 @@ function TastingTimeline({
                         {tasting.wineId?.grape || "Unknown grape"}
                       </p>
                     </div>
-                    <BottleRating rating={tasting.rating} />
+                    <div className="card-top-actions">
+                      <button
+                        type="button"
+                        className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
+                        onClick={() => onToggleFavorite(tasting._id, tasting.isFavorited)}
+                        aria-pressed={tasting.isFavorited}
+                        aria-label={
+                          tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
+                        }
+                      >
+                        {tasting.isFavorited ? "\u2605" : "\u2606"}
+                      </button>
+                      <BottleRating rating={tasting.rating} />
+                    </div>
                   </div>
 
                   {tasting.imageUrl && (
@@ -89,23 +105,33 @@ function TastingTimeline({
                     {tasting.personalThoughts || "No written thoughts yet."}
                   </p>
 
-                  <div className="button-row">
-                    <button
-                      type="button"
-                      className="button-secondary"
-                      onClick={() => onEdit(tasting)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="button-danger"
-                      onClick={() => onDelete(tasting._id)}
-                      disabled={deletingId === tasting._id}
-                    >
-                      {deletingId === tasting._id ? "Deleting..." : "Delete"}
-                    </button>
-                  </div>
+                  {showAuthor && tasting.userId && (
+                    <p className="card-author">Tasted by {tasting.userId.name}</p>
+                  )}
+
+                  {(onEdit || onDelete) && (
+                    <div className="button-row">
+                      {onEdit && (
+                        <button
+                          type="button"
+                          className="button-secondary"
+                          onClick={() => onEdit(tasting)}
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          className="button-danger"
+                          onClick={() => onDelete(tasting._id)}
+                          disabled={deletingId === tasting._id}
+                        >
+                          {deletingId === tasting._id ? "Deleting..." : "Delete"}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </article>
               ))}
             </div>

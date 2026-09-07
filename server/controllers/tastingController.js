@@ -423,7 +423,7 @@ exports.createTasting = async (req, res) => {
     const tasting = new Tasting({ ...payload, userId: req.user._id });
     const savedTasting = await tasting.save();
     await savedTasting.populate(["userId", "wineId"]);
-    res.status(201).json(savedTasting);
+    res.status(201).json(attachFavoriteFlag([savedTasting], buildFavoriteIdSet(req.user))[0]);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -457,7 +457,7 @@ exports.updateTasting = async (req, res) => {
       .populate("userId")
       .populate("wineId");
 
-    res.json(updatedTasting);
+    res.json(attachFavoriteFlag([updatedTasting], buildFavoriteIdSet(req.user))[0]);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

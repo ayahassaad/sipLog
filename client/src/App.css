@@ -374,6 +374,36 @@ textarea:focus {
   gap: 20px;
 }
 
+.card-top-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.favorite-star {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text-soft);
+  opacity: 0.45;
+  transition: color 0.16s ease, opacity 0.16s ease, transform 0.16s ease;
+}
+
+.favorite-star:hover {
+  opacity: 0.9;
+  transform: scale(1.1);
+}
+
+.favorite-star.active {
+  color: var(--gold);
+  opacity: 1;
+}
+
 
 .bottle-rating {
   display: flex;

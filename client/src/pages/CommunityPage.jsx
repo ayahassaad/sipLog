@@ -82,7 +82,20 @@ function CommunityPage() {
                       {tasting.wineId?.grape || "Unknown grape"}
                     </p>
                   </div>
-                  <BottleRating rating={tasting.rating} />
+                  <div className="card-top-actions">
+                    <button
+                      type="button"
+                      className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
+                      onClick={() => feed.toggleFavorite(tasting._id, tasting.isFavorited)}
+                      aria-pressed={tasting.isFavorited}
+                      aria-label={
+                        tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
+                      }
+                    >
+                      {tasting.isFavorited ? "\u2605" : "\u2606"}
+                    </button>
+                    <BottleRating rating={tasting.rating} />
+                  </div>
                 </div>
 
                 {tasting.imageUrl && (

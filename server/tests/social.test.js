@@ -117,6 +117,78 @@ describe("Following", () => {
   });
 });
 
+describe("Favorites", () => {
+  it("favorites a tasting and reflects isFavorited in My Journal", async () => {
+    const { agent: alice } = await registerAgent();
+    const aliceWine = await createWine(alice);
+    const created = await alice
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: aliceWine._id });
+
+    const before = await alice.get("/api/tastings");
+    expect(before.body.tastings[0].isFavorited).toBe(false);
+
+    const favoriteRes = await alice.post(`/api/tastings/${created.body._id}/favorite`);
+    expect(favoriteRes.status).toBe(200);
+
+    const after = await alice.get("/api/tastings");
+    expect(after.body.tastings[0].isFavorited).toBe(true);
+  });
+
+  it("unfavorites a tasting", async () => {
+    const { agent: alice } = await registerAgent();
+    const aliceWine = await createWine(alice);
+    const created = await alice
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: aliceWine._id });
+
+    await alice.post(`/api/tastings/${created.body._id}/favorite`);
+    const unfavoriteRes = await alice.post(`/api/tastings/${created.body._id}/unfavorite`);
+    expect(unfavoriteRes.status).toBe(200);
+
+    const after = await alice.get("/api/tastings");
+    expect(after.body.tastings[0].isFavorited).toBe(false);
+  });
+
+  it("can favorite someone else's tasting, and it shows up in /tastings/favorites", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
+
+    const bobWine = await createWine(bob, { name: "Bob's Wine" });
+    const bobTasting = await bob
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: bobWine._id });
+
+    await alice.post(`/api/tastings/${bobTasting.body._id}/favorite`);
+
+    const favorites = await alice.get("/api/tastings/favorites");
+    expect(favorites.status).toBe(200);
+    expect(favorites.body.tastings).toHaveLength(1);
+    expect(favorites.body.tastings[0].userId.name).toBe(bobUser.name);
+    expect(favorites.body.tastings[0].isFavorited).toBe(true);
+
+    // Favoriting someone else's tasting never shows up in your own private
+    // journal listing -- that's still scoped to tastings you posted.
+    const aliceJournal = await alice.get("/api/tastings");
+    expect(aliceJournal.body.tastings).toHaveLength(0);
+  });
+
+  it("does not favorite a tasting that doesn't exist", async () => {
+    const { agent: alice } = await registerAgent();
+
+    const res = await alice.post("/api/tastings/000000000000000000000000/favorite");
+    expect(res.status).toBe(404);
+  });
+
+  it("requires auth for favorite routes", async () => {
+    const favorite = await request(app).post("/api/tastings/000000000000000000000000/favorite");
+    const favorites = await request(app).get("/api/tastings/favorites");
+
+    expect(favorite.status).toBe(401);
+    expect(favorites.status).toBe(401);
+  });
+});
+
 describe("Community feed", () => {
   it("shows other users' tastings but never your own", async () => {
     const { agent: alice } = await registerAgent();

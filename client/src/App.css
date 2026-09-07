@@ -769,6 +769,13 @@ textarea:focus {
   width: min(420px, 100%);
 }
 
+/* The Log in / Create account button starts solid gold instead of the
+   ghost outline the wine-form buttons default to elsewhere. */
+.auth-panel .wine-form .button-primary {
+  background: var(--gold);
+  color: var(--page-top);
+}
+
 .auth-switch {
   margin-top: 18px;
   text-align: center;

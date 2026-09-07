@@ -5,8 +5,7 @@ function FilterBar({ searchTerm, favoritesOnly, onSearchTermChange, onFavoritesO
         <h2>Search &amp; Filter</h2>
       </div>
       <div className="filter-grid">
-        <label>
-          Search
+        <label aria-label="Search">
           <input
             type="text"
             placeholder="Search wine, grape, year, notes, moods..."

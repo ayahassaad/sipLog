@@ -173,7 +173,7 @@ function TastingTimeline({
                   </dl>
 
                   {showAuthor && tasting.userId && (
-                    <p className="card-author">Tasted by {tasting.userId.name}</p>
+                    <p className="card-author">Tasted by: {tasting.userId.name}</p>
                   )}
 
                   {(onEdit || onDelete) && (

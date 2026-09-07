@@ -2,7 +2,6 @@ const scoreOptions = [1, 2, 3, 4, 5];
 
 function TastingForm({
   editingId,
-  createNewWine,
   wines,
   wineForm,
   tastingForm,
@@ -10,7 +9,6 @@ function TastingForm({
   error,
   successMessage,
   onSubmit,
-  onWineModeChange,
   onWineChange,
   onTastingChange,
   onPhotoUpload,
@@ -27,30 +25,9 @@ function TastingForm({
         <p className="status-message success form-status">{successMessage}</p>
       )}
 
-      {!editingId && (
-        <div className="mode-toggle">
-          <label className={`toggle-chip ${createNewWine ? "active" : ""}`}>
-            <input
-              type="radio"
-              checked={createNewWine}
-              onChange={() => onWineModeChange(true)}
-            />
-            New wine
-          </label>
-          <label className={`toggle-chip ${!createNewWine ? "active" : ""}`}>
-            <input
-              type="radio"
-              checked={!createNewWine}
-              onChange={() => onWineModeChange(false)}
-            />
-            Existing wine
-          </label>
-        </div>
-      )}
-
       <form className="tasting-form" onSubmit={onSubmit}>
         <div className="form-grid">
-          {!editingId && createNewWine ? (
+          {!editingId ? (
             <>
               <label>
                 Wine Name
@@ -114,7 +91,7 @@ function TastingForm({
             </>
           ) : (
             <label className="full-width">
-              {editingId ? "Wine" : "Choose a Wine"}
+              Wine
               <select
                 name="wineId"
                 value={tastingForm.wineId}

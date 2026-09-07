@@ -20,7 +20,6 @@ function JournalPage() {
 
   const [tastingForm, setTastingForm] = useState(initialTastingForm);
   const [wineForm, setWineForm] = useState(initialWineForm);
-  const [createNewWine, setCreateNewWine] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deletingId, setDeletingId] = useState("");
@@ -37,9 +36,9 @@ function JournalPage() {
   // Default the "existing wine" picker to the first wine once wines load.
   // Derived during render instead of an effect, so there's no extra setState render.
   const effectiveWineId = useMemo(() => {
-    if (createNewWine) return tastingForm.wineId;
+    if (!editingId) return tastingForm.wineId;
     return tastingForm.wineId || wines.wines[0]?._id || "";
-  }, [createNewWine, tastingForm.wineId, wines.wines]);
+  }, [editingId, tastingForm.wineId, wines.wines]);
 
   // Keep the journal reasonably fresh if it's left open in a background tab.
   useEffect(() => {
@@ -68,7 +67,6 @@ function JournalPage() {
 
   const resetForms = () => {
     setEditingId("");
-    setCreateNewWine(true);
     setWineForm(initialWineForm);
     setTastingForm(initialTastingForm);
     setFormError("");
@@ -93,16 +91,6 @@ function JournalPage() {
       ...prev,
       [name]: type === "number" ? Number(value) : value,
     }));
-  };
-
-  const handleWineModeChange = (useNewWine) => {
-    setCreateNewWine(useNewWine);
-    if (!useNewWine && wines.wines.length > 0) {
-      setTastingForm((prev) => ({ ...prev, wineId: wines.wines[0]._id }));
-    }
-    if (useNewWine) {
-      setTastingForm((prev) => ({ ...prev, wineId: "" }));
-    }
   };
 
   const handlePhotoUpload = async (event) => {
@@ -136,7 +124,7 @@ function JournalPage() {
     try {
       let wineId = effectiveWineId;
 
-      if (!editingId && createNewWine) {
+      if (!editingId) {
         const createdWine = await wines.addWine(wineForm);
         wineId = createdWine._id;
       }
@@ -198,7 +186,6 @@ function JournalPage() {
 
   const handleEdit = (tasting) => {
     setEditingId(tasting._id);
-    setCreateNewWine(false);
     setFormError("");
     setTastingForm({
       wineId: tasting.wineId?._id || "",
@@ -266,7 +253,6 @@ function JournalPage() {
         <main className="content-grid">
           <TastingForm
             editingId={editingId}
-            createNewWine={createNewWine}
             wines={wines.wines}
             wineForm={wineForm}
             tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
@@ -274,7 +260,6 @@ function JournalPage() {
             error={error}
             successMessage={successMessage}
             onSubmit={handleSubmit}
-            onWineModeChange={handleWineModeChange}
             onWineChange={handleWineChange}
             onTastingChange={handleTastingChange}
             onPhotoUpload={handlePhotoUpload}

@@ -7,7 +7,6 @@ function renderForm(overrides = {}) {
   const onSubmit = vi.fn((event) => event.preventDefault());
   const props = {
     editingId: "",
-    createNewWine: true,
     wines: [],
     wineForm: initialWineForm,
     tastingForm: initialTastingForm,
@@ -15,7 +14,6 @@ function renderForm(overrides = {}) {
     error: "",
     successMessage: "",
     onSubmit,
-    onWineModeChange: vi.fn(),
     onWineChange: vi.fn(),
     onTastingChange: vi.fn(),
     onPhotoUpload: vi.fn(),
@@ -28,15 +26,15 @@ function renderForm(overrides = {}) {
 }
 
 describe("TastingForm", () => {
-  it("shows the new-wine fields by default", () => {
+  it("always shows the new-wine fields when adding a wine", () => {
     renderForm();
     expect(screen.getByLabelText(/wine name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/producer/i)).toBeInTheDocument();
   });
 
-  it("shows an existing-wine dropdown instead when createNewWine is false", () => {
+  it("shows an existing-wine dropdown instead when editing a tasting", () => {
     renderForm({
-      createNewWine: false,
+      editingId: "tasting-1",
       wines: [{ _id: "wine-1", name: "Rioja", producer: "Riscal", vintage: 2020 }],
     });
 

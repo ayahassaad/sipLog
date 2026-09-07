@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { createWine as createWineRequest, fetchWines } from "../services/wineService";
+import {
+  createWine as createWineRequest,
+  fetchWines,
+  updateWine as updateWineRequest,
+} from "../services/wineService";
 
 export function useWines() {
   const [wines, setWines] = useState([]);
@@ -36,5 +40,11 @@ export function useWines() {
     return wine;
   }, []);
 
-  return { wines, loading, error, loadWines, addWine };
+  const updateWine = useCallback(async (id, payload) => {
+    const wine = await updateWineRequest(id, payload);
+    setWines((prev) => prev.map((existing) => (existing._id === id ? wine : existing)));
+    return wine;
+  }, []);
+
+  return { wines, loading, error, loadWines, addWine, updateWine };
 }

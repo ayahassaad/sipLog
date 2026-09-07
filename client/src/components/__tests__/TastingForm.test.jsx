@@ -7,7 +7,6 @@ function renderForm(overrides = {}) {
   const onSubmit = vi.fn((event) => event.preventDefault());
   const props = {
     editingId: "",
-    wines: [],
     wineForm: initialWineForm,
     tastingForm: initialTastingForm,
     submitting: false,
@@ -26,20 +25,28 @@ function renderForm(overrides = {}) {
 }
 
 describe("TastingForm", () => {
-  it("always shows the new-wine fields when adding a wine", () => {
+  it("always shows the editable wine fields when adding a wine", () => {
     renderForm();
-    expect(screen.getByLabelText(/wine name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/producer/i)).toBeInTheDocument();
   });
 
-  it("shows an existing-wine dropdown instead when editing a tasting", () => {
+  it("pre-fills the wine fields (still editable, no dropdown) when editing a tasting", () => {
     renderForm({
       editingId: "tasting-1",
-      wines: [{ _id: "wine-1", name: "Rioja", producer: "Riscal", vintage: 2020 }],
+      wineForm: {
+        name: "Rioja",
+        producer: "Riscal",
+        country: "Spain",
+        region: "Rioja",
+        grape: "Tempranillo",
+        vintage: 2020,
+      },
     });
 
-    expect(screen.queryByLabelText(/wine name/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Rioja - Riscal \(2020\)/)).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: /select a wine/i })).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/^name$/i)).toHaveValue("Rioja");
+    expect(screen.getByLabelText(/producer/i)).toHaveValue("Riscal");
   });
 
   it("submits the form", () => {

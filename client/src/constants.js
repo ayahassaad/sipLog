@@ -30,7 +30,7 @@ export const initialTastingForm = {
   body: 1,
   tannin: 1,
   rating: 1,
-  price: 0,
+  price: "",
   wouldBuyAgain: false,
   moodTags: [],
   personalThoughts: "",

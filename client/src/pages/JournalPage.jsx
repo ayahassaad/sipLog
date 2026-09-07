@@ -37,13 +37,6 @@ function JournalPage() {
   const loading = activeTastingsSource.loading || wines.loading;
   const error = formError || activeTastingsSource.error || wines.error;
 
-  // Default the "existing wine" picker to the first wine once wines load.
-  // Derived during render instead of an effect, so there's no extra setState render.
-  const effectiveWineId = useMemo(() => {
-    if (!editingId) return tastingForm.wineId;
-    return tastingForm.wineId || wines.wines[0]?._id || "";
-  }, [editingId, tastingForm.wineId, wines.wines]);
-
   // Keep the journal reasonably fresh if it's left open in a background tab.
   useEffect(() => {
     const refreshAll = () => {
@@ -86,7 +79,14 @@ function JournalPage() {
     const { name, value, type, checked } = event.target;
     setTastingForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : type === "number" ? Number(value) : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? value === ""
+            ? ""
+            : Number(value)
+          : value,
     }));
   };
 
@@ -127,9 +127,11 @@ function JournalPage() {
     setSuccessMessage("");
 
     try {
-      let wineId = effectiveWineId;
+      let wineId = tastingForm.wineId;
 
-      if (!editingId) {
+      if (editingId) {
+        await wines.updateWine(wineId, wineForm);
+      } else {
         const createdWine = await wines.addWine(wineForm);
         wineId = createdWine._id;
       }
@@ -189,6 +191,14 @@ function JournalPage() {
     setEditingId(tasting._id);
     setFormError("");
     setView("add");
+    setWineForm({
+      name: tasting.wineId?.name || "",
+      producer: tasting.wineId?.producer || "",
+      country: tasting.wineId?.country || "",
+      region: tasting.wineId?.region || "",
+      grape: tasting.wineId?.grape || "",
+      vintage: tasting.wineId?.vintage || "",
+    });
     setTastingForm({
       wineId: tasting.wineId?._id || "",
       appearance: tasting.appearance || "",
@@ -199,7 +209,7 @@ function JournalPage() {
       body: tasting.body || 1,
       tannin: tasting.tannin || 1,
       rating: tasting.rating || 1,
-      price: tasting.price || 0,
+      price: tasting.price || "",
       wouldBuyAgain: tasting.wouldBuyAgain || false,
       moodTags: tasting.moodTags || [],
       personalThoughts: tasting.personalThoughts || "",
@@ -290,9 +300,8 @@ function JournalPage() {
         {view === "add" ? (
           <TastingForm
             editingId={editingId}
-            wines={wines.wines}
             wineForm={wineForm}
-            tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
+            tastingForm={tastingForm}
             submitting={submitting || uploadingPhoto}
             error={error}
             successMessage={successMessage}

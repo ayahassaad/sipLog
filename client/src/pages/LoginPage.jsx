@@ -33,17 +33,17 @@ function LoginPage() {
 
   return (
     <div className="app-shell auth-shell">
-      <section className="panel form-panel auth-panel">
+      <section className="auth-panel">
         <div className="section-heading">
-          <h2>Log in to SipLog</h2>
+          <h2 className="brand-highlight">Log in to SipLog</h2>
         </div>
 
         {error && <p className="status-message error form-status">{error}</p>}
 
-        <form className="tasting-form" onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <label className="full-width">
-              Email
+        <form className="tasting-form wine-form" onSubmit={handleSubmit}>
+          <div className="field-grid">
+            <label className="field field-full">
+              <span>Email</span>
               <input
                 type="email"
                 name="email"
@@ -52,8 +52,8 @@ function LoginPage() {
                 required
               />
             </label>
-            <label className="full-width">
-              Password
+            <label className="field field-full">
+              <span>Password</span>
               <input
                 type="password"
                 name="password"
@@ -65,7 +65,7 @@ function LoginPage() {
             </label>
           </div>
 
-          <div className="button-row">
+          <div className="button-row form-buttons">
             <button type="submit" className="button-primary" disabled={submitting}>
               {submitting ? "Logging in..." : "Log in"}
             </button>

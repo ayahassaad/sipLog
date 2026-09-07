@@ -180,7 +180,7 @@
 }
 
 .mode-toggle {
-  margin: 0 0 9px;
+  margin: 0;
 }
 
 .mode-toggle,
@@ -373,8 +373,6 @@ textarea:focus {
   filter: brightness(1.03);
 }
 
-.photo-preview-wrap { margin-top: 16px; }
-.photo-preview,
 .card-photo {
   width: 100%;
   max-height: 360px;
@@ -738,6 +736,12 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .field-grid,
+  .field-grid.cols-3,
+  .score-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .form-panel { position: static; }
   .timeline-heading {
     align-items: stretch;
@@ -756,12 +760,40 @@ textarea:focus {
 .auth-shell {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 12vh;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 32px;
 }
 
+/* Borderless / floating: no card at all, just a soft gold glow sitting
+   behind the heading and fields instead of a boxed panel. */
 .auth-panel {
+  position: relative;
   width: min(420px, 100%);
+  padding: 20px 16px;
+}
+
+.auth-panel::before {
+  content: "";
+  position: absolute;
+  inset: -40px -60px;
+  background: radial-gradient(circle, rgba(216, 173, 95, 0.14), transparent 70%);
+  z-index: -1;
+}
+
+/* The Log in / Create account button starts solid gold instead of the
+   ghost outline the wine-form buttons default to elsewhere. */
+.auth-panel .wine-form .button-primary {
+  background: var(--gold);
+  color: var(--page-top);
+}
+
+.auth-panel .section-heading {
+  text-align: center;
+}
+
+.auth-panel .button-row {
+  justify-content: center;
 }
 
 .auth-switch {
@@ -809,6 +841,16 @@ textarea:focus {
   font-weight: 700;
   font-size: 1.3rem;
   letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.brand-highlight {
+  color: var(--gold);
+}
+
+/* .section-heading h2 sets its own color, so beat it here when the
+   whole heading (not just an inline word) should be gold. */
+.section-heading h2.brand-highlight {
   color: var(--gold);
 }
 
@@ -966,35 +1008,203 @@ textarea:focus {
   letter-spacing: 0.05em;
 }
 
-/* Ledger-row layout: label on the left, field on the right, a hairline
-   under each row instead of stacked label-above-input or boxed groups. */
 .ledger-form {
   display: flex;
   flex-direction: column;
 }
 
-.ledger-row {
-  display: grid;
-  grid-template-columns: 160px 1fr;
+/* Circular camera-icon photo upload, leading the form. */
+.photo-upload-wrap {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--line);
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.ledger-row:last-of-type {
-  border-bottom: none;
+.photo-upload-wrap input[type="file"] {
+  display: none;
 }
 
-.ledger-row span {
-  font-size: 0.72rem;
+.photo-circle {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--gold);
+  background: rgba(216, 173, 95, 0.06);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
 }
 
-.ledger-row input,
-.ledger-row select,
-.ledger-row textarea {
+.photo-circle:hover {
+  border-color: var(--text);
+  transform: scale(1.03);
+}
+
+.photo-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-circle.has-photo {
+  border-style: solid;
+}
+
+.photo-circle .camera-icon-wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  transition: opacity 0.18s ease, background 0.18s ease;
+}
+
+.photo-circle.has-photo .camera-icon-wrap {
+  opacity: 0;
+}
+
+.photo-circle:hover .camera-icon-wrap {
+  opacity: 1;
+}
+
+.photo-circle.has-photo:hover .camera-icon-wrap {
+  background: rgba(50, 7, 17, 0.55);
+}
+
+.camera-icon-wrap svg {
+  width: 30px;
+  height: 30px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.photo-caption {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-soft);
+  opacity: 0.7;
+}
+
+/* Field grid: uses the form's horizontal space instead of one long
+   single column of stacked rows. */
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 28px;
+}
+
+.field-grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+
+.field span {
+  font-size: 0.66rem;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--berry-mid);
+  font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea {
   border-bottom: none;
   padding: 4px 2px;
+}
+
+/* Score row: all five ratings side by side instead of stacked. */
+.score-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  position: relative;
+}
+
+.score-row .field {
+  padding: 10px 0 6px;
+}
+
+/* Legend spanning the whole row, so "least to most" only needs to be said once. */
+.score-scale-legend {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+  opacity: 0.6;
+  margin-bottom: -2px;
+}
+
+/* Wine-drop rating selector: five drops per field, growing from small to
+   large left to right so the least-to-most direction reads at a glance,
+   filling gold up to the picked value. */
+.drop-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 6px 0 2px;
+}
+
+.drop-btn:first-child {
+  padding-left: 0;
+}
+
+.drop-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--gold);
+  transition: transform 0.15s ease;
+}
+
+.drop-btn:hover {
+  transform: scale(1.15);
+}
+
+.drop-btn svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  transition: fill 0.15s ease;
+  display: block;
+}
+
+.drop-btn.filled svg {
+  fill: currentColor;
+}
+
+.drop-btn.drop-1 svg { width: 11px; height: 11px; }
+.drop-btn.drop-2 svg { width: 14px; height: 14px; }
+.drop-btn.drop-3 svg { width: 17px; height: 17px; }
+.drop-btn.drop-4 svg { width: 20px; height: 20px; }
+.drop-btn.drop-5 svg { width: 23px; height: 23px; }
+
+.form-buttons {
+  margin-top: 8px;
 }
 
 .wine-form input,
@@ -1034,32 +1244,6 @@ textarea:focus {
   margin: 0;
 }
 
-.wine-form input[type="file"] {
-  border-bottom: none;
-  padding: 4px 0;
-}
-
-.wine-form input[type="file"]::file-selector-button,
-.wine-form input[type="file"]::-webkit-file-upload-button {
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  font-family: var(--font-body);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  padding: 8px 16px;
-  margin-right: 12px;
-  cursor: pointer;
-  transition: background 0.16s ease, color 0.16s ease;
-}
-
-.wine-form input[type="file"]:hover::file-selector-button,
-.wine-form input[type="file"]:hover::-webkit-file-upload-button {
-  background: var(--gold);
-  color: var(--page-top);
-}
-
 .wine-form .button-primary,
 .wine-form .button-secondary {
   text-transform: uppercase;
@@ -1090,4 +1274,23 @@ textarea:focus {
   background: var(--gold);
   color: var(--page-top);
   filter: none;
+}
+
+/* Pop + pulsing glow, only while actually hovered — no idle animation. */
+@keyframes wineButtonGlowPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(216, 173, 95, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(216, 173, 95, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(216, 173, 95, 0);
+  }
+}
+
+.wine-form .button-primary:hover,
+.wine-form .button-secondary:hover {
+  transform: scale(1.05);
+  animation: wineButtonGlowPulse 1.3s ease-out infinite;
 }

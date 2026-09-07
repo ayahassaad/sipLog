@@ -1,12 +1,36 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import BottleRating from "../components/BottleRating";
+import { useAuth } from "../context/useAuth";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { useUsers } from "../hooks/useUsers";
 
 function CommunityPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const feed = useCommunityFeed();
   const people = useUsers();
+
+  // Browsing is public, but favoriting and following are personal actions --
+  // send a logged-out visitor to log in instead of letting the request 401.
+  const requireLogin = () => navigate("/login", { state: { from: { pathname: "/" } } });
+
+  const handleToggleFollow = (userId, isFollowing) => {
+    if (!user) {
+      requireLogin();
+      return;
+    }
+    people.toggleFollow(userId, isFollowing);
+  };
+
+  const handleToggleFavorite = (tastingId, isFavorited) => {
+    if (!user) {
+      requireLogin();
+      return;
+    }
+    feed.toggleFavorite(tastingId, isFavorited);
+  };
 
   const followingStateById = useMemo(() => {
     const map = new Map();
@@ -40,7 +64,7 @@ function CommunityPage() {
               <button
                 type="button"
                 className={user.isFollowing ? "button-secondary" : "button-primary"}
-                onClick={() => people.toggleFollow(user.id, user.isFollowing)}
+                onClick={() => handleToggleFollow(user.id, user.isFollowing)}
               >
                 {user.isFollowing ? "Following" : "Follow"}
               </button>
@@ -86,7 +110,7 @@ function CommunityPage() {
                     <button
                       type="button"
                       className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
-                      onClick={() => feed.toggleFavorite(tasting._id, tasting.isFavorited)}
+                      onClick={() => handleToggleFavorite(tasting._id, tasting.isFavorited)}
                       aria-pressed={tasting.isFavorited}
                       aria-label={
                         tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
@@ -112,7 +136,7 @@ function CommunityPage() {
                     <button
                       type="button"
                       className={isFollowing ? "button-secondary" : "button-primary"}
-                      onClick={() => people.toggleFollow(author._id, isFollowing)}
+                      onClick={() => handleToggleFollow(author._id, isFollowing)}
                     >
                       {isFollowing ? "Following" : "Follow"}
                     </button>

@@ -13,19 +13,14 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        {/* Community is the public home page -- anyone can browse it,
+            logged in or not. My Journal is personal, so it stays gated. */}
+        <Route path="/" element={<CommunityPage />} />
         <Route
-          path="/"
+          path="/journal"
           element={
             <ProtectedRoute>
               <JournalPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/community"
-          element={
-            <ProtectedRoute>
-              <CommunityPage />
             </ProtectedRoute>
           }
         />

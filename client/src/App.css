@@ -136,15 +136,7 @@
 }
 
 .filter-bar {
-  margin-top: 24px;
-}
-
-.filter-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  margin-top: 18px;
-  align-items: end;
+  flex-shrink: 0;
 }
 
 .filter-bar input {
@@ -154,6 +146,8 @@
   border-radius: 0;
   color: var(--text);
   padding: 12px 4px;
+  width: 260px;
+  max-width: 100%;
 }
 
 .filter-bar input::placeholder {
@@ -185,7 +179,12 @@
   position: static;
 }
 
-.mode-toggle {
+.mode-toggle-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
   margin: 24px 0 20px;
 }
 
@@ -560,12 +559,18 @@ textarea:focus {
 @media (max-width: 980px) {
   .form-grid,
   .detail-grid,
-  .wines-grid,
-  .filter-grid {
+  .wines-grid {
     grid-template-columns: 1fr;
   }
 
   .form-panel { position: static; }
+  .mode-toggle-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-bar input {
+    width: 100%;
+  }
   .notice-card,
   .card-top {
     grid-template-columns: 1fr;

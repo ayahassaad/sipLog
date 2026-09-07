@@ -264,33 +264,35 @@ function JournalPage() {
     <>
       <SiteHeader />
         <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-        <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+        <div className="mode-toggle-row">
+          <div className="mode-toggle">
+            <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
+              <input
+                type="radio"
+                checked={view === "mine"}
+                onChange={() => setView("mine")}
+              />
+              My Wines
+            </label>
+            <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
+              <input
+                type="radio"
+                checked={view === "favorites"}
+                onChange={() => setView("favorites")}
+              />
+              My Favorites
+            </label>
+            <label className={`toggle-chip ${view === "add" ? "active" : ""}`}>
+              <input
+                type="radio"
+                checked={view === "add"}
+                onChange={() => setView("add")}
+              />
+              Add New Wine
+            </label>
+          </div>
 
-        <div className="mode-toggle">
-          <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
-            <input
-              type="radio"
-              checked={view === "mine"}
-              onChange={() => setView("mine")}
-            />
-            My Wines
-          </label>
-          <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
-            <input
-              type="radio"
-              checked={view === "favorites"}
-              onChange={() => setView("favorites")}
-            />
-            My Favorites
-          </label>
-          <label className={`toggle-chip ${view === "add" ? "active" : ""}`}>
-            <input
-              type="radio"
-              checked={view === "add"}
-              onChange={() => setView("add")}
-            />
-            Add New Wine
-          </label>
+          <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
         </div>
 
         {view === "add" ? (

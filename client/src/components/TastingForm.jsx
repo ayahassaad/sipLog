@@ -6,7 +6,6 @@ function TastingForm({
   wines,
   wineForm,
   tastingForm,
-  moodTags,
   submitting,
   error,
   successMessage,
@@ -15,7 +14,6 @@ function TastingForm({
   onWineChange,
   onTastingChange,
   onPhotoUpload,
-  onToggleMoodTag,
   onCancelEdit,
 }) {
   return (
@@ -219,32 +217,6 @@ function TastingForm({
             />
           </div>
         )}
-
-        <div className="tag-section">
-          <span className="mini-heading">Wine mood tags</span>
-          <div className="tag-cloud">
-            {moodTags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className={`tag-pill ${tastingForm.moodTags.includes(tag) ? "selected" : ""}`}
-                onClick={() => onToggleMoodTag(tag)}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <label className="checkbox-row">
-          <input
-            type="checkbox"
-            name="wouldBuyAgain"
-            checked={tastingForm.wouldBuyAgain}
-            onChange={onTastingChange}
-          />
-          Would buy again
-        </label>
 
         <div className="button-row">
           <button type="submit" className="button-primary" disabled={submitting}>

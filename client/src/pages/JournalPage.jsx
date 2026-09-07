@@ -6,7 +6,7 @@ import FavoritesShelf from "../components/FavoritesShelf";
 import FilterBar from "../components/FilterBar";
 import TastingForm from "../components/TastingForm";
 import TastingTimeline from "../components/TastingTimeline";
-import { initialTastingForm, initialWineForm, MOOD_TAGS } from "../constants";
+import { initialTastingForm, initialWineForm } from "../constants";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
 
@@ -100,15 +100,6 @@ function JournalPage() {
     if (useNewWine) {
       setTastingForm((prev) => ({ ...prev, wineId: "" }));
     }
-  };
-
-  const toggleMoodTag = (tag) => {
-    setTastingForm((prev) => ({
-      ...prev,
-      moodTags: prev.moodTags.includes(tag)
-        ? prev.moodTags.filter((item) => item !== tag)
-        : [...prev.moodTags, tag],
-    }));
   };
 
   const handlePhotoUpload = async (event) => {
@@ -281,7 +272,6 @@ function JournalPage() {
             wines={wines.wines}
             wineForm={wineForm}
             tastingForm={{ ...tastingForm, wineId: effectiveWineId }}
-            moodTags={MOOD_TAGS}
             submitting={submitting || uploadingPhoto}
             error={error}
             successMessage={successMessage}
@@ -290,7 +280,6 @@ function JournalPage() {
             onWineChange={handleWineChange}
             onTastingChange={handleTastingChange}
             onPhotoUpload={handlePhotoUpload}
-            onToggleMoodTag={toggleMoodTag}
             onCancelEdit={resetForms}
           />
 

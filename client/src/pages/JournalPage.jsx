@@ -152,9 +152,6 @@ function JournalPage() {
         setSuccessMessage("Tasting updated successfully. It has been refreshed in the timeline.");
       } else {
         await tastings.create(payload);
-        setSuccessMessage(
-          "Wine and tasting saved successfully. Scroll down to see it at the top of the timeline."
-        );
       }
 
       resetForms();

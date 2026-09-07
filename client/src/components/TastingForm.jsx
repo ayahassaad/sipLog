@@ -17,7 +17,7 @@ function TastingForm({
   onCancelEdit,
 }) {
   return (
-    <section className="panel form-panel">
+    <section className="panel form-panel wine-form">
       <div className="section-heading">
         <h2>{editingId ? "Edit Wine" : "Add a Wine"}</h2>
       </div>

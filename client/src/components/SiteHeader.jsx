@@ -14,24 +14,17 @@ function SiteHeader() {
   // Keep --header-height in sync with the header's real rendered height so
   // the sticky mode-toggle tabs further down the page can pin themselves
   // flush against it instead of relying on a guessed pixel value (which
-  // also drifts once the heading webfont finishes loading).
+  // also drifts once the heading webfont finishes loading). The tabs
+  // themselves close the small app-shell padding gap with a matching
+  // negative margin, so this only needs the header's own height.
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return undefined;
 
     const syncHeaderHeight = () => {
-      // Also fold in the app-shell's own top padding, which is the small
-      // remaining gap between the header and the sticky mode-toggle tabs.
-      // Without it, the tabs would still travel that extra gap before
-      // locking in place instead of holding their original position from
-      // the very first frame.
-      const appShell = document.querySelector(".app-shell");
-      const extraGap = appShell
-        ? parseFloat(getComputedStyle(appShell).paddingTop) || 0
-        : 0;
       document.documentElement.style.setProperty(
         "--header-height",
-        `${header.offsetHeight + extraGap}px`
+        `${header.offsetHeight}px`
       );
     };
 

@@ -226,6 +226,11 @@
   top: var(--header-height);
   z-index: 20;
   background: var(--page-top);
+  /* Extend the background up over the app-shell's top padding so there's
+     no sliver of mismatched page background between the header's gold
+     rim and the tabs once this is stuck. */
+  margin-top: -5px;
+  padding-top: 5px;
 }
 
 .toggle-chip {

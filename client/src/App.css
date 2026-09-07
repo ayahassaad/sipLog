@@ -143,6 +143,19 @@
   align-items: end;
 }
 
+.filter-bar input {
+  border: 1px solid var(--gold);
+}
+
+.filter-bar input::placeholder {
+  color: rgba(78, 16, 35, 0.55);
+}
+
+.filter-bar input:focus {
+  outline: 3px solid rgba(216, 173, 95, 0.28);
+  border-color: var(--gold);
+}
+
 .favorites-only {
   justify-content: center;
   min-height: 50px;

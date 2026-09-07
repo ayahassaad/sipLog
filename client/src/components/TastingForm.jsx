@@ -16,10 +16,6 @@ function TastingForm({
 }) {
   return (
     <section className="panel form-panel wine-form">
-      <div className="section-heading">
-        <h2>{editingId ? "Edit Wine" : "Add a Wine"}</h2>
-      </div>
-
       {error && <p className="status-message error form-status">{error}</p>}
       {!error && successMessage && (
         <p className="status-message success form-status">{successMessage}</p>

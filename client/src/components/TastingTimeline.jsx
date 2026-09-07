@@ -62,7 +62,6 @@ function TastingTimeline({
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">
-        <h2>{heading}</h2>
         {onSearchTermChange && (
           <FilterBar searchTerm={searchTerm} onSearchTermChange={onSearchTermChange} />
         )}

@@ -728,13 +728,6 @@ textarea:focus {
   letter-spacing: 0.05em;
 }
 
-.wine-form label input,
-.wine-form label select,
-.wine-form label textarea {
-  text-transform: none;
-  letter-spacing: normal;
-}
-
 .wine-form .button-primary,
 .wine-form .button-secondary {
   text-transform: uppercase;

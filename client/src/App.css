@@ -241,7 +241,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   background: none;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -825,7 +825,7 @@ textarea:focus {
   padding: 8px 2px;
   border-radius: 0;
   border-bottom: 2px solid transparent;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.14em;

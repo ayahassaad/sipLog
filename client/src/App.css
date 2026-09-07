@@ -997,3 +997,16 @@ textarea:focus {
   color: var(--page-top);
   filter: none;
 }
+
+.wine-form .button-secondary {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  box-shadow: none;
+}
+
+.wine-form .button-secondary:hover {
+  background: var(--gold);
+  color: var(--page-top);
+  filter: none;
+}

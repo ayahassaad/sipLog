@@ -719,6 +719,37 @@ textarea:focus {
   letter-spacing: 0.05em;
 }
 
+/* Ledger-row layout: label on the left, field on the right, a hairline
+   under each row instead of stacked label-above-input or boxed groups. */
+.ledger-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ledger-row:last-of-type {
+  border-bottom: none;
+}
+
+.ledger-row span {
+  font-size: 0.72rem;
+}
+
+.ledger-row input,
+.ledger-row select,
+.ledger-row textarea {
+  border-bottom: none;
+  padding: 4px 2px;
+}
+
 .wine-form input,
 .wine-form select,
 .wine-form textarea {

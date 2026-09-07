@@ -728,6 +728,33 @@ textarea:focus {
   letter-spacing: 0.05em;
 }
 
+.wine-form input,
+.wine-form select,
+.wine-form textarea {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--gold);
+  border-radius: 0;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+  padding: 12px 4px;
+}
+
+.wine-form input::placeholder,
+.wine-form textarea::placeholder {
+  color: var(--text-soft);
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.wine-form input:focus,
+.wine-form select:focus,
+.wine-form textarea:focus {
+  outline: none;
+  border-bottom: 2px solid var(--gold);
+}
+
 .wine-form .button-primary,
 .wine-form .button-secondary {
   text-transform: uppercase;

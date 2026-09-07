@@ -179,12 +179,7 @@
   position: static;
 }
 
-.mode-toggle-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
+.mode-toggle {
   margin: 24px 0 20px;
 }
 
@@ -477,6 +472,11 @@ textarea:focus {
 
 .timeline-heading {
   margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .card-stack {
@@ -564,9 +564,9 @@ textarea:focus {
   }
 
   .form-panel { position: static; }
-  .mode-toggle-row {
-    flex-direction: column;
+  .timeline-heading {
     align-items: stretch;
+    flex-direction: column;
   }
   .filter-bar input {
     width: 100%;

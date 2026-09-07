@@ -264,35 +264,31 @@ function JournalPage() {
     <>
       <SiteHeader />
         <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
-        <div className="mode-toggle-row">
-          <div className="mode-toggle">
-            <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
-              <input
-                type="radio"
-                checked={view === "mine"}
-                onChange={() => setView("mine")}
-              />
-              My Wines
-            </label>
-            <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
-              <input
-                type="radio"
-                checked={view === "favorites"}
-                onChange={() => setView("favorites")}
-              />
-              My Favorites
-            </label>
-            <label className={`toggle-chip ${view === "add" ? "active" : ""}`}>
-              <input
-                type="radio"
-                checked={view === "add"}
-                onChange={() => setView("add")}
-              />
-              Add New Wine
-            </label>
-          </div>
-
-          <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+        <div className="mode-toggle">
+          <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "mine"}
+              onChange={() => setView("mine")}
+            />
+            My Wines
+          </label>
+          <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "favorites"}
+              onChange={() => setView("favorites")}
+            />
+            My Favorites
+          </label>
+          <label className={`toggle-chip ${view === "add" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "add"}
+              onChange={() => setView("add")}
+            />
+            Add New Wine
+          </label>
         </div>
 
         {view === "add" ? (
@@ -324,6 +320,8 @@ function JournalPage() {
               onToggleFavorite={handleToggleFavorite}
               showAuthor={view === "favorites"}
               heading={view === "mine" ? "My Wines" : "My Favorites"}
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
             />
             {activeTastingsSource.hasMore && (
               <div className="button-row">

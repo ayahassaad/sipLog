@@ -1,4 +1,5 @@
 import BottleRating from "./BottleRating";
+import FilterBar from "./FilterBar";
 
 function TastingTimeline({
   loading,
@@ -12,11 +13,16 @@ function TastingTimeline({
   onToggleFavorite,
   showAuthor = false,
   heading = "My Wines",
+  searchTerm,
+  onSearchTermChange,
 }) {
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">
         <h2>{heading}</h2>
+        {onSearchTermChange && (
+          <FilterBar searchTerm={searchTerm} onSearchTermChange={onSearchTermChange} />
+        )}
       </div>
 
       {loading && <p className="status-message">Loading tastings...</p>}

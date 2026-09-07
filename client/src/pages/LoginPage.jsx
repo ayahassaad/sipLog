@@ -35,9 +35,7 @@ function LoginPage() {
     <div className="app-shell auth-shell">
       <section className="panel form-panel auth-panel">
         <div className="section-heading">
-          <h2>
-            Log in to <span className="brand-highlight">SipLog</span>
-          </h2>
+          <h2 className="brand-highlight">Log in to SipLog</h2>
         </div>
 
         {error && <p className="status-message error form-status">{error}</p>}

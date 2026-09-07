@@ -26,8 +26,6 @@ function JournalPage() {
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [ratingFilter, setRatingFilter] = useState("all");
-  const [grapeFilter, setGrapeFilter] = useState("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [saveSplash, setSaveSplash] = useState(false);
 
@@ -175,8 +173,6 @@ function JournalPage() {
 
       resetForms();
       setSearchTerm("");
-      setRatingFilter("all");
-      setGrapeFilter("all");
       setFavoritesOnly(false);
       flashSplash();
       window.setTimeout(() => {
@@ -231,11 +227,6 @@ function JournalPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const grapes = useMemo(
-    () => [...new Set(tastings.tastings.map((tasting) => tasting.wineId?.grape).filter(Boolean))],
-    [tastings.tastings]
-  );
-
   const filteredTastings = useMemo(() => {
     return tastings.tastings.filter((tasting) => {
       const matchesSearch =
@@ -244,6 +235,8 @@ function JournalPage() {
           tasting.wineId?.name,
           tasting.wineId?.producer,
           tasting.wineId?.grape,
+          tasting.wineId?.country,
+          tasting.wineId?.vintage,
           tasting.appearance,
           tasting.personalThoughts,
           ...(tasting.noseNotes || []),
@@ -254,13 +247,11 @@ function JournalPage() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
-      const matchesRating = ratingFilter === "all" || tasting.rating >= Number(ratingFilter);
-      const matchesGrape = grapeFilter === "all" || tasting.wineId?.grape === grapeFilter;
       const matchesFavorites = !favoritesOnly || tasting.wouldBuyAgain || tasting.rating >= 4;
 
-      return matchesSearch && matchesRating && matchesGrape && matchesFavorites;
+      return matchesSearch && matchesFavorites;
     });
-  }, [favoritesOnly, grapeFilter, ratingFilter, searchTerm, tastings.tastings]);
+  }, [favoritesOnly, searchTerm, tastings.tastings]);
 
   const favoriteTastings = useMemo(
     () => filteredTastings.filter((tasting) => tasting.wouldBuyAgain || tasting.rating >= 4),
@@ -286,14 +277,9 @@ function JournalPage() {
       <SiteHeader />
         <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
         <FilterBar
-          grapes={grapes}
           searchTerm={searchTerm}
-          ratingFilter={ratingFilter}
-          grapeFilter={grapeFilter}
           favoritesOnly={favoritesOnly}
           onSearchTermChange={setSearchTerm}
-          onRatingFilterChange={setRatingFilter}
-          onGrapeFilterChange={setGrapeFilter}
           onFavoritesOnlyChange={setFavoritesOnly}
         />
 

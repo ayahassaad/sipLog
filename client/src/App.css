@@ -792,14 +792,14 @@ textarea:focus {
 }
 
 .wine-form .button-primary {
-  background: var(--gold);
-  color: var(--page-top);
+  background: transparent;
+  color: var(--gold);
   border: 1px solid var(--gold);
   box-shadow: none;
 }
 
 .wine-form .button-primary:hover {
-  background: transparent;
-  color: var(--gold);
+  background: var(--gold);
+  color: var(--page-top);
   filter: none;
 }

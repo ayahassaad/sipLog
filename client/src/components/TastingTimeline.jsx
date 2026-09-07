@@ -28,7 +28,7 @@ function TastingTimeline({
         <p className="status-message">No entries match your current filters.</p>
       )}
 
-      <div className="card-stack">
+      <div className="card-stack wines-grid">
         {tastings.map((tasting) => (
           <article className="tasting-card" key={tasting._id}>
             <div className="card-top">

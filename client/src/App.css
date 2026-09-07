@@ -485,6 +485,11 @@ textarea:focus {
   gap: 18px;
 }
 
+.wines-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
 .tasting-card {
   padding: 24px;
   background:
@@ -556,6 +561,7 @@ textarea:focus {
   .content-grid,
   .form-grid,
   .detail-grid,
+  .wines-grid,
   .filter-grid {
     grid-template-columns: 1fr;
   }

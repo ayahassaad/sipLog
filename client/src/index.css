@@ -14,8 +14,8 @@
   --berry-mid: #f7ccd5;
   --accent: #ca4f73;
   --accent-strong: #e16c90;
-  --font-heading: "Georgia", "Times New Roman", serif;
-  --font-body: "Avenir Next", "Segoe UI", sans-serif;
+  --font-heading: "Petit Formal Script", "Georgia", cursive;
+  --font-body: "Petit Formal Script", "Georgia", cursive;
   font-family: var(--font-body);
   color: var(--text);
   font-synthesis: none;

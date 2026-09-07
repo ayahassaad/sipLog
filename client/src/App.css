@@ -797,6 +797,10 @@ textarea:focus {
   color: var(--page-top);
 }
 
+.auth-panel .section-heading {
+  text-align: center;
+}
+
 .auth-switch {
   margin-top: 18px;
   text-align: center;

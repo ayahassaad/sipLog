@@ -1124,9 +1124,13 @@ textarea:focus {
 .drop-row {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
   padding: 6px 0 2px;
+}
+
+.drop-btn:first-child {
+  padding-left: 0;
 }
 
 .drop-btn {

@@ -6,26 +6,14 @@ function TastingTimeline({
   successMessage,
   filteredCount,
   timelineGroups,
-  lastUpdatedAt,
   deletingId,
   onEdit,
   onDelete,
 }) {
-  const lastUpdatedLabel = lastUpdatedAt
-    ? new Intl.DateTimeFormat(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }).format(lastUpdatedAt)
-    : "Waiting for first sync";
-
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">
         <h2>Tasting Timeline</h2>
-        <p className="timeline-refresh-note">
-          Auto-refreshes every 30 seconds. Last updated: {lastUpdatedLabel}
-        </p>
       </div>
 
       {loading && <p className="status-message">Loading tastings...</p>}

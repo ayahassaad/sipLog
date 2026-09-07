@@ -291,7 +291,6 @@ function JournalPage() {
               successMessage={successMessage}
               filteredCount={filteredTastings.length}
               timelineGroups={timelineGroups}
-              lastUpdatedAt={tastings.lastUpdatedAt}
               deletingId={deletingId}
               onEdit={handleEdit}
               onDelete={handleDelete}

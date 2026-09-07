@@ -790,3 +790,16 @@ textarea:focus {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+.wine-form .button-primary {
+  background: var(--gold);
+  color: var(--page-top);
+  border: 1px solid var(--gold);
+  box-shadow: none;
+}
+
+.wine-form .button-primary:hover {
+  background: transparent;
+  color: var(--gold);
+  filter: none;
+}

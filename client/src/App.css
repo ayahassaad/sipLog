@@ -384,7 +384,7 @@ textarea:focus {
   width: 14px;
   height: 30px;
   background: linear-gradient(180deg, #355845, #1f352b);
-  border-radius: 0;
+  border-radius: 8px 8px 3px 3px;
   border: 2px solid rgba(224, 236, 226, 0.14);
   margin-bottom: -6px;
   position: relative;
@@ -394,7 +394,7 @@ textarea:focus {
 .bottle-body {
   width: 50px;
   height: 96px;
-  border-radius: 0;
+  border-radius: 16px 16px 18px 18px;
   background: linear-gradient(180deg, rgba(61, 92, 73, 0.72), rgba(27, 48, 38, 0.94));
   border: 2px solid rgba(224, 236, 226, 0.16);
   overflow: hidden;
@@ -408,7 +408,7 @@ textarea:focus {
   position: absolute;
   inset: 10px auto 10px 8px;
   width: 6px;
-  border-radius: 0;
+  border-radius: 999px;
   background: rgba(229, 243, 233, 0.14);
 }
 

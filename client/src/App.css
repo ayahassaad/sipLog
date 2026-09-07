@@ -816,6 +816,10 @@ textarea:focus {
   color: var(--gold);
 }
 
+.brand-highlight {
+  color: var(--gold);
+}
+
 .main-nav {
   display: flex;
   gap: 24px;

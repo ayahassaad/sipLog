@@ -34,15 +34,17 @@ function RegisterPage() {
       <section className="panel form-panel auth-panel">
         <div className="section-heading">
           <p className="section-kicker">Start your journal</p>
-          <h2>Create your SipLog account</h2>
+          <h2>
+            Create your <span className="brand-highlight">SipLog</span> account
+          </h2>
         </div>
 
         {error && <p className="status-message error form-status">{error}</p>}
 
-        <form className="tasting-form" onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <label className="full-width">
-              Name
+        <form className="tasting-form wine-form" onSubmit={handleSubmit}>
+          <div className="field-grid">
+            <label className="field field-full">
+              <span>Name</span>
               <input
                 type="text"
                 name="name"
@@ -51,8 +53,8 @@ function RegisterPage() {
                 required
               />
             </label>
-            <label className="full-width">
-              Email
+            <label className="field field-full">
+              <span>Email</span>
               <input
                 type="email"
                 name="email"
@@ -61,8 +63,8 @@ function RegisterPage() {
                 required
               />
             </label>
-            <label className="full-width">
-              Password
+            <label className="field field-full">
+              <span>Password</span>
               <input
                 type="password"
                 name="password"
@@ -74,7 +76,7 @@ function RegisterPage() {
             </label>
           </div>
 
-          <div className="button-row">
+          <div className="button-row form-buttons">
             <button type="submit" className="button-primary" disabled={submitting}>
               {submitting ? "Creating account..." : "Create account"}
             </button>

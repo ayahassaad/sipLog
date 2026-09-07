@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const tastingController = require("../controllers/tastingController");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, optionalAuth } = require("../middleware/auth");
 
 // The community feed is the one tasting route that's public -- everything
 // else here is private (your own journal, favorites, and any writes), so
 // requireAuth is applied per-route instead of to the whole router.
-router.get("/feed", tastingController.getCommunityFeed);
+router.get("/feed", optionalAuth, tastingController.getCommunityFeed);
 router.get("/stats/summary", requireAuth, tastingController.getTastingStats);
 router.get("/favorites", requireAuth, tastingController.getFavoriteTastings);
 router.get("/", requireAuth, tastingController.getAllTastings);

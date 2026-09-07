@@ -144,16 +144,23 @@
 }
 
 .filter-bar input {
-  border: 1px solid var(--gold);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--gold);
+  border-radius: 0;
+  color: var(--text);
+  padding: 12px 4px;
 }
 
 .filter-bar input::placeholder {
-  color: rgba(78, 16, 35, 0.55);
+  color: var(--text-soft);
+  opacity: 0.55;
+  font-style: italic;
 }
 
 .filter-bar input:focus {
-  outline: 3px solid rgba(216, 173, 95, 0.28);
-  border-color: var(--gold);
+  outline: none;
+  border-bottom: 2px solid var(--gold);
 }
 
 .favorites-only {

@@ -615,9 +615,9 @@ textarea:focus {
   width: 46px;
   height: 46px;
   border-radius: 44% 56% 60% 40% / 52% 40% 60% 48%;
-  border: 1.5px solid var(--accent-strong);
+  border: 1.5px solid var(--gold);
   background: transparent;
-  color: var(--accent-strong);
+  color: var(--gold);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -630,7 +630,7 @@ textarea:focus {
 .carousel-arrow:hover {
   transform: translateY(-56%) scale(1.22);
   border-radius: 58% 42% 46% 54% / 46% 54% 46% 54%;
-  background: rgba(225, 108, 144, 0.16);
+  background: rgba(216, 173, 95, 0.16);
   box-shadow: 0 10px 18px rgba(10, 0, 4, 0.4);
 }
 
@@ -639,8 +639,11 @@ textarea:focus {
   transition-duration: 0.1s;
 }
 
-.carousel-arrow.left { left: 0; }
-.carousel-arrow.right { right: 0; }
+/* Sitting a little inside the carousel's edge (rather than flush at 0)
+   leaves room for the hover "pop" to grow into without getting clipped
+   by the carousel's overflow: hidden. */
+.carousel-arrow.left { left: 10px; }
+.carousel-arrow.right { right: 10px; }
 
 .carousel-arrow svg {
   width: 20px;

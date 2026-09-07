@@ -33,7 +33,7 @@ function JournalPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [saveSplash, setSaveSplash] = useState(false);
 
-  const activeTastingsSource = view === "mine" ? tastings : favorites;
+  const activeTastingsSource = view === "favorites" ? favorites : tastings;
   const loading = activeTastingsSource.loading || wines.loading;
   const error = formError || activeTastingsSource.error || wines.error;
 
@@ -74,6 +74,7 @@ function JournalPage() {
     setWineForm(initialWineForm);
     setTastingForm(initialTastingForm);
     setFormError("");
+    setView("mine");
   };
 
   const flashSplash = () => {
@@ -191,6 +192,7 @@ function JournalPage() {
   const handleEdit = (tasting) => {
     setEditingId(tasting._id);
     setFormError("");
+    setView("add");
     setTastingForm({
       wineId: tasting.wineId?._id || "",
       appearance: tasting.appearance || "",
@@ -264,7 +266,34 @@ function JournalPage() {
         <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
         <FilterBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
-        <main className="content-grid">
+        <div className="mode-toggle">
+          <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "mine"}
+              onChange={() => setView("mine")}
+            />
+            My Wines
+          </label>
+          <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "favorites"}
+              onChange={() => setView("favorites")}
+            />
+            My Favorites
+          </label>
+          <label className={`toggle-chip ${view === "add" ? "active" : ""}`}>
+            <input
+              type="radio"
+              checked={view === "add"}
+              onChange={() => setView("add")}
+            />
+            Add New Wine
+          </label>
+        </div>
+
+        {view === "add" ? (
           <TastingForm
             editingId={editingId}
             wines={wines.wines}
@@ -279,27 +308,8 @@ function JournalPage() {
             onPhotoUpload={handlePhotoUpload}
             onCancelEdit={resetForms}
           />
-
+        ) : (
           <section className="panel list-panel">
-            <div className="mode-toggle">
-              <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
-                <input
-                  type="radio"
-                  checked={view === "mine"}
-                  onChange={() => setView("mine")}
-                />
-                My Wines
-              </label>
-              <label className={`toggle-chip ${view === "favorites" ? "active" : ""}`}>
-                <input
-                  type="radio"
-                  checked={view === "favorites"}
-                  onChange={() => setView("favorites")}
-                />
-                My Favorites
-              </label>
-            </div>
-
             <TastingTimeline
               loading={loading}
               error={error}
@@ -325,7 +335,7 @@ function JournalPage() {
               </div>
             )}
           </section>
-        </main>
+        )}
       </div>
     </>
   );

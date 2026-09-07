@@ -216,11 +216,16 @@
 }
 
 /* Styled like the site's main nav (My Journal / Community) -- a second,
-   in-page nav bar for switching between My Wines and My Favorites. */
+   in-page nav bar for switching between My Wines and My Favorites. Sticks
+   just under the site header so the tabs stay reachable while scrolling. */
 .mode-toggle {
   gap: 24px;
   border-bottom: 1px solid var(--line);
   padding-bottom: 2px;
+  position: sticky;
+  top: 92px;
+  z-index: 20;
+  background: var(--page-top);
 }
 
 .toggle-chip {

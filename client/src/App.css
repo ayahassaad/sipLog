@@ -581,6 +581,16 @@ textarea:focus {
   color: var(--text-soft, inherit);
 }
 
+.auth-switch a {
+  color: var(--berry-dark);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.auth-switch a:hover {
+  color: var(--accent-strong);
+}
+
 .top-bar {
   display: flex;
   justify-content: space-between;

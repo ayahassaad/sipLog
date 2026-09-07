@@ -83,7 +83,6 @@
 .notice-card,
 .panel,
 .tasting-card,
-.favorite-card,
 .wheel-card {
   position: relative;
   border: 1px solid var(--line);
@@ -96,7 +95,6 @@
 
 .panel::before,
 .tasting-card::before,
-.favorite-card::before,
 .wheel-card::before {
   content: "";
   position: absolute;
@@ -376,22 +374,6 @@ textarea:focus {
   gap: 20px;
 }
 
-.favorites-shelf {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.favorite-card {
-  padding: 20px;
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 12px;
-  align-items: center;
-  background: linear-gradient(180deg, rgba(255, 234, 239, 0.04), transparent 48%), #84203a;
-}
-
-.favorite-card p { color: var(--text-soft); }
 
 .bottle-rating {
   display: flex;
@@ -563,15 +545,13 @@ textarea:focus {
   .content-grid,
   .form-grid,
   .detail-grid,
-  .favorites-shelf,
   .filter-grid {
     grid-template-columns: 1fr;
   }
 
   .form-panel { position: static; }
   .notice-card,
-  .card-top,
-  .favorite-card {
+  .card-top {
     grid-template-columns: 1fr;
     flex-direction: column;
   }

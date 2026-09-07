@@ -13,7 +13,7 @@ function TastingTimeline({
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">
-        <h2>Tasting Timeline</h2>
+        <h2>My Wines</h2>
       </div>
 
       {loading && <p className="status-message">Loading tastings...</p>}

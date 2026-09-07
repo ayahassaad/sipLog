@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import { useTastings } from "../hooks/useTastings";
 import { useWines } from "../hooks/useWines";
-import FavoritesShelf from "../components/FavoritesShelf";
 import FilterBar from "../components/FilterBar";
 import TastingForm from "../components/TastingForm";
 import TastingTimeline from "../components/TastingTimeline";
@@ -240,11 +239,6 @@ function JournalPage() {
     });
   }, [searchTerm, tastings.tastings]);
 
-  const favoriteTastings = useMemo(
-    () => filteredTastings.filter((tasting) => tasting.wouldBuyAgain || tasting.rating >= 4),
-    [filteredTastings]
-  );
-
   const timelineGroups = useMemo(() => {
     return filteredTastings.reduce((groups, tasting) => {
       const timelineDate = tasting.createdAt || tasting.updatedAt;
@@ -284,7 +278,6 @@ function JournalPage() {
           />
 
           <section className="panel list-panel">
-            <FavoritesShelf tastings={favoriteTastings} />
             <TastingTimeline
               loading={loading}
               error={error}

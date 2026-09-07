@@ -1079,6 +1079,10 @@ textarea:focus {
 .field span {
   font-size: 0.66rem;
   margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--berry-mid);
+  font-weight: 600;
 }
 
 .field input,

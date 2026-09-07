@@ -20,9 +20,18 @@ function SiteHeader() {
     if (!header) return undefined;
 
     const syncHeaderHeight = () => {
+      // Also fold in the app-shell's own top padding, which is the small
+      // remaining gap between the header and the sticky mode-toggle tabs.
+      // Without it, the tabs would still travel that extra gap before
+      // locking in place instead of holding their original position from
+      // the very first frame.
+      const appShell = document.querySelector(".app-shell");
+      const extraGap = appShell
+        ? parseFloat(getComputedStyle(appShell).paddingTop) || 0
+        : 0;
       document.documentElement.style.setProperty(
         "--header-height",
-        `${header.offsetHeight}px`
+        `${header.offsetHeight + extraGap}px`
       );
     };
 

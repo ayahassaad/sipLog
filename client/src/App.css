@@ -767,6 +767,27 @@ textarea:focus {
 
 .auth-panel {
   width: min(420px, 100%);
+  margin-top: 22px;
+  border-radius: 100px 100px 4px 4px;
+}
+
+/* Cork Arch: swap the thin top hairline every other panel gets for a
+   little cork sitting on the rounded top edge instead. */
+.auth-panel::before {
+  display: none;
+}
+
+.auth-panel::after {
+  content: "";
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 30px;
+  background: linear-gradient(180deg, #dcb774, var(--gold));
+  border-radius: 6px 6px 3px 3px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(50, 7, 17, 0.25);
 }
 
 /* The Log in / Create account button starts solid gold instead of the

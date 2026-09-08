@@ -26,12 +26,10 @@ const sampleProfile = {
   username: "ayah",
   email: "ayah@example.com",
   avatarUrl: "",
-  following: [
-    { id: "bob-id", name: "Bob", username: "bob", avatarUrl: "", isFollowing: true },
-  ],
-  followers: [
-    { id: "carla-id", name: "Carla", username: "carla", avatarUrl: "", isFollowing: false },
-  ],
+  // Only the counts (following.length / followers.length) are read now --
+  // the profile page no longer renders the individual people in these lists.
+  following: [{ id: "bob-id" }],
+  followers: [{ id: "carla-id" }],
 };
 
 function renderPage() {
@@ -46,7 +44,6 @@ describe("ProfilePage", () => {
   let updateProfile;
   let updateEmail;
   let updatePassword;
-  let toggleFollow;
 
   beforeEach(() => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
@@ -54,7 +51,6 @@ describe("ProfilePage", () => {
     updateProfile = vi.fn().mockResolvedValue({ ...sampleProfile, name: "Ayah A." });
     updateEmail = vi.fn().mockResolvedValue({ ...sampleProfile, email: "new@example.com" });
     updatePassword = vi.fn().mockResolvedValue({ message: "Password updated" });
-    toggleFollow = vi.fn();
 
     useProfile.mockReturnValue({
       profile: sampleProfile,
@@ -63,27 +59,24 @@ describe("ProfilePage", () => {
       updateProfile,
       updateEmail,
       updatePassword,
-      toggleFollow,
     });
   });
 
-  it("shows the profile info and both connection lists", () => {
+  it("shows the profile info and the following/followers counts", () => {
     const { container } = renderPage();
 
     expect(screen.getByText("Ayah")).toBeInTheDocument();
     expect(screen.getByText("@ayah")).toBeInTheDocument();
     expect(screen.queryByText("ayah@example.com")).not.toBeInTheDocument();
 
-    // Following/Followers counts now live in the header's stat row, not in
-    // the section headings below (which just say "Following"/"Followers").
+    // Following/Followers now show only as counts in the header's stat row --
+    // there's no longer a list of the actual people below.
     const statNums = container.querySelectorAll(".profile-stat-num");
     expect(statNums).toHaveLength(2);
     expect(statNums[0]).toHaveTextContent("1");
     expect(statNums[1]).toHaveTextContent("1");
-    expect(screen.getByRole("heading", { name: "Following" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Followers" })).toBeInTheDocument();
-    expect(screen.getByText("@bob")).toBeInTheDocument();
-    expect(screen.getByText("@carla")).toBeInTheDocument();
+    expect(screen.queryByText("@bob")).not.toBeInTheDocument();
+    expect(screen.queryByText("@carla")).not.toBeInTheDocument();
   });
 
   it("saves a new name and username from edit mode", async () => {
@@ -159,13 +152,6 @@ describe("ProfilePage", () => {
         newPassword: "brand-new-password",
       })
     );
-  });
-
-  it("calls toggleFollow when following someone back from the Followers list", () => {
-    renderPage();
-
-    fireEvent.click(screen.getByRole("button", { name: /^follow$/i }));
-    expect(toggleFollow).toHaveBeenCalledWith("carla-id", false);
   });
 
   it("uploads and saves a new avatar photo", async () => {

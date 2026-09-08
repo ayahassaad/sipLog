@@ -8,8 +8,7 @@ import { uploadImage } from "../services/uploadService";
 const emptyStatus = { error: "", success: "", saving: false };
 
 function ProfilePage() {
-  const { profile, loading, error, updateProfile, updateEmail, updatePassword, toggleFollow } =
-    useProfile();
+  const { profile, loading, error, updateProfile, updateEmail, updatePassword } = useProfile();
 
   const [editing, setEditing] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -102,30 +101,6 @@ function ProfilePage() {
     } catch (err) {
       setPasswordStatus({ error: err.message, success: "", saving: false });
     }
-  };
-
-  const renderConnectionList = (people, emptyMessage) => {
-    if (people.length === 0) {
-      return <p className="status-message">{emptyMessage}</p>;
-    }
-
-    return (
-      <div className="connection-list">
-        {people.map((person) => (
-          <div className="connection-row" key={person.id}>
-            <Avatar url={person.avatarUrl} name={person.name} size="sm" />
-            <span className="connection-name">@{person.username}</span>
-            <button
-              type="button"
-              className={`button-gold ${person.isFollowing ? "is-following" : ""}`}
-              onClick={() => toggleFollow(person.id, person.isFollowing)}
-            >
-              {person.isFollowing ? "Following" : "Follow"}
-            </button>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -360,24 +335,6 @@ function ProfilePage() {
             </>
           )}
         </section>
-
-        {!loading && !error && profile && (
-          <>
-            <section className="panel">
-              <div className="section-heading">
-                <h2 className="brand-highlight">Following</h2>
-              </div>
-              {renderConnectionList(profile.following, "You're not following anyone yet.")}
-            </section>
-
-            <section className="panel">
-              <div className="section-heading">
-                <h2 className="brand-highlight">Followers</h2>
-              </div>
-              {renderConnectionList(profile.followers, "No one is following you yet.")}
-            </section>
-          </>
-        )}
       </div>
     </>
   );

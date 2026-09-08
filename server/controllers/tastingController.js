@@ -220,15 +220,21 @@ exports.getCommunityFeed = async (req, res) => {
     // (My Journal is the private/filtered view of just your own tastings).
     const query = {};
 
-    // Optional wine search -- match against the wine's name, producer, or
-    // grape, then scope the feed to tastings of those wines only.
+    // Optional search -- match against the wine's name, producer, or grape,
+    // OR the author's username/name, then scope the feed to tastings of
+    // whichever wines or people matched.
     const search = (req.query.search || "").trim();
     if (search) {
       const pattern = new RegExp(escapeRegex(search), "i");
-      const matchingWineIds = await Wine.find({
-        $or: [{ name: pattern }, { producer: pattern }, { grape: pattern }],
-      }).distinct("_id");
-      query.wineId = { $in: matchingWineIds };
+      const [matchingWineIds, matchingUserIds] = await Promise.all([
+        Wine.find({
+          $or: [{ name: pattern }, { producer: pattern }, { grape: pattern }],
+        }).distinct("_id"),
+        User.find({
+          $or: [{ username: pattern }, { name: pattern }],
+        }).distinct("_id"),
+      ]);
+      query.$or = [{ wineId: { $in: matchingWineIds } }, { userId: { $in: matchingUserIds } }];
     }
 
     const page = Math.max(1, Number(req.query.page) || 1);

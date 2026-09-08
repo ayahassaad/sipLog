@@ -75,7 +75,7 @@ function CommunityPage() {
             <FilterBar
               searchTerm={searchTerm}
               onSearchTermChange={setSearchTerm}
-              placeholder="Search wines by name, producer, or grape..."
+              placeholder="Search for a wine or a user..."
             />
           </div>
 

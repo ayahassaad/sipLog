@@ -1445,12 +1445,19 @@ textarea:focus {
   display: none;
 }
 
-/* The wine search box at the top of Community -- reuses FilterBar's gold
-   underline look, just centered to match the rest of this panel. */
+/* The search box at the top of Community -- reuses FilterBar's gold
+   underline look, centered and sized up since it's the main way to find
+   things on this page (not just a secondary filter like on My Journal). */
 .community-search {
   display: flex;
   justify-content: center;
   margin-bottom: 28px;
+}
+
+.community-search .filter-bar input {
+  width: 420px;
+  font-size: 1.05rem;
+  padding: 16px 8px;
 }
 
 .community-feed-panel .tasting-card {

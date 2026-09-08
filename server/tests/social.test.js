@@ -304,4 +304,24 @@ describe("Community feed", () => {
     expect(feed.status).toBe(200);
     expect(feed.body.tastings).toHaveLength(1);
   });
+
+  it("also matches search against the tasting author's username or name", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
+
+    const aliceWine = await createWine(alice, { name: "Alice's Wine" });
+    const bobWine = await createWine(bob, { name: "Bob's Wine" });
+
+    await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: bobWine._id });
+
+    const byUsername = await alice.get("/api/tastings/feed").query({ search: bobUser.username });
+    expect(byUsername.status).toBe(200);
+    expect(byUsername.body.tastings).toHaveLength(1);
+    expect(byUsername.body.tastings[0].userId.username).toBe(bobUser.username);
+
+    const byName = await alice.get("/api/tastings/feed").query({ search: bobUser.name });
+    expect(byName.body.tastings).toHaveLength(1);
+    expect(byName.body.tastings[0].userId.username).toBe(bobUser.username);
+  });
 });

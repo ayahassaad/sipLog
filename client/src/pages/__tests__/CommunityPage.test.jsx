@@ -201,7 +201,7 @@ describe("CommunityPage", () => {
 
     renderPage();
 
-    fireEvent.change(screen.getByPlaceholderText(/search wines/i), {
+    fireEvent.change(screen.getByPlaceholderText(/search for a wine or a user/i), {
       target: { value: "rioja" },
     });
 

@@ -31,21 +31,21 @@ function Leaderboard({ title, entries, countLabel }) {
   }
 
   return (
-    <div className="admin-leaderboard">
-      <p className="section-kicker">{title}</p>
-      <div className="connection-list">
-        {entries.map((person) => (
-          <div className="connection-row" key={person.id}>
-            <Link to={`/users/${person.username}`} className="connection-link">
-              <Avatar url={person.avatarUrl} name={person.name} size="sm" />
-              <span className="connection-name">@{person.username}</span>
-            </Link>
-            <span className="admin-leaderboard-count">
-              {person.followersCount ?? person.tastingsCount} {countLabel}
-            </span>
-          </div>
-        ))}
-      </div>
+    <div>
+      <p className="admin-board-title">{title}</p>
+      {entries.map((person) => (
+        <Link
+          to={`/users/${person.username}`}
+          className="admin-board-person"
+          key={person.id}
+        >
+          <Avatar url={person.avatarUrl} name={person.name} size="sm" />
+          <span className="admin-board-name">@{person.username}</span>
+          <span className="admin-board-count">
+            {person.followersCount ?? person.tastingsCount} {countLabel}
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }
@@ -69,26 +69,28 @@ function AdminStats() {
         <h2 className="brand-highlight">Site Stats</h2>
       </div>
 
-      <div className="admin-stat-grid">
-        {STAT_TILES.map((tile) => (
-          <div className="admin-stat-tile" key={tile.key}>
-            <span className="admin-stat-num">{stats[tile.key] ?? 0}</span>
-            <span className="admin-stat-label">{tile.label}</span>
-          </div>
-        ))}
-      </div>
+      <div className="admin-stats-split">
+        <div className="admin-stats-stack">
+          {STAT_TILES.map((tile) => (
+            <div className="admin-stat-row" key={tile.key}>
+              <span className="admin-stat-num">{stats[tile.key] ?? 0}</span>
+              <span className="admin-stat-label">{tile.label}</span>
+            </div>
+          ))}
+        </div>
 
-      <div className="admin-leaderboards">
-        <Leaderboard
-          title="Most Followed"
-          entries={stats.topByFollowers}
-          countLabel="followers"
-        />
-        <Leaderboard
-          title="Most Tastings Posted"
-          entries={stats.topByTastings}
-          countLabel="tastings"
-        />
+        <div className="admin-boards-stack">
+          <Leaderboard
+            title="Most Followed"
+            entries={stats.topByFollowers}
+            countLabel="followers"
+          />
+          <Leaderboard
+            title="Most Tastings Posted"
+            entries={stats.topByTastings}
+            countLabel="tastings"
+          />
+        </div>
       </div>
     </section>
   );

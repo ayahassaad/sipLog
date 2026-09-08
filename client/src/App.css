@@ -1749,32 +1749,35 @@ textarea:focus {
   text-decoration: underline;
 }
 
-/* Admin tab: a KPI-style stat grid up top, two small leaderboards, and the
-   full user directory (which reuses .connection-list/.connection-row/
+/* Admin tab: stats as a narrow left-hand sidebar and the two leaderboards
+   stacked beside it, no divider lines between them -- just whitespace.
+   The full user directory below reuses .connection-list/.connection-row/
    .connection-name from Community/Profile, same as everywhere else people
-   are listed). Numbers stay in the app's existing text tokens (gold for
+   are listed. Numbers stay in the app's existing text tokens (gold for
    the value, soft-pink for the label) rather than introducing new colors. */
-.admin-stat-grid {
+.admin-stats-split {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 18px;
+  grid-template-columns: minmax(160px, 200px) 1fr;
+  gap: 36px;
   margin-top: 6px;
 }
 
-.admin-stat-tile {
+.admin-stats-stack {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 18px 10px;
-  border: 1px solid var(--line);
-  text-align: center;
+  gap: 20px;
+}
+
+.admin-stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .admin-stat-num {
   font-family: var(--font-heading);
   color: var(--gold);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   line-height: 1.1;
 }
 
@@ -1786,24 +1789,44 @@ textarea:focus {
   opacity: 0.8;
 }
 
-.admin-leaderboards {
+.admin-boards-stack {
   display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  margin-top: 28px;
-  padding-top: 22px;
-  border-top: 1px solid var(--line);
+  flex-direction: column;
+  gap: 28px;
 }
 
-.admin-leaderboard {
+.admin-board-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--gold);
+  margin: 0 0 10px;
+}
+
+.admin-board-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.admin-board-person:hover .admin-board-name {
+  color: var(--gold);
+}
+
+.admin-board-name {
   flex: 1;
-  min-width: 220px;
+  min-width: 0;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-.admin-leaderboard-count {
+.admin-board-count {
   color: var(--text-soft);
-  font-size: 0.8rem;
-  opacity: 0.85;
+  font-size: 0.76rem;
+  opacity: 0.75;
   white-space: nowrap;
 }
 

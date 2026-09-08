@@ -1537,6 +1537,56 @@ textarea:focus {
   margin: 0;
 }
 
+/* Option-3 "bio card" layout: avatar, name, handle, and the two connection
+   counts stacked and centered, with a divider between the identity block
+   and the counts. Used only in view mode -- edit mode keeps the original
+   left-avatar / right-form row since that layout is about the forms, not
+   the identity header. */
+.profile-header-view {
+  flex-direction: column;
+  text-align: center;
+}
+
+.profile-header-view .profile-identity {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.profile-header-view .profile-edit-toggle {
+  margin-top: 18px;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  width: 100%;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-stat-num {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.profile-stat-label {
+  color: var(--text-soft);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
 .profile-edit-forms {
   margin-top: 26px;
   display: flex;

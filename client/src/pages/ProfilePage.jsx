@@ -138,7 +138,7 @@ function ProfilePage() {
 
           {!loading && !error && profile && (
             <>
-              <div className="profile-header">
+              <div className={`profile-header ${editing ? "" : "profile-header-view"}`}>
                 {editing ? (
                   <div className="photo-upload-wrap">
                     <label
@@ -222,6 +222,19 @@ function ProfilePage() {
                     </>
                   )}
                 </div>
+
+                {!editing && (
+                  <div className="profile-stats">
+                    <div className="profile-stat">
+                      <span className="profile-stat-num">{profile.following.length}</span>
+                      <span className="profile-stat-label">Following</span>
+                    </div>
+                    <div className="profile-stat">
+                      <span className="profile-stat-num">{profile.followers.length}</span>
+                      <span className="profile-stat-label">Followers</span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="button-row profile-edit-toggle">
                   <button

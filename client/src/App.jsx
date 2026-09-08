@@ -6,6 +6,8 @@ import JournalPage from "./pages/JournalPage";
 import CommunityPage from "./pages/CommunityPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -21,6 +23,22 @@ function App() {
           element={
             <ProtectedRoute>
               <JournalPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

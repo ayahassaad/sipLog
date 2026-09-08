@@ -9,7 +9,7 @@ vi.mock("../../context/useAuth", () => ({
 }));
 
 describe("SiteHeader", () => {
-  it("shows both nav links and the logout button when logged in", () => {
+  it("shows both nav links and a burger menu button when logged in, with no bare log out button", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
 
     render(
@@ -20,10 +20,27 @@ describe("SiteHeader", () => {
 
     expect(screen.getByRole("link", { name: /my journal/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /community/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open menu/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^log out$/i })).not.toBeInTheDocument();
   });
 
-  it("calls logout when the log out button is clicked", () => {
+  it("opens the menu on click and shows My Profile, Settings and Log out", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+
+    render(
+      <MemoryRouter>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+    expect(screen.getByRole("link", { name: /my profile/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^log out$/i })).toBeInTheDocument();
+  });
+
+  it("calls logout and closes the menu when Log out is clicked", () => {
     const logout = vi.fn();
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout });
 
@@ -33,11 +50,14 @@ describe("SiteHeader", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /log out/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^log out$/i }));
+
     expect(logout).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /^log out$/i })).not.toBeInTheDocument();
   });
 
-  it("shows a log in link instead of log out when logged out", () => {
+  it("shows a log in link and no burger menu when logged out", () => {
     useAuth.mockReturnValue({ user: null, logout: vi.fn() });
 
     render(
@@ -47,6 +67,6 @@ describe("SiteHeader", () => {
     );
 
     expect(screen.getByRole("link", { name: /log in/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /log out/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /open menu/i })).not.toBeInTheDocument();
   });
 });

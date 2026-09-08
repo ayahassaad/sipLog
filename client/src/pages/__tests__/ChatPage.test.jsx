@@ -2,11 +2,18 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ChatPage from "../ChatPage";
+import { useAuth } from "../../context/useAuth";
 import { useConversations } from "../../hooks/useConversations";
 import { useChatThread } from "../../hooks/useChatThread";
 import { fetchUserProfile } from "../../services/userService";
 import { getOrCreateConversation } from "../../services/chatService";
 
+// ChatPage renders SiteHeader, which calls the real useAuth() -- mock it
+// the same way AdminPage/CommunityPage's tests do so that doesn't need a
+// real AuthProvider around every render below.
+vi.mock("../../context/useAuth", () => ({
+  useAuth: vi.fn(),
+}));
 vi.mock("../../hooks/useConversations", () => ({
   useConversations: vi.fn(),
 }));
@@ -62,6 +69,7 @@ function renderChatPage() {
 beforeEach(() => {
   mockParams = {};
   mockNavigate.mockClear();
+  useAuth.mockReturnValue({ user: { id: "me-id", name: "Ayah" }, logout: vi.fn() });
   useConversations.mockReturnValue(baseConversationsState);
   useChatThread.mockReturnValue(baseThreadState);
 });

@@ -5,6 +5,7 @@ import ChatPage from "../ChatPage";
 import { useAuth } from "../../context/useAuth";
 import { useConversations } from "../../hooks/useConversations";
 import { useChatThread } from "../../hooks/useChatThread";
+import { useUsers } from "../../hooks/useUsers";
 import { fetchUserProfile } from "../../services/userService";
 import { getOrCreateConversation } from "../../services/chatService";
 
@@ -19,6 +20,9 @@ vi.mock("../../hooks/useConversations", () => ({
 }));
 vi.mock("../../hooks/useChatThread", () => ({
   useChatThread: vi.fn(),
+}));
+vi.mock("../../hooks/useUsers", () => ({
+  useUsers: vi.fn(),
 }));
 vi.mock("../../services/userService", () => ({
   fetchUserProfile: vi.fn(),
@@ -58,6 +62,14 @@ const baseThreadState = {
   send: vi.fn(),
 };
 
+const baseUsersState = {
+  users: [],
+  loading: false,
+  error: "",
+  refresh: vi.fn(),
+  toggleFollow: vi.fn(),
+};
+
 function renderChatPage() {
   render(
     <MemoryRouter>
@@ -72,6 +84,7 @@ beforeEach(() => {
   useAuth.mockReturnValue({ user: { id: "me-id", name: "Ayah" }, logout: vi.fn() });
   useConversations.mockReturnValue(baseConversationsState);
   useChatThread.mockReturnValue(baseThreadState);
+  useUsers.mockReturnValue(baseUsersState);
 });
 
 describe("ChatPage inbox", () => {
@@ -154,8 +167,6 @@ describe("ChatPage deep link from a profile", () => {
 
     renderChatPage();
 
-    expect(screen.getByText(/starting conversation/i)).toBeInTheDocument();
-
     await waitFor(() => expect(getOrCreateConversation).toHaveBeenCalledWith("bob-id"));
     expect(fetchUserProfile).toHaveBeenCalledWith("bob");
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/chat", { replace: true }));
@@ -168,5 +179,43 @@ describe("ChatPage deep link from a profile", () => {
     renderChatPage();
 
     await waitFor(() => expect(screen.getByText("User not found")).toBeInTheDocument());
+  });
+});
+
+describe("ChatPage search for someone to message", () => {
+  const dana = { id: "dana-id", name: "Dana", username: "dana", avatarUrl: "" };
+
+  it("filters the user directory as you type and starts a conversation on click", async () => {
+    useUsers.mockReturnValue({ ...baseUsersState, users: [dana] });
+    getOrCreateConversation.mockResolvedValue({
+      id: "conversation-2",
+      otherUser: dana,
+      lastMessageAt: null,
+      lastMessageText: "",
+    });
+
+    renderChatPage();
+    fireEvent.click(screen.getByRole("button", { name: /find someone to message/i }));
+    fireEvent.change(screen.getByPlaceholderText(/find someone to message/i), {
+      target: { value: "dan" },
+    });
+
+    expect(screen.getByText("Dana")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Dana"));
+
+    await waitFor(() => expect(getOrCreateConversation).toHaveBeenCalledWith("dana-id"));
+  });
+
+  it("excludes yourself and shows nothing for an unmatched search", () => {
+    useUsers.mockReturnValue({ ...baseUsersState, users: [{ id: "me-id", name: "Ayah", username: "ayah" }] });
+
+    renderChatPage();
+    fireEvent.click(screen.getByRole("button", { name: /find someone to message/i }));
+    fireEvent.change(screen.getByPlaceholderText(/find someone to message/i), {
+      target: { value: "ayah" },
+    });
+
+    expect(screen.getByText(/no users found/i)).toBeInTheDocument();
   });
 });

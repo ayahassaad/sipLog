@@ -80,7 +80,7 @@ function UserProfilePageContent({ username }) {
                   >
                     {profile.isFollowing ? "Following" : "Follow"}
                   </button>
-                  <button type="button" className="button-secondary" onClick={handleMessage}>
+                  <button type="button" className="button-gold" onClick={handleMessage}>
                     Message
                   </button>
                 </div>

@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
+import FilterBar from "../components/FilterBar";
+import { useAuth } from "../context/useAuth";
 import { useConversations } from "../hooks/useConversations";
 import { useChatThread } from "../hooks/useChatThread";
+import { useUsers } from "../hooks/useUsers";
 import { fetchUserProfile } from "../services/userService";
 import { getOrCreateConversation } from "../services/chatService";
 import { formatTimelineDate } from "../utils/formatTimelineDate";
@@ -60,7 +63,6 @@ function ChatThread({ conversation, onRead }) {
       </div>
 
       <div className="chat-messages">
-        {thread.loading && <p className="feed-loading">Loading messages...</p>}
         {thread.error && <p className="status-message error">{thread.error}</p>}
         {!thread.loading && !thread.error && thread.messages.length === 0 && (
           <p className="feed-empty">No messages yet -- say hello!</p>
@@ -95,27 +97,28 @@ function ChatThread({ conversation, onRead }) {
   );
 }
 
-// Direct messages: an inbox on the left, the selected conversation's
-// thread on the right. Visiting /chat/:username (from a profile's
-// "Message" button) resolves that person to a conversation, selects it,
-// then swaps the URL back to the plain /chat so refreshing doesn't repeat
-// the lookup.
+// Direct messages: an inbox on the left (plus a small search toggle to find
+// someone new to message), the selected conversation's thread on the
+// right. Visiting /chat/:username (from a profile's "Message" button)
+// resolves that person to a conversation, selects it, then swaps the URL
+// back to the plain /chat so refreshing doesn't repeat the lookup.
 function ChatPage() {
+  const { user } = useAuth();
   const { username } = useParams();
   const navigate = useNavigate();
   const conversationsState = useConversations();
+  const people = useUsers();
   const [activeConversation, setActiveConversation] = useState(null);
-  const [startingChat, setStartingChat] = useState(Boolean(username));
   const [startError, setStartError] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (!username) {
-      setStartingChat(false);
       return undefined;
     }
 
     let ignore = false;
-    setStartingChat(true);
     setStartError("");
 
     fetchUserProfile(username)
@@ -130,11 +133,6 @@ function ChatPage() {
         if (!ignore) {
           setStartError(err.message);
         }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setStartingChat(false);
-        }
       });
 
     return () => {
@@ -146,16 +144,84 @@ function ChatPage() {
     conversationsState.refresh();
   }, [conversationsState]);
 
+  // Client-side filter over the same user directory Community's search
+  // draws from -- the app's user base is small enough that fetching
+  // everyone once and filtering locally is simpler than a dedicated search
+  // endpoint, and avoids yet another debounced-search round trip.
+  const matchedUsers = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      return [];
+    }
+    return people.users.filter(
+      (person) =>
+        person.id !== user?.id &&
+        (person.name.toLowerCase().includes(term) || person.username.toLowerCase().includes(term))
+    );
+  }, [people.users, searchTerm, user]);
+
+  const handleStartFromSearch = async (person) => {
+    setSearchOpen(false);
+    setSearchTerm("");
+    try {
+      const conversation = await getOrCreateConversation(person.id);
+      setActiveConversation(conversation);
+      conversationsState.refresh();
+    } catch (err) {
+      setStartError(err.message);
+    }
+  };
+
   return (
     <>
       <SiteHeader />
       <div className="app-shell chat-layout">
         <section className="panel chat-list-panel">
-          <div className="section-heading">
+          <div className="section-heading chat-list-heading">
             <h2 className="brand-highlight">Messages</h2>
+            <button
+              type="button"
+              className="chat-search-toggle"
+              aria-label={searchOpen ? "Close search" : "Find someone to message"}
+              onClick={() => setSearchOpen((open) => !open)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </button>
           </div>
 
-          {conversationsState.loading && <p className="feed-loading">Loading conversations...</p>}
+          {searchOpen && (
+            <div className="chat-search-panel">
+              <FilterBar
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
+                placeholder="Find someone to message..."
+              />
+
+              {searchTerm.trim() && matchedUsers.length === 0 && (
+                <p className="feed-empty">No users found.</p>
+              )}
+
+              {matchedUsers.length > 0 && (
+                <div className="chat-search-results">
+                  {matchedUsers.map((person) => (
+                    <button
+                      type="button"
+                      key={person.id}
+                      className="chat-search-result"
+                      onClick={() => handleStartFromSearch(person)}
+                    >
+                      <Avatar url={person.avatarUrl} name={person.name} size="sm" />
+                      <span className="chat-conversation-name">{person.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {conversationsState.error && (
             <p className="status-message error">{conversationsState.error}</p>
           )}
@@ -178,9 +244,8 @@ function ChatPage() {
         </section>
 
         <section className="panel chat-thread-panel">
-          {startingChat && <p className="feed-loading">Starting conversation...</p>}
           {startError && <p className="status-message error">{startError}</p>}
-          {!startingChat && !startError && !activeConversation && (
+          {!startError && !activeConversation && (
             <p className="feed-empty">Select a conversation to start chatting.</p>
           )}
           {activeConversation && (

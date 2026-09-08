@@ -2043,10 +2043,13 @@ textarea:focus {
   padding-right: 4px;
 }
 
+/* Actual speech bubbles -- rounded all around except the corner nearest
+   the sender, which stays tight the way iMessage/WhatsApp bubbles do, so
+   the shape itself (not just the color) says who sent it. */
 .chat-message {
   max-width: 70%;
-  padding: 10px 14px;
-  border-radius: 0;
+  padding: 10px 16px;
+  border-radius: 18px;
   font-size: 0.88rem;
   line-height: 1.4;
 }
@@ -2057,12 +2060,14 @@ textarea:focus {
 
 .chat-message.theirs {
   align-self: flex-start;
+  border-bottom-left-radius: 4px;
   background: rgba(255, 228, 233, 0.08);
   color: var(--text-soft);
 }
 
 .chat-message.own {
   align-self: flex-end;
+  border-bottom-right-radius: 4px;
   background: linear-gradient(180deg, var(--accent-strong), var(--accent));
   color: #fff9fb;
 }
@@ -2076,4 +2081,99 @@ textarea:focus {
 
 .chat-composer input {
   flex: 1;
+}
+
+
+/* A persistent shortcut to Messages, fixed in the same screen spot on
+   every page regardless of scroll position -- see ChatFab. */
+.chat-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  box-shadow: 0 10px 22px rgba(83, 4, 23, 0.32);
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.chat-fab:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.chat-fab svg {
+  width: 24px;
+  height: 24px;
+  stroke: #fff9fb;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chat-search-toggle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.chat-search-toggle:hover {
+  border-color: var(--gold);
+  background: rgba(216, 173, 95, 0.1);
+}
+
+.chat-search-toggle svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--text-soft);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.chat-search-panel {
+  margin-bottom: 6px;
+}
+
+.chat-search-results {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.chat-search-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+}
+
+.chat-search-result:hover {
+  background: rgba(255, 228, 233, 0.06);
 }

@@ -35,9 +35,11 @@ describe("SiteHeader", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
 
-    expect(screen.getByRole("link", { name: /my profile/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /settings/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^log out$/i })).toBeInTheDocument();
+    // Each item's explicit role="menuitem" (standard for a dropdown menu)
+    // overrides its implicit link/button role, so that's what to query by.
+    expect(screen.getByRole("menuitem", { name: /my profile/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /^log out$/i })).toBeInTheDocument();
   });
 
   it("calls logout and closes the menu when Log out is clicked", () => {
@@ -51,10 +53,10 @@ describe("SiteHeader", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
-    fireEvent.click(screen.getByRole("button", { name: /^log out$/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^log out$/i }));
 
     expect(logout).toHaveBeenCalled();
-    expect(screen.queryByRole("button", { name: /^log out$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: /^log out$/i })).not.toBeInTheDocument();
   });
 
   it("shows a log in link and no burger menu when logged out", () => {

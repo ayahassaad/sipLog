@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import TastingTimeline from "../TastingTimeline";
 
@@ -48,5 +49,43 @@ describe("TastingTimeline empty state", () => {
     expect(
       screen.queryByRole("button", { name: /create your first entry/i })
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("TastingTimeline author link (Favorites tab)", () => {
+  const favoritedTasting = {
+    _id: "tasting-1",
+    rating: 4,
+    appearance: "Deep ruby",
+    noseNotes: ["cherry"],
+    palateNotes: ["oak"],
+    sweetness: 2,
+    acidity: 3,
+    body: 4,
+    tannin: 3,
+    wineId: {
+      name: "Rioja Reserva",
+      producer: "Bodega Test",
+      grape: "Tempranillo",
+      country: "Spain",
+      vintage: 2018,
+    },
+    userId: { _id: "bob-id", username: "bob" },
+  };
+
+  it("links 'Tasted by: @username' to that person's public profile", () => {
+    render(
+      <MemoryRouter>
+        <TastingTimeline
+          {...baseProps}
+          filteredCount={1}
+          tastings={[favoritedTasting]}
+          showAuthor
+        />
+      </MemoryRouter>
+    );
+
+    const link = screen.getByRole("link", { name: "@bob" });
+    expect(link).toHaveAttribute("href", "/users/bob");
   });
 });

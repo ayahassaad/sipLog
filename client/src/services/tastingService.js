@@ -13,11 +13,14 @@ export async function fetchTastings({ page = 1, limit = 50 } = {}) {
   }
 }
 
-export async function fetchCommunityFeed({ page = 1, limit = 50, search = "" } = {}) {
+export async function fetchCommunityFeed({ page = 1, limit = 50, search = "", author = "" } = {}) {
   try {
     const params = { page, limit };
     if (search) {
       params.search = search;
+    }
+    if (author) {
+      params.author = author;
     }
     const res = await api.get("/tastings/feed", { params });
     return res.data;

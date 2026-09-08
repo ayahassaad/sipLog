@@ -43,6 +43,41 @@ function toOwnProfile(user) {
   };
 }
 
+// -- Someone else's (or your own) public profile, looked up by username.
+// No email, no raw following/favorites arrays -- just what anyone browsing
+// Community is allowed to see, plus follow state relative to the viewer.
+exports.getUserProfile = async (req, res) => {
+  try {
+    const username = String(req.params.username || "").trim().toLowerCase();
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const [followingCount, followersCount] = await Promise.all([
+      User.countDocuments({ _id: { $in: user.following } }),
+      User.countDocuments({ following: user._id }),
+    ]);
+
+    const viewerFollowingIds = new Set((req.user?.following || []).map((id) => id.toString()));
+    const isOwnProfile = Boolean(req.user && req.user._id.toString() === user._id.toString());
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      username: user.username,
+      avatarUrl: user.avatarUrl || "",
+      followingCount,
+      followersCount,
+      isFollowing: viewerFollowingIds.has(user._id.toString()),
+      isOwnProfile,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.listUsers = async (req, res) => {
   try {
     // The user directory is public -- browsing "People to Follow" doesn't

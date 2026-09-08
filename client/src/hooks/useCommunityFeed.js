@@ -7,8 +7,9 @@ import {
 
 const PAGE_SIZE = 20;
 
-export function useCommunityFeed() {
+export function useCommunityFeed({ author = "" } = {}) {
   const [tastings, setTastings] = useState([]);
+  const [matchedUsers, setMatchedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +20,7 @@ export function useCommunityFeed() {
 
   const loadFirstPage = useCallback(async () => {
     try {
-      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE });
+      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, author });
       setTastings(data.tastings);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -27,7 +28,7 @@ export function useCommunityFeed() {
     } catch (err) {
       setError(err.message);
     }
-  }, []);
+  }, [author]);
 
   useEffect(() => {
     let ignore = false;
@@ -49,7 +50,7 @@ export function useCommunityFeed() {
     loadingMoreRef.current = true;
     try {
       const nextPage = page + 1;
-      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE, search });
+      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE, search, author });
       setTastings((prev) => [...prev, ...data.tastings]);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -58,7 +59,7 @@ export function useCommunityFeed() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [page, totalPages, search]);
+  }, [page, totalPages, search, author]);
 
   // Runs (or clears, when term is empty) a wine search against the feed.
   // A plain event-triggered action rather than an effect, so the caller
@@ -68,9 +69,10 @@ export function useCommunityFeed() {
     setSearching(true);
     setError("");
     try {
-      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, search: trimmed });
+      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, search: trimmed, author });
       setSearch(trimmed);
       setTastings(data.tastings);
+      setMatchedUsers(data.matchedUsers || []);
       setPage(data.page);
       setTotalPages(data.totalPages);
     } catch (err) {
@@ -78,7 +80,7 @@ export function useCommunityFeed() {
     } finally {
       setSearching(false);
     }
-  }, []);
+  }, [author]);
 
   // Optimistic toggle: flip the star instantly, roll back if the request fails.
   const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
@@ -106,6 +108,7 @@ export function useCommunityFeed() {
 
   return {
     tastings,
+    matchedUsers,
     loading,
     searching,
     error,

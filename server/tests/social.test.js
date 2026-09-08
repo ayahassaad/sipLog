@@ -324,4 +324,49 @@ describe("Community feed", () => {
     expect(byName.body.tastings).toHaveLength(1);
     expect(byName.body.tastings[0].userId.username).toBe(bobUser.username);
   });
+
+  it("returns a matching user in matchedUsers even if they haven't posted", async () => {
+    const { agent: alice } = await registerAgent();
+    const { user: bobUser } = await registerAgent();
+    // Bob never posts a tasting.
+
+    const feed = await alice.get("/api/tastings/feed").query({ search: bobUser.username });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(0);
+    expect(feed.body.matchedUsers).toHaveLength(1);
+    expect(feed.body.matchedUsers[0]).toMatchObject({ username: bobUser.username });
+  });
+
+  it("omits matchedUsers when there's no search", async () => {
+    const { agent: alice } = await registerAgent();
+
+    const feed = await alice.get("/api/tastings/feed");
+
+    expect(feed.body.matchedUsers).toEqual([]);
+  });
+
+  it("filters the feed down to one author's tastings via ?author=", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
+
+    const aliceWine = await createWine(alice, { name: "Alice's Wine" });
+    const bobWine = await createWine(bob, { name: "Bob's Wine" });
+
+    await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: bobWine._id });
+
+    const feed = await request(app).get("/api/tastings/feed").query({ author: bobUser.username });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(1);
+    expect(feed.body.tastings[0].userId.username).toBe(bobUser.username);
+  });
+
+  it("returns an empty feed for ?author= on a username that doesn't exist", async () => {
+    const feed = await request(app).get("/api/tastings/feed").query({ author: "nobody-here" });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(0);
+  });
 });

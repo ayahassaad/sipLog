@@ -220,21 +220,44 @@ exports.getCommunityFeed = async (req, res) => {
     // (My Journal is the private/filtered view of just your own tastings).
     const query = {};
 
+    // Optional exact filter to just one author's tastings -- used by that
+    // author's public profile page, as opposed to the fuzzy multi-field
+    // `search` below. A username with no such user matches nothing rather
+    // than erroring, same as any other filter with zero results.
+    const authorUsername = String(req.query.author || "").trim().toLowerCase();
+    if (authorUsername) {
+      const authorUser = await User.findOne({ username: authorUsername }).select("_id");
+      query.userId = authorUser ? authorUser._id : new mongoose.Types.ObjectId();
+    }
+
     // Optional search -- match against the wine's name, producer, or grape,
     // OR the author's username/name, then scope the feed to tastings of
-    // whichever wines or people matched.
+    // whichever wines or people matched. Matching users are also returned
+    // on their own (as `matchedUsers`) so someone who hasn't posted yet
+    // still turns up as a result, not just their tastings.
     const search = (req.query.search || "").trim();
+    let matchedUsers = [];
     if (search) {
       const pattern = new RegExp(escapeRegex(search), "i");
-      const [matchingWineIds, matchingUserIds] = await Promise.all([
+      const [matchingWineIds, matchingUserDocs] = await Promise.all([
         Wine.find({
           $or: [{ name: pattern }, { producer: pattern }, { grape: pattern }],
         }).distinct("_id"),
         User.find({
           $or: [{ username: pattern }, { name: pattern }],
-        }).distinct("_id"),
+        }),
       ]);
+      const matchingUserIds = matchingUserDocs.map((user) => user._id);
       query.$or = [{ wineId: { $in: matchingWineIds } }, { userId: { $in: matchingUserIds } }];
+
+      const viewerFollowingIds = new Set((req.user?.following || []).map((id) => id.toString()));
+      matchedUsers = matchingUserDocs.map((user) => ({
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        avatarUrl: user.avatarUrl || "",
+        isFollowing: viewerFollowingIds.has(user._id.toString()),
+      }));
     }
 
     const page = Math.max(1, Number(req.query.page) || 1);
@@ -256,6 +279,7 @@ exports.getCommunityFeed = async (req, res) => {
 
     res.json({
       tastings: attachFavoriteFlag(tastings, favoriteIdSet),
+      matchedUsers,
       page,
       limit,
       total,

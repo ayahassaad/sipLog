@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 function App() {
   return (
@@ -42,6 +43,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Public -- anyone can view a profile by username, logged in or
+            not, same as Community itself. */}
+        <Route path="/users/:username" element={<UserProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>

@@ -1668,3 +1668,40 @@ textarea:focus {
   color: var(--text-soft);
   font-size: 0.9rem;
 }
+
+/* Wraps the avatar + name when the whole row is a link to that person's
+   profile (Community's search results) -- plain flex row, no underline or
+   color change of its own so it looks identical to the old static text. */
+.connection-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.connection-link:hover .connection-name {
+  color: var(--gold);
+}
+
+/* The "People" results block above the tastings list when a Community
+   search matches a user (with or without any tastings of their own). */
+.community-people {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The clickable @username inside "Posted by @username" on a tasting card. */
+.card-author-link {
+  color: var(--text-soft);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.card-author-link:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}

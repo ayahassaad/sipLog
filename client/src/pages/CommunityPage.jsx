@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
+import Avatar from "../components/Avatar";
 import BottleRating from "../components/BottleRating";
 import FilterBar from "../components/FilterBar";
 import { useAuth } from "../context/useAuth";
@@ -81,6 +82,37 @@ function CommunityPage() {
 
           {loading && <p className="feed-loading">Loading the community feed...</p>}
           {error && <p className="status-message error">{error}</p>}
+
+          {!loading && !error && feed.search && feed.matchedUsers.length > 0 && (
+            <div className="community-people">
+              <p className="section-kicker">People</p>
+              <div className="connection-list">
+                {feed.matchedUsers.map((person) => {
+                  const isFollowing = followingStateById.get(person.id) ?? person.isFollowing;
+                  const isSelf = Boolean(user && person.id === user.id);
+
+                  return (
+                    <div className="connection-row" key={person.id}>
+                      <Link to={`/users/${person.username}`} className="connection-link">
+                        <Avatar url={person.avatarUrl} name={person.name} size="sm" />
+                        <span className="connection-name">@{person.username}</span>
+                      </Link>
+                      {!isSelf && (
+                        <button
+                          type="button"
+                          className={`button-gold ${isFollowing ? "is-following" : ""}`}
+                          onClick={() => handleToggleFollow(person.id, isFollowing)}
+                        >
+                          {isFollowing ? "Following" : "Follow"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {!loading && !error && feed.tastings.length === 0 && feed.search && (
             <p className="status-message">
               No tastings found for &ldquo;{feed.search}&rdquo;.
@@ -141,9 +173,16 @@ function CommunityPage() {
 
                       {author && (
                         <div className="card-author-row">
-                          <span className="card-author">
-                            {isOwnPost ? "Posted by you" : `Posted by @${author.username}`}
-                          </span>
+                          {isOwnPost ? (
+                            <span className="card-author">Posted by you</span>
+                          ) : (
+                            <span className="card-author">
+                              Posted by{" "}
+                              <Link to={`/users/${author.username}`} className="card-author-link">
+                                @{author.username}
+                              </Link>
+                            </span>
+                          )}
                           {!isOwnPost && (
                             <button
                               type="button"

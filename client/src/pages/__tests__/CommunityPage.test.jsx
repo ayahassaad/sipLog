@@ -63,12 +63,14 @@ describe("CommunityPage", () => {
       loadMore: vi.fn(),
       search: "",
       runSearch: vi.fn(),
+      matchedUsers: [],
     });
 
     renderPage();
 
     expect(screen.getByText("Rioja Reserva")).toBeInTheDocument();
-    expect(screen.getByText("Posted by @bob")).toBeInTheDocument();
+    expect(screen.getByText(/posted by/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "@bob" })).toHaveAttribute("href", "/users/bob");
     expect(screen.queryByText(/tasted by/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/people to follow/i)).not.toBeInTheDocument();
   });
@@ -90,6 +92,7 @@ describe("CommunityPage", () => {
       loadMore: vi.fn(),
       search: "",
       runSearch: vi.fn(),
+      matchedUsers: [],
     });
 
     renderPage();
@@ -116,6 +119,7 @@ describe("CommunityPage", () => {
       loadMore: vi.fn(),
       search: "",
       runSearch: vi.fn(),
+      matchedUsers: [],
     });
 
     renderPage();
@@ -144,6 +148,7 @@ describe("CommunityPage", () => {
       toggleFavorite,
       search: "",
       runSearch: vi.fn(),
+      matchedUsers: [],
     });
 
     renderPage();
@@ -169,12 +174,13 @@ describe("CommunityPage", () => {
       loadMore: vi.fn(),
       search: "",
       runSearch: vi.fn(),
+      matchedUsers: [],
     });
 
     renderPage();
 
     expect(screen.getByText("Posted by you")).toBeInTheDocument();
-    expect(screen.queryByText("Posted by @bob")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "@bob" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^follow$/i })).not.toBeInTheDocument();
   });
 
@@ -197,6 +203,7 @@ describe("CommunityPage", () => {
       loadMore: vi.fn(),
       search: "",
       runSearch,
+      matchedUsers: [],
     });
 
     renderPage();
@@ -215,5 +222,63 @@ describe("CommunityPage", () => {
     expect(runSearch).toHaveBeenCalledWith("rioja");
 
     vi.useRealTimers();
+  });
+
+  it("shows a matched user in the People section even if they haven't posted", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "carla",
+      runSearch: vi.fn(),
+      matchedUsers: [
+        { id: "carla-id", name: "Carla", username: "carla", avatarUrl: "", isFollowing: false },
+      ],
+    });
+
+    renderPage();
+
+    expect(screen.getByText("People")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /@carla/i })).toHaveAttribute(
+      "href",
+      "/users/carla"
+    );
+    expect(screen.getByRole("button", { name: /^follow$/i })).toBeInTheDocument();
+  });
+
+  it("hides the Follow button next to your own result in the People section", () => {
+    useAuth.mockReturnValue({ user: { id: "ayah-id", name: "Ayah" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "ayah",
+      runSearch: vi.fn(),
+      matchedUsers: [
+        { id: "ayah-id", name: "Ayah", username: "ayahassaad", avatarUrl: "", isFollowing: false },
+      ],
+    });
+
+    renderPage();
+
+    expect(screen.getByRole("link", { name: /@ayahassaad/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^follow$/i })).not.toBeInTheDocument();
   });
 });

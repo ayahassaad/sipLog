@@ -32,6 +32,15 @@ export async function unfollowUser(id) {
 }
 
 
+export async function fetchUserProfile(username) {
+  try {
+    const res = await api.get(`/users/${username}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to load this profile"));
+  }
+}
+
 export async function fetchMyProfile() {
   try {
     const res = await api.get("/users/me");

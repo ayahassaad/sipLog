@@ -165,7 +165,7 @@ function ProfilePage() {
                   <div className="button-row profile-edit-toggle">
                     <button
                       type="button"
-                      className="button-primary"
+                      className="button-gold"
                       onClick={() => setEditing(true)}
                     >
                       Edit Profile

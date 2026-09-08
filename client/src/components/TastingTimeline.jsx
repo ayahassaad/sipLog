@@ -37,6 +37,7 @@ function TastingTimeline({
   heading = "My Wines",
   searchTerm,
   onSearchTermChange,
+  onCreateFirst,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const count = tastings.length;
@@ -73,7 +74,16 @@ function TastingTimeline({
         <p className="status-message success">{successMessage}</p>
       )}
       {!loading && !error && filteredCount === 0 && (
-        <p className="status-message">No entries match your current filters.</p>
+        onCreateFirst && !searchTerm ? (
+          <button type="button" className="empty-state-cta" onClick={onCreateFirst}>
+            <span className="empty-state-label">Create your first entry</span>
+            <svg className="empty-state-arrow" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 5c4 2 7 5 7 7s-3 5-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        ) : (
+          <p className="status-message">No entries match your current filters.</p>
+        )
       )}
 
       {count > 0 && (

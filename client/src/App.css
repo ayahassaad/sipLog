@@ -1518,6 +1518,49 @@ textarea:focus {
   100% { background-position: -200% 0; }
 }
 
+/* "My Wines" empty state for a brand-new account with no entries yet --
+   a clickable shimmering prompt (same gold sweep as .feed-loading/
+   .feed-empty above) with a small arrow, that jumps straight into the
+   Add New Wine tab. Only shown when there's no search term narrowing
+   things down; a search with zero matches still gets the plain
+   "No entries match your current filters." message above. */
+.empty-state-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.empty-state-label {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  background: linear-gradient(90deg, var(--text-soft) 30%, var(--gold) 50%, var(--text-soft) 70%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: feedLoadingShimmer 2.2s ease-in-out infinite;
+}
+
+.empty-state-arrow {
+  width: 18px;
+  height: 18px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.8;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.empty-state-cta:hover .empty-state-arrow {
+  transform: translateX(5px);
+}
+
 /* Profile page: header (avatar + name/email + edit toggle), the edit-mode
    sub-forms for email/password, and the Following/Followers connection
    lists. Reuses .photo-circle (TastingForm's upload circle), .wine-form

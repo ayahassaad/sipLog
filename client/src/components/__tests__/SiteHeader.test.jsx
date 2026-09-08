@@ -9,8 +9,8 @@ vi.mock("../../context/useAuth", () => ({
 }));
 
 describe("SiteHeader", () => {
-  it("shows both nav links and the logout button", () => {
-    useAuth.mockReturnValue({ logout: vi.fn() });
+  it("shows both nav links and a burger menu button when logged in, with no bare log out button", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
 
     render(
       <MemoryRouter>
@@ -20,12 +20,12 @@ describe("SiteHeader", () => {
 
     expect(screen.getByRole("link", { name: /my journal/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /community/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open menu/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^log out$/i })).not.toBeInTheDocument();
   });
 
-  it("calls logout when the log out button is clicked", () => {
-    const logout = vi.fn();
-    useAuth.mockReturnValue({ logout });
+  it("opens the menu on click and shows My Profile, Settings and Log out", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
 
     render(
       <MemoryRouter>
@@ -33,7 +33,42 @@ describe("SiteHeader", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /log out/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+    // Each item's explicit role="menuitem" (standard for a dropdown menu)
+    // overrides its implicit link/button role, so that's what to query by.
+    expect(screen.getByRole("menuitem", { name: /my profile/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /^log out$/i })).toBeInTheDocument();
+  });
+
+  it("calls logout and closes the menu when Log out is clicked", () => {
+    const logout = vi.fn();
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout });
+
+    render(
+      <MemoryRouter>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^log out$/i }));
+
     expect(logout).toHaveBeenCalled();
+    expect(screen.queryByRole("menuitem", { name: /^log out$/i })).not.toBeInTheDocument();
+  });
+
+  it("shows a log in link and no burger menu when logged out", () => {
+    useAuth.mockReturnValue({ user: null, logout: vi.fn() });
+
+    render(
+      <MemoryRouter>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("link", { name: /log in/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /open menu/i })).not.toBeInTheDocument();
   });
 });

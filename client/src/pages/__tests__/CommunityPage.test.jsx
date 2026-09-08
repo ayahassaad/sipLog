@@ -16,11 +16,18 @@ vi.mock("../../hooks/useUsers", () => ({
   useUsers: vi.fn(),
 }));
 
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate };
+});
+
 const sampleTasting = {
   _id: "tasting-1",
   rating: 4,
   moodTags: [],
   personalThoughts: "Lovely with dinner.",
+  createdAt: "2026-09-07T15:42:00.000Z",
   wineId: {
     name: "Rioja Reserva",
     producer: "Bodega Test",
@@ -40,7 +47,7 @@ function renderPage() {
 }
 
 describe("CommunityPage", () => {
-  it("lists people to follow and shows a feed of other users' tastings", () => {
+  it("shows the feed as a timeline, with each post's author and no dropdown of people to follow", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
     useUsers.mockReturnValue({
       users: [{ id: "bob-id", name: "Bob", isFollowing: false }],
@@ -58,9 +65,10 @@ describe("CommunityPage", () => {
 
     renderPage();
 
-    expect(screen.getByText("Bob")).toBeInTheDocument();
     expect(screen.getByText("Rioja Reserva")).toBeInTheDocument();
-    expect(screen.getByText(/tasted by bob/i)).toBeInTheDocument();
+    expect(screen.getByText("Posted by Bob")).toBeInTheDocument();
+    expect(screen.queryByText(/tasted by/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/people to follow/i)).not.toBeInTheDocument();
   });
 
   it("calls toggleFollow when a follow button is clicked", () => {
@@ -73,7 +81,7 @@ describe("CommunityPage", () => {
       toggleFollow,
     });
     useCommunityFeed.mockReturnValue({
-      tastings: [],
+      tastings: [sampleTasting],
       loading: false,
       error: "",
       hasMore: false,
@@ -84,5 +92,56 @@ describe("CommunityPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^follow$/i }));
     expect(toggleFollow).toHaveBeenCalledWith("bob-id", false);
+  });
+
+  it("sends a logged-out visitor to log in instead of following", () => {
+    mockNavigate.mockClear();
+    useAuth.mockReturnValue({ user: null, logout: vi.fn() });
+    const toggleFollow = vi.fn();
+    useUsers.mockReturnValue({
+      users: [{ id: "bob-id", name: "Bob", isFollowing: false }],
+      loading: false,
+      error: "",
+      toggleFollow,
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [sampleTasting],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /^follow$/i }));
+    expect(toggleFollow).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/login", expect.anything());
+  });
+
+  it("sends a logged-out visitor to log in instead of favoriting", () => {
+    mockNavigate.mockClear();
+    useAuth.mockReturnValue({ user: null, logout: vi.fn() });
+    const toggleFavorite = vi.fn();
+    useUsers.mockReturnValue({
+      users: [],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [sampleTasting],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      toggleFavorite,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /add to favorites/i }));
+    expect(toggleFavorite).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/login", expect.anything());
   });
 });

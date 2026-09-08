@@ -29,10 +29,13 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/tastings", requireAuth, tastingRoutes);
+// Tastings and users each have a couple of public read routes (the
+// community feed, the user directory), so they apply requireAuth per-route
+// internally instead of here. Wines and uploads stay fully private.
+app.use("/api/tastings", tastingRoutes);
 app.use("/api/wines", requireAuth, wineRoutes);
 app.use("/api/uploads", requireAuth, uploadRoutes);
-app.use("/api/users", requireAuth, userRoutes);
+app.use("/api/users", userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

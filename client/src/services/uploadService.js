@@ -4,8 +4,10 @@ import api from "./api";
 // Uploads directly to Cloudinary from the browser using a short-lived signature
 // from our backend, so image bytes never have to pass through (and be paid for
 // by) our own server.
-export async function uploadImage(file) {
-  const { data: signatureData } = await api.get("/uploads/signature");
+export async function uploadImage(file, { type } = {}) {
+  const { data: signatureData } = await api.get("/uploads/signature", {
+    params: type ? { type } : undefined,
+  });
 
   if (!signatureData.cloudName) {
     throw new Error("Image uploads are not configured yet");

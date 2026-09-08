@@ -6,6 +6,8 @@ import JournalPage from "./pages/JournalPage";
 import CommunityPage from "./pages/CommunityPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -13,8 +15,11 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        {/* Community is the public home page -- anyone can browse it,
+            logged in or not. My Journal is personal, so it stays gated. */}
+        <Route path="/" element={<CommunityPage />} />
         <Route
-          path="/"
+          path="/journal"
           element={
             <ProtectedRoute>
               <JournalPage />
@@ -22,10 +27,18 @@ function App() {
           }
         />
         <Route
-          path="/community"
+          path="/profile"
           element={
             <ProtectedRoute>
-              <CommunityPage />
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

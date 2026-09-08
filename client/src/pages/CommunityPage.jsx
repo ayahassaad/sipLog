@@ -49,8 +49,8 @@ function CommunityPage() {
     <>
       <SiteHeader />
       <div className="app-shell">
-        <section className="panel list-panel">
-          {loading && <p className="status-message">Loading the community feed...</p>}
+        <section className="panel list-panel community-feed-panel">
+          {loading && <p className="feed-loading">Loading the community feed...</p>}
           {error && <p className="status-message error">{error}</p>}
           {!loading && !error && feed.tastings.length === 0 && (
             <p className="status-message">

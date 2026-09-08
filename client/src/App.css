@@ -1336,6 +1336,7 @@ textarea:focus {
   border-radius: 50%;
   background: var(--page-top);
   border: 2px solid var(--gold);
+  transition: box-shadow 0.2s ease;
 }
 
 .feed-dot::after {
@@ -1353,4 +1354,78 @@ textarea:focus {
   color: var(--text-soft);
   opacity: 0.75;
   margin: 0 0 8px;
+}
+
+/* The Community feed reads as an actual feed, not another boxed data
+   panel -- narrower single column, centered, no outer border/shadow. Each
+   tasting card drops its box entirely too: no fill, no border, just a thin
+   hairline between entries, with a soft gold pop on hover to show it's
+   worth a closer look. */
+.community-feed-panel {
+  max-width: 640px;
+  margin: 0 auto;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.community-feed-panel::before {
+  display: none;
+}
+
+.community-feed-panel .tasting-card {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.community-feed-panel .tasting-card::before {
+  display: none;
+}
+
+.community-feed-panel .feed-entry:last-child .tasting-card {
+  border-bottom: none;
+}
+
+.community-feed-panel .tasting-card h3 {
+  transition: color 0.2s ease;
+}
+
+/* On hover: the wine name turns gold, the timeline dot for that entry gets
+   a soft glow ring, and the whole card lifts with a shadow -- no
+   background tint. */
+.community-feed-panel .tasting-card:hover {
+  transform: scale(1.015);
+  box-shadow: 0 14px 28px rgba(10, 0, 3, 0.35);
+}
+
+.community-feed-panel .tasting-card:hover h3 {
+  color: var(--gold);
+}
+
+.community-feed-panel .feed-entry:has(.tasting-card:hover) .feed-dot {
+  box-shadow: 0 0 0 5px rgba(216, 173, 95, 0.28);
+}
+
+/* Community feed's loading message -- text-only with a slow gold shimmer
+   sweeping through it, instead of the plain solid status-message box used
+   for errors/empty states elsewhere. */
+.feed-loading {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  background: linear-gradient(90deg, var(--text-soft) 30%, var(--gold) 50%, var(--text-soft) 70%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: feedLoadingShimmer 2.2s ease-in-out infinite;
+}
+
+@keyframes feedLoadingShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

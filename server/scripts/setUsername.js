@@ -23,7 +23,7 @@ async function main() {
     const user = await User.findOneAndUpdate(
       { email: email.trim().toLowerCase() },
       { username: username.trim().toLowerCase() },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     );
 
     if (!user) {

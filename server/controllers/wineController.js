@@ -121,7 +121,7 @@ exports.updateWine = async (req, res) => {
     }
 
     const updatedWine = await Wine.findByIdAndUpdate(req.params.id, payload, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     });
 

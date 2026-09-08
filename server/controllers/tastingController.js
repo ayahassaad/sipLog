@@ -457,7 +457,7 @@ exports.updateTasting = async (req, res) => {
     const updatedTasting = await Tasting.findOneAndUpdate(
       { _id: req.params.id, userId: req.user._id },
       payload,
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     )
       .populate("userId")
       .populate("wineId");

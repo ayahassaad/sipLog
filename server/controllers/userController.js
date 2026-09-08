@@ -160,7 +160,9 @@ exports.updateMyProfile = async (req, res) => {
       return res.status(400).json({ message: "Nothing to update" });
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
+    const user = await User.findByIdAndUpdate(req.user._id, updates, {
+      returnDocument: "after",
+    });
 
     res.json(toOwnProfile(user));
   } catch (error) {

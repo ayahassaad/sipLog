@@ -20,7 +20,6 @@ function formatJoinDate(isoString) {
 const STAT_TILES = [
   { key: "totalUsers", label: "Total Users" },
   { key: "totalVisits", label: "Site Visits" },
-  { key: "totalWines", label: "Wines Logged" },
   { key: "totalTastings", label: "Tastings Logged" },
   { key: "newUsersThisWeek", label: "New This Week" },
   { key: "newUsersThisMonth", label: "New This Month" },

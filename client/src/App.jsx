@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AuthProvider } from "./context/AuthContext";
@@ -17,8 +17,18 @@ import { recordVisit } from "./services/analyticsService";
 function App() {
   // Once per app load, logged in or not -- the site-wide visit counter
   // shown on the admin tab. Fire-and-forget (see analyticsService), so
-  // nothing here waits on it or reacts to whether it succeeded.
+  // nothing here waits on it or reacts to whether it succeeded. The ref
+  // guard is what actually makes this "once": React 18 StrictMode runs a
+  // mount effect, its cleanup, and the effect again in development, and
+  // without the guard that double-fire counted every dev page load as 2
+  // visits instead of 1 (a dev-only quirk -- the ref survives StrictMode's
+  // replay because it's the same component instance throughout).
+  const hasRecordedVisit = useRef(false);
   useEffect(() => {
+    if (hasRecordedVisit.current) {
+      return;
+    }
+    hasRecordedVisit.current = true;
     recordVisit();
   }, []);
 

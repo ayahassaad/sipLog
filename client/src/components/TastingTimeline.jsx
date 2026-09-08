@@ -69,7 +69,7 @@ function TastingTimeline({
         )}
       </div>
 
-      {loading && <p className="status-message">Loading tastings...</p>}
+      {loading && <p className="feed-loading">Loading tastings...</p>}
       {error && <p className="status-message error">{error}</p>}
       {!loading && !error && successMessage && (
         <p className="status-message success">{successMessage}</p>

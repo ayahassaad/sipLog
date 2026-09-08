@@ -208,8 +208,8 @@ describe("Favorites", () => {
 });
 
 describe("Community feed", () => {
-  it("shows other users' tastings but never your own", async () => {
-    const { agent: alice } = await registerAgent();
+  it("shows every user's tastings, including your own", async () => {
+    const { agent: alice, user: aliceUser } = await registerAgent();
     const { agent: bob, user: bobUser } = await registerAgent();
 
     const aliceWine = await createWine(alice, { name: "Alice's Wine" });
@@ -221,8 +221,9 @@ describe("Community feed", () => {
     const feed = await alice.get("/api/tastings/feed");
 
     expect(feed.status).toBe(200);
-    expect(feed.body.tastings).toHaveLength(1);
-    expect(feed.body.tastings[0].userId.name).toBe(bobUser.name);
+    expect(feed.body.tastings).toHaveLength(2);
+    const authorNames = feed.body.tastings.map((tasting) => tasting.userId.name);
+    expect(authorNames).toEqual(expect.arrayContaining([aliceUser.name, bobUser.name]));
     expect(feed.body).toHaveProperty("page");
     expect(feed.body).toHaveProperty("totalPages");
   });
@@ -244,7 +245,7 @@ describe("Community feed", () => {
     expect(feed.body.tastings.every((tasting) => tasting.isFavorited === false)).toBe(true);
   });
 
-  it("returns an empty feed when no one else has posted", async () => {
+  it("shows your own tasting even when no one else has posted", async () => {
     const { agent: alice } = await registerAgent();
     const aliceWine = await createWine(alice);
     await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
@@ -252,7 +253,7 @@ describe("Community feed", () => {
     const feed = await alice.get("/api/tastings/feed");
 
     expect(feed.status).toBe(200);
-    expect(feed.body.tastings).toHaveLength(0);
+    expect(feed.body.tastings).toHaveLength(1);
   });
 
   it("filters the feed by wine name, producer, or grape when searching", async () => {

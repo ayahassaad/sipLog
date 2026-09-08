@@ -153,6 +153,31 @@ describe("CommunityPage", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/login", expect.anything());
   });
 
+  it("shows your own post as \"Posted by you\" with no Follow button", () => {
+    useAuth.mockReturnValue({ user: { id: "bob-id", name: "Bob" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [sampleTasting],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+    });
+
+    renderPage();
+
+    expect(screen.getByText("Posted by you")).toBeInTheDocument();
+    expect(screen.queryByText("Posted by @bob")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^follow$/i })).not.toBeInTheDocument();
+  });
+
   it("debounces the wine search box before querying the feed", () => {
     vi.useFakeTimers();
 

@@ -87,10 +87,7 @@ function CommunityPage() {
             </p>
           )}
           {!loading && !error && feed.tastings.length === 0 && !feed.search && (
-            <p className="feed-empty">
-              No tastings from other users yet - once people you know join in, their
-              tastings will show up here.
-            </p>
+            <p className="feed-empty">No tastings yet.</p>
           )}
 
           {feed.tastings.length > 0 && (
@@ -98,6 +95,7 @@ function CommunityPage() {
               {feed.tastings.map((tasting) => {
                 const author = tasting.userId;
                 const isFollowing = author ? followingStateById.get(author._id) : false;
+                const isOwnPost = Boolean(user && author && author._id === user.id);
 
                 return (
                   <div className="feed-entry" key={tasting._id}>
@@ -143,14 +141,18 @@ function CommunityPage() {
 
                       {author && (
                         <div className="card-author-row">
-                          <span className="card-author">Posted by @{author.username}</span>
-                          <button
-                            type="button"
-                            className={`button-gold ${isFollowing ? "is-following" : ""}`}
-                            onClick={() => handleToggleFollow(author._id, isFollowing)}
-                          >
-                            {isFollowing ? "Following" : "Follow"}
-                          </button>
+                          <span className="card-author">
+                            {isOwnPost ? "Posted by you" : `Posted by @${author.username}`}
+                          </span>
+                          {!isOwnPost && (
+                            <button
+                              type="button"
+                              className={`button-gold ${isFollowing ? "is-following" : ""}`}
+                              onClick={() => handleToggleFollow(author._id, isFollowing)}
+                            >
+                              {isFollowing ? "Following" : "Follow"}
+                            </button>
+                          )}
                         </div>
                       )}
                     </article>

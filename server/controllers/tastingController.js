@@ -216,9 +216,9 @@ exports.getAllTastings = async (req, res) => {
 exports.getCommunityFeed = async (req, res) => {
   try {
     // The community feed is public -- anyone can browse it without logging
-    // in. Logged-in users never see their own tastings here (that's what
-    // "My Journal" is for); a logged-out visitor sees everyone's.
-    const query = req.user ? { userId: { $ne: req.user._id } } : {};
+    // in, and it shows every tasting from every user, including your own
+    // (My Journal is the private/filtered view of just your own tastings).
+    const query = {};
 
     // Optional wine search -- match against the wine's name, producer, or
     // grape, then scope the feed to tastings of those wines only.

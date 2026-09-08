@@ -9,6 +9,7 @@ function toPublicUser(user) {
     name: user.name,
     email: user.email,
     username: user.username,
+    avatarUrl: user.avatarUrl || "",
     // isSuperAdmin implies admin access too (see requireAdmin) -- exposed
     // alongside isAdmin so the client can also decide whether to show the
     // "make admin" controls on top of just the admin tab itself.

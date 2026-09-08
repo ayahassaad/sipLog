@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import Avatar from "./Avatar";
 import RoseGlassLogo from "./RoseGlassLogo";
 import ChatFab from "./ChatFab";
 
@@ -124,9 +125,7 @@ function SiteHeader() {
               {menuOpen && (
                 <div className="burger-dropdown" role="menu">
                   <div className="burger-profile">
-                    <span className="burger-avatar" aria-hidden="true">
-                      {user.name?.charAt(0) || "S"}
-                    </span>
+                    <Avatar url={user.avatarUrl} name={user.name} size="sm" />
                     <div>
                       <p className="burger-profile-name">{user.name}</p>
                       {user.username && <p className="burger-profile-handle">@{user.username}</p>}

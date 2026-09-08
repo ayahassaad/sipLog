@@ -915,20 +915,6 @@ textarea:focus {
   padding: 22px 36px 33px;
 }
 
-.burger-avatar {
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--gold);
-  border-radius: 50%;
-  background: var(--page-top);
-  color: var(--gold);
-  font-family: var(--font-heading);
-  font-size: 1rem;
-}
-
 .burger-profile-name,
 .burger-profile-handle {
   margin: 0;

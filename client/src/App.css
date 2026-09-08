@@ -1816,8 +1816,6 @@ textarea:focus {
 }
 
 .admin-board-name {
-  flex: 1;
-  min-width: 0;
   color: var(--text-soft);
   font-size: 0.85rem;
   font-weight: 600;
@@ -1828,6 +1826,7 @@ textarea:focus {
   font-size: 0.76rem;
   opacity: 0.75;
   white-space: nowrap;
+  margin-left: 6px;
 }
 
 .admin-user-list .connection-row {

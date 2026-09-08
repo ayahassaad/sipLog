@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
@@ -38,6 +38,14 @@ function ConversationRow({ conversation, isActive, onSelect }) {
 function ChatThread({ conversation, onRead }) {
   const thread = useChatThread(conversation.id, { onRead });
   const [draft, setDraft] = useState("");
+  const messagesEndRef = useRef(null);
+
+  // The composer stays fixed in place (see .chat-messages' bounded height
+  // in App.css) -- this is what keeps the newest message in view instead,
+  // scrolling the messages list itself rather than the whole page.
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [thread.messages]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -78,6 +86,7 @@ function ChatThread({ conversation, onRead }) {
             <p>{message.text}</p>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       <form className="chat-composer" onSubmit={handleSubmit}>

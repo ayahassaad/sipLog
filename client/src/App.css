@@ -1917,27 +1917,32 @@ textarea:focus {
 
 /* ---- Chat (direct messages) ------------------------------------------- */
 
+/* A fixed height for the whole two-panel layout (rather than growing with
+   content) is what lets .chat-messages below scroll internally while the
+   composer stays put -- without it, flex:1/overflow-y:auto on a child has
+   no bounded parent height to actually constrain against, so the panel
+   just grows and pushes the composer down the page as messages arrive. */
 .chat-layout {
   display: flex;
   gap: 24px;
-  align-items: flex-start;
+  height: calc(100vh - var(--header-height) - 100px);
 }
 
 .chat-list-panel {
   flex: 0 0 300px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: calc(100vh - var(--header-height) - 100px);
   overflow-y: auto;
 }
 
 .chat-thread-panel {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 480px;
 }
 
 .chat-conversation-row {
@@ -2017,6 +2022,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   gap: 16px;
 }
 
@@ -2036,6 +2042,7 @@ textarea:focus {
 
 .chat-messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -2101,15 +2108,18 @@ textarea:focus {
   transition: transform 0.16s ease, filter 0.16s ease;
 }
 
+/* Same gold ghost-outline "pop" family as .button-gold -- scale up and
+   pulse a gold glow on hover instead of just nudging upward. */
 .chat-fab:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
+  transform: scale(1.12);
+  filter: brightness(1.08);
+  animation: wineButtonGlowPulse 1.3s ease-out infinite;
 }
 
 .chat-fab svg {
   width: 24px;
   height: 24px;
-  stroke: #fff9fb;
+  stroke: var(--gold);
   fill: none;
   stroke-width: 1.8;
   stroke-linecap: round;

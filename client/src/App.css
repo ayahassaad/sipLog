@@ -1748,3 +1748,91 @@ textarea:focus {
   color: var(--gold);
   text-decoration: underline;
 }
+
+/* Admin tab: a KPI-style stat grid up top, two small leaderboards, and the
+   full user directory (which reuses .connection-list/.connection-row/
+   .connection-name from Community/Profile, same as everywhere else people
+   are listed). Numbers stay in the app's existing text tokens (gold for
+   the value, soft-pink for the label) rather than introducing new colors. */
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.admin-stat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 10px;
+  border: 1px solid var(--line);
+  text-align: center;
+}
+
+.admin-stat-num {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.admin-stat-label {
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.admin-leaderboards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-leaderboard {
+  flex: 1;
+  min-width: 220px;
+}
+
+.admin-leaderboard-count {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.admin-user-list .connection-row {
+  align-items: flex-start;
+}
+
+.admin-user-meta {
+  margin: 2px 0 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.admin-badge {
+  border: 1px solid var(--line);
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.admin-badge-super {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.admin-users-panel {
+  margin-top: 24px;
+}

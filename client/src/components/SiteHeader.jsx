@@ -126,6 +126,16 @@ function SiteHeader() {
                 >
                   Settings
                 </Link>
+                {user.isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="burger-item"
+                    role="menuitem"
+                    onClick={closeMenu}
+                  >
+                    Admin
+                  </Link>
+                )}
                 <button
                   type="button"
                   className="burger-item"

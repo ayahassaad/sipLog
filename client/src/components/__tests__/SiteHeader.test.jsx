@@ -38,8 +38,23 @@ describe("SiteHeader", () => {
     // Each item's explicit role="menuitem" (standard for a dropdown menu)
     // overrides its implicit link/button role, so that's what to query by.
     expect(screen.getByRole("menuitem", { name: /my profile/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /messages/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /settings/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /^log out$/i })).toBeInTheDocument();
+  });
+
+  it("links the Messages item to /chat", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+
+    render(
+      <MemoryRouter>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+    expect(screen.getByRole("menuitem", { name: /messages/i })).toHaveAttribute("href", "/chat");
   });
 
   it("calls logout and closes the menu when Log out is clicked", () => {

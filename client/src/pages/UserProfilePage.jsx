@@ -28,6 +28,14 @@ function UserProfilePageContent({ username }) {
     toggleFollow();
   };
 
+  const handleMessage = () => {
+    if (!user) {
+      requireLogin();
+      return;
+    }
+    navigate(`/chat/${username}`);
+  };
+
   const handleToggleFavorite = (tastingId, isFavorited) => {
     if (!user) {
       requireLogin();
@@ -71,6 +79,9 @@ function UserProfilePageContent({ username }) {
                     onClick={handleToggleFollow}
                   >
                     {profile.isFollowing ? "Following" : "Follow"}
+                  </button>
+                  <button type="button" className="button-secondary" onClick={handleMessage}>
+                    Message
                   </button>
                 </div>
               )}

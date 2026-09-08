@@ -1,0 +1,164 @@
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import ChatPage from "../ChatPage";
+import { useConversations } from "../../hooks/useConversations";
+import { useChatThread } from "../../hooks/useChatThread";
+import { fetchUserProfile } from "../../services/userService";
+import { getOrCreateConversation } from "../../services/chatService";
+
+vi.mock("../../hooks/useConversations", () => ({
+  useConversations: vi.fn(),
+}));
+vi.mock("../../hooks/useChatThread", () => ({
+  useChatThread: vi.fn(),
+}));
+vi.mock("../../services/userService", () => ({
+  fetchUserProfile: vi.fn(),
+}));
+vi.mock("../../services/chatService", () => ({
+  getOrCreateConversation: vi.fn(),
+}));
+
+let mockParams = {};
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate, useParams: () => mockParams };
+});
+
+const bobConversation = {
+  id: "conversation-1",
+  otherUser: { id: "bob-id", name: "Bob", username: "bob", avatarUrl: "" },
+  lastMessageAt: "2026-01-05T00:00:00.000Z",
+  lastMessageText: "See you at the tasting!",
+  unreadCount: 2,
+};
+
+const baseConversationsState = {
+  conversations: [],
+  loading: false,
+  error: "",
+  totalUnread: 0,
+  refresh: vi.fn(),
+};
+
+const baseThreadState = {
+  messages: [],
+  loading: false,
+  error: "",
+  sending: false,
+  send: vi.fn(),
+};
+
+function renderChatPage() {
+  render(
+    <MemoryRouter>
+      <ChatPage />
+    </MemoryRouter>
+  );
+}
+
+beforeEach(() => {
+  mockParams = {};
+  mockNavigate.mockClear();
+  useConversations.mockReturnValue(baseConversationsState);
+  useChatThread.mockReturnValue(baseThreadState);
+});
+
+describe("ChatPage inbox", () => {
+  it("lists conversations with a preview and unread badge", () => {
+    useConversations.mockReturnValue({ ...baseConversationsState, conversations: [bobConversation] });
+
+    renderChatPage();
+
+    expect(screen.getByText("Bob")).toBeInTheDocument();
+    expect(screen.getByText("See you at the tasting!")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+  });
+
+  it("shows an empty state with no conversations", () => {
+    renderChatPage();
+
+    expect(screen.getByText(/no conversations yet/i)).toBeInTheDocument();
+  });
+
+  it("prompts to select a conversation before one is picked", () => {
+    useConversations.mockReturnValue({ ...baseConversationsState, conversations: [bobConversation] });
+
+    renderChatPage();
+
+    expect(screen.getByText(/select a conversation/i)).toBeInTheDocument();
+  });
+});
+
+describe("ChatPage thread", () => {
+  it("opens a conversation and shows its messages", () => {
+    useConversations.mockReturnValue({ ...baseConversationsState, conversations: [bobConversation] });
+    useChatThread.mockReturnValue({
+      ...baseThreadState,
+      messages: [
+        { id: "m1", conversationId: "conversation-1", senderId: "bob-id", text: "Hey!" },
+        { id: "m2", conversationId: "conversation-1", senderId: "me-id", text: "Hi Bob" },
+      ],
+    });
+
+    renderChatPage();
+    fireEvent.click(screen.getByText("Bob"));
+
+    expect(screen.getByText("Hey!")).toBeInTheDocument();
+    expect(screen.getByText("Hi Bob")).toBeInTheDocument();
+  });
+
+  it("sends a message from the composer and clears the input", async () => {
+    const send = vi.fn().mockResolvedValue({ id: "m3" });
+    useConversations.mockReturnValue({ ...baseConversationsState, conversations: [bobConversation] });
+    useChatThread.mockReturnValue({ ...baseThreadState, send });
+
+    renderChatPage();
+    fireEvent.click(screen.getByText("Bob"));
+
+    const input = screen.getByPlaceholderText(/write a message/i);
+    fireEvent.change(input, { target: { value: "Sounds great!" } });
+    fireEvent.click(screen.getByRole("button", { name: /send/i }));
+
+    await waitFor(() => expect(send).toHaveBeenCalledWith("Sounds great!"));
+    expect(input.value).toBe("");
+  });
+
+  it("does not send a blank message", () => {
+    const send = vi.fn();
+    useConversations.mockReturnValue({ ...baseConversationsState, conversations: [bobConversation] });
+    useChatThread.mockReturnValue({ ...baseThreadState, send });
+
+    renderChatPage();
+    fireEvent.click(screen.getByText("Bob"));
+
+    expect(screen.getByRole("button", { name: /send/i })).toBeDisabled();
+  });
+});
+
+describe("ChatPage deep link from a profile", () => {
+  it("resolves /chat/:username into a conversation and swaps the URL", async () => {
+    mockParams = { username: "bob" };
+    fetchUserProfile.mockResolvedValue({ id: "bob-id", username: "bob" });
+    getOrCreateConversation.mockResolvedValue(bobConversation);
+
+    renderChatPage();
+
+    expect(screen.getByText(/starting conversation/i)).toBeInTheDocument();
+
+    await waitFor(() => expect(getOrCreateConversation).toHaveBeenCalledWith("bob-id"));
+    expect(fetchUserProfile).toHaveBeenCalledWith("bob");
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/chat", { replace: true }));
+  });
+
+  it("shows an error if the deep-linked user can't be found", async () => {
+    mockParams = { username: "ghost" };
+    fetchUserProfile.mockRejectedValue(new Error("User not found"));
+
+    renderChatPage();
+
+    await waitFor(() => expect(screen.getByText("User not found")).toBeInTheDocument());
+  });
+});

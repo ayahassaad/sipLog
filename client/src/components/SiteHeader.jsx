@@ -119,6 +119,14 @@ function SiteHeader() {
                   My Profile
                 </Link>
                 <Link
+                  to="/chat"
+                  className="burger-item"
+                  role="menuitem"
+                  onClick={closeMenu}
+                >
+                  Messages
+                </Link>
+                <Link
                   to="/settings"
                   className="burger-item"
                   role="menuitem"

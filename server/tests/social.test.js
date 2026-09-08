@@ -22,6 +22,7 @@ async function registerAgent() {
   const agent = request.agent(app);
   const res = await agent.post("/api/auth/register").send({
     name: `Taster ${userCounter}`,
+    username: `taster${userCounter}`,
     email: `taster${userCounter}@example.com`,
     password: "supersecret123",
   });
@@ -207,8 +208,8 @@ describe("Favorites", () => {
 });
 
 describe("Community feed", () => {
-  it("shows other users' tastings but never your own", async () => {
-    const { agent: alice } = await registerAgent();
+  it("shows every user's tastings, including your own", async () => {
+    const { agent: alice, user: aliceUser } = await registerAgent();
     const { agent: bob, user: bobUser } = await registerAgent();
 
     const aliceWine = await createWine(alice, { name: "Alice's Wine" });
@@ -220,8 +221,9 @@ describe("Community feed", () => {
     const feed = await alice.get("/api/tastings/feed");
 
     expect(feed.status).toBe(200);
-    expect(feed.body.tastings).toHaveLength(1);
-    expect(feed.body.tastings[0].userId.name).toBe(bobUser.name);
+    expect(feed.body.tastings).toHaveLength(2);
+    const authorNames = feed.body.tastings.map((tasting) => tasting.userId.name);
+    expect(authorNames).toEqual(expect.arrayContaining([aliceUser.name, bobUser.name]));
     expect(feed.body).toHaveProperty("page");
     expect(feed.body).toHaveProperty("totalPages");
   });
@@ -243,12 +245,126 @@ describe("Community feed", () => {
     expect(feed.body.tastings.every((tasting) => tasting.isFavorited === false)).toBe(true);
   });
 
-  it("returns an empty feed when no one else has posted", async () => {
+  it("shows your own tasting even when no one else has posted", async () => {
     const { agent: alice } = await registerAgent();
     const aliceWine = await createWine(alice);
     await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
 
     const feed = await alice.get("/api/tastings/feed");
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(1);
+  });
+
+  it("filters the feed by wine name, producer, or grape when searching", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob } = await registerAgent();
+
+    const riojaWine = await createWine(bob, {
+      name: "Rioja Reserva",
+      producer: "Marques de Riscal",
+      grape: "Tempranillo",
+    });
+    const chiantiWine = await createWine(bob, {
+      name: "Chianti Classico",
+      producer: "Ruffino",
+      grape: "Sangiovese",
+    });
+
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: riojaWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: chiantiWine._id });
+
+    const byName = await alice.get("/api/tastings/feed").query({ search: "rioja" });
+    expect(byName.status).toBe(200);
+    expect(byName.body.tastings).toHaveLength(1);
+    expect(byName.body.tastings[0].wineId.name).toBe("Rioja Reserva");
+
+    // Case-insensitive, and matches on producer or grape too.
+    const byProducer = await alice.get("/api/tastings/feed").query({ search: "ruffino" });
+    expect(byProducer.body.tastings).toHaveLength(1);
+    expect(byProducer.body.tastings[0].wineId.name).toBe("Chianti Classico");
+
+    const byGrape = await alice.get("/api/tastings/feed").query({ search: "SANGIOVESE" });
+    expect(byGrape.body.tastings).toHaveLength(1);
+    expect(byGrape.body.tastings[0].wineId.name).toBe("Chianti Classico");
+
+    const noMatch = await alice.get("/api/tastings/feed").query({ search: "does-not-exist" });
+    expect(noMatch.body.tastings).toHaveLength(0);
+  });
+
+  it("treats search input safely even when it contains regex metacharacters", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob } = await registerAgent();
+
+    const wine = await createWine(bob, { name: "Chateau (Reserve)" });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: wine._id });
+
+    const feed = await alice.get("/api/tastings/feed").query({ search: "Chateau (Reserve)" });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(1);
+  });
+
+  it("also matches search against the tasting author's username or name", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
+
+    const aliceWine = await createWine(alice, { name: "Alice's Wine" });
+    const bobWine = await createWine(bob, { name: "Bob's Wine" });
+
+    await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: bobWine._id });
+
+    const byUsername = await alice.get("/api/tastings/feed").query({ search: bobUser.username });
+    expect(byUsername.status).toBe(200);
+    expect(byUsername.body.tastings).toHaveLength(1);
+    expect(byUsername.body.tastings[0].userId.username).toBe(bobUser.username);
+
+    const byName = await alice.get("/api/tastings/feed").query({ search: bobUser.name });
+    expect(byName.body.tastings).toHaveLength(1);
+    expect(byName.body.tastings[0].userId.username).toBe(bobUser.username);
+  });
+
+  it("returns a matching user in matchedUsers even if they haven't posted", async () => {
+    const { agent: alice } = await registerAgent();
+    const { user: bobUser } = await registerAgent();
+    // Bob never posts a tasting.
+
+    const feed = await alice.get("/api/tastings/feed").query({ search: bobUser.username });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(0);
+    expect(feed.body.matchedUsers).toHaveLength(1);
+    expect(feed.body.matchedUsers[0]).toMatchObject({ username: bobUser.username });
+  });
+
+  it("omits matchedUsers when there's no search", async () => {
+    const { agent: alice } = await registerAgent();
+
+    const feed = await alice.get("/api/tastings/feed");
+
+    expect(feed.body.matchedUsers).toEqual([]);
+  });
+
+  it("filters the feed down to one author's tastings via ?author=", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
+
+    const aliceWine = await createWine(alice, { name: "Alice's Wine" });
+    const bobWine = await createWine(bob, { name: "Bob's Wine" });
+
+    await alice.post("/api/tastings").send({ ...baseTasting, wineId: aliceWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: bobWine._id });
+
+    const feed = await request(app).get("/api/tastings/feed").query({ author: bobUser.username });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(1);
+    expect(feed.body.tastings[0].userId.username).toBe(bobUser.username);
+  });
+
+  it("returns an empty feed for ?author= on a username that doesn't exist", async () => {
+    const feed = await request(app).get("/api/tastings/feed").query({ author: "nobody-here" });
 
     expect(feed.status).toBe(200);
     expect(feed.body.tastings).toHaveLength(0);

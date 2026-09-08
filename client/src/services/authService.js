@@ -4,9 +4,9 @@ function extractMessage(error, fallback) {
   return error.response?.data?.message || fallback;
 }
 
-export async function registerUser({ name, email, password }) {
+export async function registerUser({ name, username, email, password }) {
   try {
-    const res = await api.post("/auth/register", { name, email, password });
+    const res = await api.post("/auth/register", { name, username, email, password });
     return res.data.user;
   } catch (error) {
     throw new Error(extractMessage(error, "Failed to register"));

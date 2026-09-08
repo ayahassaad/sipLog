@@ -8,30 +8,19 @@ import { uploadImage } from "../services/uploadService";
 const emptyStatus = { error: "", success: "", saving: false };
 
 function ProfilePage() {
-  const { profile, loading, error, updateProfile, updateEmail, updatePassword, toggleFollow } =
-    useProfile();
+  const { profile, loading, error, updateProfile } = useProfile();
 
   const [editing, setEditing] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState("");
 
-  const [nameForm, setNameForm] = useState({ name: "" });
+  const [nameForm, setNameForm] = useState({ name: "", username: "" });
   const [nameStatus, setNameStatus] = useState(emptyStatus);
 
-  const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
-  const [emailStatus, setEmailStatus] = useState(emptyStatus);
-
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const [passwordStatus, setPasswordStatus] = useState(emptyStatus);
-
-  // Keep the name field in sync whenever the profile (re)loads.
+  // Keep the name/username fields in sync whenever the profile (re)loads.
   useEffect(() => {
     if (profile) {
-      setNameForm({ name: profile.name });
+      setNameForm({ name: profile.name, username: profile.username });
     }
   }, [profile]);
 
@@ -59,73 +48,12 @@ function ProfilePage() {
     setNameStatus({ error: "", success: "", saving: true });
 
     try {
-      await updateProfile({ name: nameForm.name });
-      setNameStatus({ error: "", success: "Name updated.", saving: false });
+      await updateProfile({ name: nameForm.name, username: nameForm.username });
+      setNameStatus(emptyStatus);
+      setEditing(false);
     } catch (err) {
       setNameStatus({ error: err.message, success: "", saving: false });
     }
-  };
-
-  const handleChangeEmail = async (event) => {
-    event.preventDefault();
-    setEmailStatus({ error: "", success: "", saving: true });
-
-    try {
-      await updateEmail({
-        newEmail: emailForm.newEmail,
-        currentPassword: emailForm.currentPassword,
-      });
-      setEmailForm({ newEmail: "", currentPassword: "" });
-      setEmailStatus({ error: "", success: "Email updated.", saving: false });
-    } catch (err) {
-      setEmailStatus({ error: err.message, success: "", saving: false });
-    }
-  };
-
-  const handleChangePassword = async (event) => {
-    event.preventDefault();
-
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordStatus({ error: "New passwords don't match.", success: "", saving: false });
-      return;
-    }
-
-    setPasswordStatus({ error: "", success: "", saving: true });
-
-    try {
-      await updatePassword({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      });
-      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      setPasswordStatus({ error: "", success: "Password updated.", saving: false });
-    } catch (err) {
-      setPasswordStatus({ error: err.message, success: "", saving: false });
-    }
-  };
-
-  const renderConnectionList = (people, emptyMessage) => {
-    if (people.length === 0) {
-      return <p className="status-message">{emptyMessage}</p>;
-    }
-
-    return (
-      <div className="connection-list">
-        {people.map((person) => (
-          <div className="connection-row" key={person.id}>
-            <Avatar url={person.avatarUrl} name={person.name} size="sm" />
-            <span className="connection-name">{person.name}</span>
-            <button
-              type="button"
-              className={`button-gold ${person.isFollowing ? "is-following" : ""}`}
-              onClick={() => toggleFollow(person.id, person.isFollowing)}
-            >
-              {person.isFollowing ? "Following" : "Follow"}
-            </button>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -138,7 +66,7 @@ function ProfilePage() {
 
           {!loading && !error && profile && (
             <>
-              <div className="profile-header">
+              <div className={`profile-header ${editing ? "" : "profile-header-view"}`}>
                 {editing ? (
                   <div className="photo-upload-wrap">
                     <label
@@ -177,172 +105,77 @@ function ProfilePage() {
                       {nameStatus.error && (
                         <p className="status-message error form-status">{nameStatus.error}</p>
                       )}
-                      {!nameStatus.error && nameStatus.success && (
-                        <p className="status-message success form-status">{nameStatus.success}</p>
-                      )}
-                      <label className="field field-full">
-                        <span>Name</span>
-                        <input
-                          type="text"
-                          value={nameForm.name}
-                          onChange={(event) => setNameForm({ name: event.target.value })}
-                          required
-                        />
-                      </label>
+                      <div className="field-grid">
+                        <label className="field">
+                          <span>Name</span>
+                          <input
+                            type="text"
+                            value={nameForm.name}
+                            onChange={(event) =>
+                              setNameForm((prev) => ({ ...prev, name: event.target.value }))
+                            }
+                            required
+                          />
+                        </label>
+                        <label className="field">
+                          <span>Username</span>
+                          <input
+                            type="text"
+                            value={nameForm.username}
+                            onChange={(event) =>
+                              setNameForm((prev) => ({ ...prev, username: event.target.value }))
+                            }
+                            required
+                            minLength={3}
+                            maxLength={20}
+                            pattern="[a-z0-9_]+"
+                            title="Lowercase letters, numbers, and underscores only"
+                            autoCapitalize="none"
+                          />
+                        </label>
+                      </div>
                       <div className="button-row form-buttons">
                         <button type="submit" className="button-primary" disabled={nameStatus.saving}>
-                          {nameStatus.saving ? "Saving..." : "Save name"}
+                          {nameStatus.saving ? "Saving..." : "Save changes"}
                         </button>
                       </div>
                     </form>
                   ) : (
-                    <h2 className="brand-highlight">{profile.name}</h2>
+                    <>
+                      <h2 className="brand-highlight">{profile.name}</h2>
+                      <p className="profile-handle">@{profile.username}</p>
+                    </>
                   )}
-                  <p className="profile-email">{profile.email}</p>
                 </div>
 
-                <div className="button-row profile-edit-toggle">
-                  <button
-                    type="button"
-                    className="button-secondary"
-                    onClick={() => setEditing((prev) => !prev)}
-                  >
-                    {editing ? "Done editing" : "Edit Profile"}
-                  </button>
-                </div>
+                {!editing && (
+                  <div className="profile-stats">
+                    <div className="profile-stat">
+                      <span className="profile-stat-num">{profile.following.length}</span>
+                      <span className="profile-stat-label">Following</span>
+                    </div>
+                    <div className="profile-stat">
+                      <span className="profile-stat-num">{profile.followers.length}</span>
+                      <span className="profile-stat-label">Followers</span>
+                    </div>
+                  </div>
+                )}
+
+                {!editing && (
+                  <div className="button-row profile-edit-toggle">
+                    <button
+                      type="button"
+                      className="button-gold"
+                      onClick={() => setEditing(true)}
+                    >
+                      Edit Profile
+                    </button>
+                  </div>
+                )}
               </div>
-
-              {editing && (
-                <div className="profile-edit-forms">
-                  <form className="tasting-form wine-form" onSubmit={handleChangeEmail}>
-                    <p className="section-kicker">Change email</p>
-                    {emailStatus.error && (
-                      <p className="status-message error form-status">{emailStatus.error}</p>
-                    )}
-                    {!emailStatus.error && emailStatus.success && (
-                      <p className="status-message success form-status">{emailStatus.success}</p>
-                    )}
-                    <div className="field-grid">
-                      <label className="field field-full">
-                        <span>New email</span>
-                        <input
-                          type="email"
-                          value={emailForm.newEmail}
-                          onChange={(event) =>
-                            setEmailForm((prev) => ({ ...prev, newEmail: event.target.value }))
-                          }
-                          required
-                        />
-                      </label>
-                      <label className="field field-full">
-                        <span>Current password</span>
-                        <input
-                          type="password"
-                          value={emailForm.currentPassword}
-                          onChange={(event) =>
-                            setEmailForm((prev) => ({
-                              ...prev,
-                              currentPassword: event.target.value,
-                            }))
-                          }
-                          required
-                        />
-                      </label>
-                    </div>
-                    <div className="button-row form-buttons">
-                      <button type="submit" className="button-primary" disabled={emailStatus.saving}>
-                        {emailStatus.saving ? "Saving..." : "Update email"}
-                      </button>
-                    </div>
-                  </form>
-
-                  <form className="tasting-form wine-form" onSubmit={handleChangePassword}>
-                    <p className="section-kicker">Change password</p>
-                    {passwordStatus.error && (
-                      <p className="status-message error form-status">{passwordStatus.error}</p>
-                    )}
-                    {!passwordStatus.error && passwordStatus.success && (
-                      <p className="status-message success form-status">{passwordStatus.success}</p>
-                    )}
-                    <div className="field-grid">
-                      <label className="field field-full">
-                        <span>Current password</span>
-                        <input
-                          type="password"
-                          value={passwordForm.currentPassword}
-                          onChange={(event) =>
-                            setPasswordForm((prev) => ({
-                              ...prev,
-                              currentPassword: event.target.value,
-                            }))
-                          }
-                          required
-                        />
-                      </label>
-                      <label className="field">
-                        <span>New password</span>
-                        <input
-                          type="password"
-                          value={passwordForm.newPassword}
-                          onChange={(event) =>
-                            setPasswordForm((prev) => ({
-                              ...prev,
-                              newPassword: event.target.value,
-                            }))
-                          }
-                          required
-                          minLength={8}
-                        />
-                      </label>
-                      <label className="field">
-                        <span>Confirm new password</span>
-                        <input
-                          type="password"
-                          value={passwordForm.confirmPassword}
-                          onChange={(event) =>
-                            setPasswordForm((prev) => ({
-                              ...prev,
-                              confirmPassword: event.target.value,
-                            }))
-                          }
-                          required
-                          minLength={8}
-                        />
-                      </label>
-                    </div>
-                    <div className="button-row form-buttons">
-                      <button
-                        type="submit"
-                        className="button-primary"
-                        disabled={passwordStatus.saving}
-                      >
-                        {passwordStatus.saving ? "Saving..." : "Update password"}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
             </>
           )}
         </section>
-
-        {!loading && !error && profile && (
-          <>
-            <section className="panel">
-              <div className="section-heading">
-                <h2 className="brand-highlight">Following ({profile.following.length})</h2>
-              </div>
-              {renderConnectionList(profile.following, "You're not following anyone yet.")}
-            </section>
-
-            <section className="panel">
-              <div className="section-heading">
-                <h2 className="brand-highlight">Followers ({profile.followers.length})</h2>
-              </div>
-              {renderConnectionList(profile.followers, "No one is following you yet.")}
-            </section>
-          </>
-        )}
       </div>
     </>
   );

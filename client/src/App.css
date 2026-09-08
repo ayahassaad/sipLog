@@ -1445,6 +1445,21 @@ textarea:focus {
   display: none;
 }
 
+/* The search box at the top of Community -- reuses FilterBar's gold
+   underline look, centered and sized up since it's the main way to find
+   things on this page (not just a secondary filter like on My Journal). */
+.community-search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.community-search .filter-bar input {
+  width: 420px;
+  font-size: 1.05rem;
+  padding: 16px 8px;
+}
+
 .community-feed-panel .tasting-card {
   background: transparent;
   border: none;
@@ -1485,7 +1500,8 @@ textarea:focus {
 /* Community feed's loading message -- text-only with a slow gold shimmer
    sweeping through it, instead of the plain solid status-message box used
    for errors/empty states elsewhere. */
-.feed-loading {
+.feed-loading,
+.feed-empty {
   text-align: center;
   font-family: var(--font-heading);
   font-size: 0.95rem;
@@ -1500,6 +1516,49 @@ textarea:focus {
 @keyframes feedLoadingShimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* "My Wines" empty state for a brand-new account with no entries yet --
+   a clickable shimmering prompt (same gold sweep as .feed-loading/
+   .feed-empty above) with a small arrow, that jumps straight into the
+   Add New Wine tab. Only shown when there's no search term narrowing
+   things down; a search with zero matches still gets the plain
+   "No entries match your current filters." message above. */
+.empty-state-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.empty-state-label {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  background: linear-gradient(90deg, var(--text-soft) 30%, var(--gold) 50%, var(--text-soft) 70%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: feedLoadingShimmer 2.2s ease-in-out infinite;
+}
+
+.empty-state-arrow {
+  width: 18px;
+  height: 18px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.8;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.empty-state-cta:hover .empty-state-arrow {
+  transform: translateX(5px);
 }
 
 /* Profile page: header (avatar + name/email + edit toggle), the edit-mode
@@ -1527,7 +1586,7 @@ textarea:focus {
   margin: 0 0 4px;
 }
 
-.profile-email {
+.profile-handle {
   color: var(--text-soft);
   margin: 0;
   font-size: 0.9rem;
@@ -1535,6 +1594,56 @@ textarea:focus {
 
 .profile-edit-toggle {
   margin: 0;
+}
+
+/* Option-3 "bio card" layout: avatar, name, handle, and the two connection
+   counts stacked and centered, with a divider between the identity block
+   and the counts. Used only in view mode -- edit mode keeps the original
+   left-avatar / right-form row since that layout is about the forms, not
+   the identity header. */
+.profile-header-view {
+  flex-direction: column;
+  text-align: center;
+}
+
+.profile-header-view .profile-identity {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.profile-header-view .profile-edit-toggle {
+  margin-top: 18px;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  width: 100%;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-stat-num {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.profile-stat-label {
+  color: var(--text-soft);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
 }
 
 .profile-edit-forms {
@@ -1601,4 +1710,480 @@ textarea:focus {
   font-weight: 600;
   color: var(--text-soft);
   font-size: 0.9rem;
+}
+
+/* Wraps the avatar + name when the whole row is a link to that person's
+   profile (Community's search results) -- plain flex row, no underline or
+   color change of its own so it looks identical to the old static text. */
+.connection-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.connection-link:hover .connection-name {
+  color: var(--gold);
+}
+
+/* The "People" results block above the tastings list when a Community
+   search matches a user (with or without any tastings of their own). */
+.community-people {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The clickable @username inside "Posted by @username" on a tasting card. */
+.card-author-link {
+  color: var(--text-soft);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.card-author-link:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+/* Admin tab: stats as a narrow left-hand sidebar and the two leaderboards
+   stacked beside it, no divider lines between them -- just whitespace.
+   The full user directory below reuses .connection-list/.connection-row/
+   .connection-name from Community/Profile, same as everywhere else people
+   are listed. Numbers stay in the app's existing text tokens (gold for
+   the value, soft-pink for the label) rather than introducing new colors. */
+.admin-stats-split {
+  display: grid;
+  grid-template-columns: minmax(160px, 200px) 1fr;
+  gap: 36px;
+  margin-top: 6px;
+}
+
+.admin-stats-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-stat-num {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.admin-stat-label {
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+/* Holds the two leaderboards (narrow, fixed-ish width) and the recent-
+   tastings moderation list (flexes to fill the rest of the row -- the
+   space that used to just sit empty next to the leaderboards). */
+.admin-stats-main {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.admin-boards-stack {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Capped rather than flex: 1 -- letting rows stretch to fill all the
+   remaining panel width would shove the Remove button just as far from
+   the text as the earlier leaderboard-count spacing bug. */
+.admin-recent-tastings {
+  flex: 0 1 460px;
+  min-width: 260px;
+}
+
+/* A deliberately small search box -- this list is only ever a handful of
+   posts, so the search doesn't need Community's full-size treatment. */
+.admin-recent-search .filter-bar {
+  margin-bottom: 10px;
+}
+
+.admin-recent-search .filter-bar input {
+  width: 100%;
+  max-width: 220px;
+  font-size: 0.78rem;
+  padding: 6px 2px;
+}
+
+.admin-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.admin-recent-info {
+  min-width: 0;
+}
+
+.admin-recent-wine {
+  margin: 0;
+  color: var(--berry-dark);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.admin-recent-meta {
+  margin: 2px 0 0;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  opacity: 0.8;
+}
+
+.admin-board-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--gold);
+  margin: 0 0 10px;
+}
+
+.admin-board-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.admin-board-person:hover .admin-board-name {
+  color: var(--gold);
+}
+
+.admin-board-name {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-board-count {
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  opacity: 0.75;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+
+.admin-user-list .connection-row {
+  align-items: flex-start;
+}
+
+.admin-user-meta {
+  margin: 2px 0 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.admin-badge {
+  border: 1px solid var(--line);
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.admin-badge-super {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.admin-users-panel {
+  margin-top: 24px;
+}
+
+/* ---- Chat (direct messages) ------------------------------------------- */
+
+/* A fixed height for the whole two-panel layout (rather than growing with
+   content) is what lets .chat-messages below scroll internally while the
+   composer stays put -- without it, flex:1/overflow-y:auto on a child has
+   no bounded parent height to actually constrain against, so the panel
+   just grows and pushes the composer down the page as messages arrive. */
+.chat-layout {
+  display: flex;
+  gap: 24px;
+  height: calc(100vh - var(--header-height) - 100px);
+}
+
+.chat-list-panel {
+  flex: 0 0 300px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.chat-thread-panel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-conversation-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+}
+
+.chat-conversation-row:last-child {
+  border-bottom: none;
+}
+
+.chat-conversation-row:hover,
+.chat-conversation-row.active {
+  background: rgba(255, 228, 233, 0.06);
+}
+
+.chat-conversation-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-conversation-name {
+  font-weight: 600;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.chat-conversation-preview {
+  margin: 2px 0 0;
+  color: var(--text-soft);
+  opacity: 0.65;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-conversation-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.chat-conversation-time {
+  color: var(--text-soft);
+  opacity: 0.55;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.chat-unread-badge {
+  background: var(--gold);
+  color: var(--page-top);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.chat-thread {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 16px;
+}
+
+.chat-thread-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.chat-thread-name {
+  font-weight: 600;
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+/* Actual speech bubbles -- rounded all around except the corner nearest
+   the sender, which stays tight the way iMessage/WhatsApp bubbles do, so
+   the shape itself (not just the color) says who sent it. */
+.chat-message {
+  max-width: 70%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.chat-message p {
+  margin: 0;
+}
+
+.chat-message.theirs {
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  background: rgba(255, 228, 233, 0.08);
+  color: var(--text-soft);
+}
+
+.chat-message.own {
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  color: #fff9fb;
+}
+
+.chat-composer {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.chat-composer input {
+  flex: 1;
+}
+
+
+/* A persistent shortcut to Messages, fixed in the same screen spot on
+   every page regardless of scroll position -- see ChatFab. */
+.chat-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  box-shadow: 0 10px 22px rgba(83, 4, 23, 0.32);
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+/* Same gold ghost-outline "pop" family as .button-gold -- scale up and
+   pulse a gold glow on hover instead of just nudging upward. */
+.chat-fab:hover {
+  transform: scale(1.12);
+  filter: brightness(1.08);
+  animation: wineButtonGlowPulse 1.3s ease-out infinite;
+}
+
+.chat-fab svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chat-search-toggle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.chat-search-toggle:hover {
+  border-color: var(--gold);
+  background: rgba(216, 173, 95, 0.1);
+}
+
+.chat-search-toggle svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--text-soft);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.chat-search-panel {
+  margin-bottom: 6px;
+}
+
+.chat-search-results {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.chat-search-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+}
+
+.chat-search-result:hover {
+  background: rgba(255, 228, 233, 0.06);
 }

@@ -22,6 +22,7 @@ async function registerAgent() {
   const agent = request.agent(app);
   await agent.post("/api/auth/register").send({
     name: `Taster ${userCounter}`,
+    username: `taster${userCounter}`,
     email: `taster${userCounter}@example.com`,
     password: "supersecret123",
   });

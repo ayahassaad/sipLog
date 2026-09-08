@@ -327,6 +327,7 @@ function JournalPage() {
               heading={view === "mine" ? "My Wines" : "My Favorites"}
               searchTerm={searchTerm}
               onSearchTermChange={setSearchTerm}
+              onCreateFirst={view === "mine" ? () => setView("add") : undefined}
             />
             {activeTastingsSource.hasMore && (
               <div className="button-row">

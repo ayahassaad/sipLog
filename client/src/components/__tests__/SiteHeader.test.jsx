@@ -59,6 +59,34 @@ describe("SiteHeader", () => {
     expect(screen.queryByRole("menuitem", { name: /^log out$/i })).not.toBeInTheDocument();
   });
 
+  it("does not show an Admin link for a regular user", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah", isAdmin: false }, logout: vi.fn() });
+
+    render(
+      <MemoryRouter>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+    expect(screen.queryByRole("menuitem", { name: /admin/i })).not.toBeInTheDocument();
+  });
+
+  it("shows an Admin link in the menu for an admin user", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah", isAdmin: true }, logout: vi.fn() });
+
+    render(
+      <MemoryRouter>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+
+    expect(screen.getByRole("menuitem", { name: /admin/i })).toBeInTheDocument();
+  });
+
   it("shows a log in link and no burger menu when logged out", () => {
     useAuth.mockReturnValue({ user: null, logout: vi.fn() });
 

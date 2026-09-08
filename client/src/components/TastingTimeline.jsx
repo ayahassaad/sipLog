@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import BottleRating from "./BottleRating";
 import FilterBar from "./FilterBar";
 
@@ -37,6 +38,7 @@ function TastingTimeline({
   heading = "My Wines",
   searchTerm,
   onSearchTermChange,
+  onCreateFirst,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const count = tastings.length;
@@ -67,13 +69,22 @@ function TastingTimeline({
         )}
       </div>
 
-      {loading && <p className="status-message">Loading tastings...</p>}
+      {loading && <p className="feed-loading">Loading tastings...</p>}
       {error && <p className="status-message error">{error}</p>}
       {!loading && !error && successMessage && (
         <p className="status-message success">{successMessage}</p>
       )}
       {!loading && !error && filteredCount === 0 && (
-        <p className="status-message">No entries match your current filters.</p>
+        onCreateFirst && !searchTerm ? (
+          <button type="button" className="empty-state-cta" onClick={onCreateFirst}>
+            <span className="empty-state-label">Create your first entry</span>
+            <svg className="empty-state-arrow" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 5c4 2 7 5 7 7s-3 5-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        ) : (
+          <p className="status-message">No entries match your current filters.</p>
+        )
       )}
 
       {count > 0 && (
@@ -172,7 +183,16 @@ function TastingTimeline({
                   </dl>
 
                   {showAuthor && tasting.userId && (
-                    <p className="card-author">Tasted by: {tasting.userId.name}</p>
+                    <p className="card-author">
+                      Tasted by:{" "}
+                      <Link
+                        to={`/users/${tasting.userId.username}`}
+                        className="card-author-link"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        @{tasting.userId.username}
+                      </Link>
+                    </p>
                   )}
 
                   {(onEdit || onDelete) && (

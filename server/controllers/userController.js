@@ -2,15 +2,20 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const { hashPassword, comparePassword } = require("../utils/password");
 
+const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
+
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
 // Minimal, non-sensitive shape for browsing other users (no email exposed).
+// username is what identifies someone to everyone else -- name is still
+// carried along as a friendlier label, but username is the public handle.
 function toDirectoryUser(user, followingIds) {
   return {
     id: user._id,
     name: user.name,
+    username: user.username,
     isFollowing: followingIds.has(user._id.toString()),
   };
 }
@@ -22,6 +27,7 @@ function toConnectionUser(user, followingIds) {
   return {
     id: user._id,
     name: user.name,
+    username: user.username,
     avatarUrl: user.avatarUrl || "",
     isFollowing: followingIds.has(user._id.toString()),
   };
@@ -31,10 +37,46 @@ function toOwnProfile(user) {
   return {
     id: user._id,
     name: user.name,
+    username: user.username,
     email: user.email,
     avatarUrl: user.avatarUrl || "",
   };
 }
+
+// -- Someone else's (or your own) public profile, looked up by username.
+// No email, no raw following/favorites arrays -- just what anyone browsing
+// Community is allowed to see, plus follow state relative to the viewer.
+exports.getUserProfile = async (req, res) => {
+  try {
+    const username = String(req.params.username || "").trim().toLowerCase();
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const [followingCount, followersCount] = await Promise.all([
+      User.countDocuments({ _id: { $in: user.following } }),
+      User.countDocuments({ following: user._id }),
+    ]);
+
+    const viewerFollowingIds = new Set((req.user?.following || []).map((id) => id.toString()));
+    const isOwnProfile = Boolean(req.user && req.user._id.toString() === user._id.toString());
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      username: user.username,
+      avatarUrl: user.avatarUrl || "",
+      followingCount,
+      followersCount,
+      isFollowing: viewerFollowingIds.has(user._id.toString()),
+      isOwnProfile,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 exports.listUsers = async (req, res) => {
   try {
@@ -128,6 +170,23 @@ exports.updateMyProfile = async (req, res) => {
       updates.name = trimmedName;
     }
 
+    if (typeof req.body.username === "string") {
+      const username = req.body.username.trim().toLowerCase();
+      if (!USERNAME_PATTERN.test(username)) {
+        return res.status(400).json({
+          message:
+            "Username must be 3-20 characters, using only lowercase letters, numbers, and underscores",
+        });
+      }
+
+      const existing = await User.findOne({ username, _id: { $ne: req.user._id } });
+      if (existing) {
+        return res.status(409).json({ message: "That username is already taken" });
+      }
+
+      updates.username = username;
+    }
+
     if (typeof req.body.avatarUrl === "string") {
       updates.avatarUrl = req.body.avatarUrl;
     }
@@ -136,7 +195,9 @@ exports.updateMyProfile = async (req, res) => {
       return res.status(400).json({ message: "Nothing to update" });
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
+    const user = await User.findByIdAndUpdate(req.user._id, updates, {
+      returnDocument: "after",
+    });
 
     res.json(toOwnProfile(user));
   } catch (error) {

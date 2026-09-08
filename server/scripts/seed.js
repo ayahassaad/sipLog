@@ -29,11 +29,41 @@ async function buildUsers() {
   const passwordHash = await hashPassword(SEED_PASSWORD);
 
   return [
-    { _id: userIds.ayah, name: "Ayah Assaad", email: "ayah@siplog.app", passwordHash },
-    { _id: userIds.sara, name: "Sara Nilsson", email: "sara@siplog.app", passwordHash },
-    { _id: userIds.leila, name: "Leila Haddad", email: "leila@siplog.app", passwordHash },
-    { _id: userIds.emma, name: "Emma Berg", email: "emma@siplog.app", passwordHash },
-    { _id: userIds.nora, name: "Nora Lind", email: "nora@siplog.app", passwordHash },
+    {
+      _id: userIds.ayah,
+      name: "Ayah Assaad",
+      username: "ayah",
+      email: "ayah@siplog.app",
+      passwordHash,
+    },
+    {
+      _id: userIds.sara,
+      name: "Sara Nilsson",
+      username: "sara",
+      email: "sara@siplog.app",
+      passwordHash,
+    },
+    {
+      _id: userIds.leila,
+      name: "Leila Haddad",
+      username: "leila",
+      email: "leila@siplog.app",
+      passwordHash,
+    },
+    {
+      _id: userIds.emma,
+      name: "Emma Berg",
+      username: "emma",
+      email: "emma@siplog.app",
+      passwordHash,
+    },
+    {
+      _id: userIds.nora,
+      name: "Nora Lind",
+      username: "nora",
+      email: "nora@siplog.app",
+      passwordHash,
+    },
   ];
 }
 

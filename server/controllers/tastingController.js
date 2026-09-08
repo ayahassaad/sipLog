@@ -9,6 +9,13 @@ function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
+// Turns free-text search input into a safe, case-insensitive regex --
+// escapes regex metacharacters so a search like "Chateau (2020)" doesn't
+// throw or behave unexpectedly.
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // A tasting can be favorited by any logged-in user, regardless of who
 // posted it, so "favorited" state lives on the viewer (req.user.favorites),
 // not on the Tasting document itself.
@@ -209,26 +216,70 @@ exports.getAllTastings = async (req, res) => {
 exports.getCommunityFeed = async (req, res) => {
   try {
     // The community feed is public -- anyone can browse it without logging
-    // in. Logged-in users never see their own tastings here (that's what
-    // "My Journal" is for); a logged-out visitor sees everyone's.
-    const query = req.user ? { userId: { $ne: req.user._id } } : {};
+    // in, and it shows every tasting from every user, including your own
+    // (My Journal is the private/filtered view of just your own tastings).
+    const query = {};
+
+    // Optional exact filter to just one author's tastings -- used by that
+    // author's public profile page, as opposed to the fuzzy multi-field
+    // `search` below. A username with no such user matches nothing rather
+    // than erroring, same as any other filter with zero results.
+    const authorUsername = String(req.query.author || "").trim().toLowerCase();
+    if (authorUsername) {
+      const authorUser = await User.findOne({ username: authorUsername }).select("_id");
+      query.userId = authorUser ? authorUser._id : new mongoose.Types.ObjectId();
+    }
+
+    // Optional search -- match against the wine's name, producer, or grape,
+    // OR the author's username/name, then scope the feed to tastings of
+    // whichever wines or people matched. Matching users are also returned
+    // on their own (as `matchedUsers`) so someone who hasn't posted yet
+    // still turns up as a result, not just their tastings.
+    const search = (req.query.search || "").trim();
+    let matchedUsers = [];
+    if (search) {
+      const pattern = new RegExp(escapeRegex(search), "i");
+      const [matchingWineIds, matchingUserDocs] = await Promise.all([
+        Wine.find({
+          $or: [{ name: pattern }, { producer: pattern }, { grape: pattern }],
+        }).distinct("_id"),
+        User.find({
+          $or: [{ username: pattern }, { name: pattern }],
+        }),
+      ]);
+      const matchingUserIds = matchingUserDocs.map((user) => user._id);
+      query.$or = [{ wineId: { $in: matchingWineIds } }, { userId: { $in: matchingUserIds } }];
+
+      const viewerFollowingIds = new Set((req.user?.following || []).map((id) => id.toString()));
+      matchedUsers = matchingUserDocs.map((user) => ({
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        avatarUrl: user.avatarUrl || "",
+        isFollowing: viewerFollowingIds.has(user._id.toString()),
+      }));
+    }
 
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
 
     const total = await Tasting.countDocuments(query);
 
+    // Scoped to public-safe fields only -- this response goes out to anyone
+    // browsing the feed (logged in or not), so the author's email and
+    // following/favorites lists must never ride along on tasting.userId.
     const tastings = await Tasting.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("userId")
+      .populate("userId", "name username avatarUrl")
       .populate("wineId");
 
     const favoriteIdSet = buildFavoriteIdSet(req.user);
 
     res.json({
       tastings: attachFavoriteFlag(tastings, favoriteIdSet),
+      matchedUsers,
       page,
       limit,
       total,
@@ -251,11 +302,13 @@ exports.getFavoriteTastings = async (req, res) => {
 
     const total = await Tasting.countDocuments(query);
 
+    // Same reasoning as the community feed above: a favorited tasting can
+    // belong to someone else, so only public-safe author fields are populated.
     const tastings = await Tasting.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("userId")
+      .populate("userId", "name username avatarUrl")
       .populate("wineId");
 
     const favoriteIdSet = buildFavoriteIdSet(req.user);
@@ -452,7 +505,7 @@ exports.updateTasting = async (req, res) => {
     const updatedTasting = await Tasting.findOneAndUpdate(
       { _id: req.params.id, userId: req.user._id },
       payload,
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     )
       .populate("userId")
       .populate("wineId");

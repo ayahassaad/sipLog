@@ -23,10 +23,13 @@ vi.mock("../../services/uploadService", () => ({
 const sampleProfile = {
   id: "me-id",
   name: "Ayah",
+  username: "ayah",
   email: "ayah@example.com",
   avatarUrl: "",
-  following: [{ id: "bob-id", name: "Bob", avatarUrl: "", isFollowing: true }],
-  followers: [{ id: "carla-id", name: "Carla", avatarUrl: "", isFollowing: false }],
+  // Only the counts (following.length / followers.length) are read now --
+  // the profile page no longer renders the individual people in these lists.
+  following: [{ id: "bob-id" }],
+  followers: [{ id: "carla-id" }],
 };
 
 function renderPage() {
@@ -39,117 +42,53 @@ function renderPage() {
 
 describe("ProfilePage", () => {
   let updateProfile;
-  let updateEmail;
-  let updatePassword;
-  let toggleFollow;
 
   beforeEach(() => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
 
     updateProfile = vi.fn().mockResolvedValue({ ...sampleProfile, name: "Ayah A." });
-    updateEmail = vi.fn().mockResolvedValue({ ...sampleProfile, email: "new@example.com" });
-    updatePassword = vi.fn().mockResolvedValue({ message: "Password updated" });
-    toggleFollow = vi.fn();
 
     useProfile.mockReturnValue({
       profile: sampleProfile,
       loading: false,
       error: "",
       updateProfile,
-      updateEmail,
-      updatePassword,
-      toggleFollow,
     });
   });
 
-  it("shows the profile info and both connection lists", () => {
-    renderPage();
+  it("shows the profile info and the following/followers counts", () => {
+    const { container } = renderPage();
 
     expect(screen.getByText("Ayah")).toBeInTheDocument();
-    expect(screen.getByText("ayah@example.com")).toBeInTheDocument();
-    expect(screen.getByText("Following (1)")).toBeInTheDocument();
-    expect(screen.getByText("Followers (1)")).toBeInTheDocument();
-    expect(screen.getByText("Bob")).toBeInTheDocument();
-    expect(screen.getByText("Carla")).toBeInTheDocument();
+    expect(screen.getByText("@ayah")).toBeInTheDocument();
+    expect(screen.queryByText("ayah@example.com")).not.toBeInTheDocument();
+
+    // Following/Followers now show only as counts in the header's stat row --
+    // there's no longer a list of the actual people below.
+    const statNums = container.querySelectorAll(".profile-stat-num");
+    expect(statNums).toHaveLength(2);
+    expect(statNums[0]).toHaveTextContent("1");
+    expect(statNums[1]).toHaveTextContent("1");
+    expect(screen.queryByText("@bob")).not.toBeInTheDocument();
+    expect(screen.queryByText("@carla")).not.toBeInTheDocument();
   });
 
-  it("saves a new name from edit mode", async () => {
+  it("saves a new name and username from edit mode, then returns to the view", async () => {
     renderPage();
 
     fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
     fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: "Ayah A." } });
-    fireEvent.click(screen.getByRole("button", { name: /save name/i }));
-
-    await waitFor(() => expect(updateProfile).toHaveBeenCalledWith({ name: "Ayah A." }));
-  });
-
-  it("submits an email change with the current password", async () => {
-    renderPage();
-
-    fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
-    fireEvent.change(screen.getByLabelText(/new email/i), {
-      target: { value: "new@example.com" },
-    });
-    fireEvent.change(screen.getAllByLabelText(/current password/i)[0], {
-      target: { value: "supersecret123" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /update email/i }));
+    fireEvent.change(screen.getByLabelText(/^username$/i), { target: { value: "ayah_a" } });
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() =>
-      expect(updateEmail).toHaveBeenCalledWith({
-        newEmail: "new@example.com",
-        currentPassword: "supersecret123",
-      })
+      expect(updateProfile).toHaveBeenCalledWith({ name: "Ayah A.", username: "ayah_a" })
     );
-  });
 
-  it("blocks a password change when the confirmation doesn't match", async () => {
-    renderPage();
-
-    fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
-    fireEvent.change(screen.getAllByLabelText(/current password/i)[1], {
-      target: { value: "supersecret123" },
-    });
-    fireEvent.change(screen.getByLabelText(/^new password$/i), {
-      target: { value: "brand-new-password" },
-    });
-    fireEvent.change(screen.getByLabelText(/confirm new password/i), {
-      target: { value: "does-not-match" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /update password/i }));
-
-    expect(await screen.findByText(/don't match/i)).toBeInTheDocument();
-    expect(updatePassword).not.toHaveBeenCalled();
-  });
-
-  it("submits a password change when the confirmation matches", async () => {
-    renderPage();
-
-    fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
-    fireEvent.change(screen.getAllByLabelText(/current password/i)[1], {
-      target: { value: "supersecret123" },
-    });
-    fireEvent.change(screen.getByLabelText(/^new password$/i), {
-      target: { value: "brand-new-password" },
-    });
-    fireEvent.change(screen.getByLabelText(/confirm new password/i), {
-      target: { value: "brand-new-password" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /update password/i }));
-
-    await waitFor(() =>
-      expect(updatePassword).toHaveBeenCalledWith({
-        currentPassword: "supersecret123",
-        newPassword: "brand-new-password",
-      })
-    );
-  });
-
-  it("calls toggleFollow when following someone back from the Followers list", () => {
-    renderPage();
-
-    fireEvent.click(screen.getByRole("button", { name: /^follow$/i }));
-    expect(toggleFollow).toHaveBeenCalledWith("carla-id", false);
+    // Saving drops you back into the read-only view rather than leaving the
+    // form (and its "Done editing" button) open.
+    expect(await screen.findByRole("button", { name: /edit profile/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /done editing/i })).not.toBeInTheDocument();
   });
 
   it("uploads and saves a new avatar photo", async () => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import RoseGlassLogo from "./RoseGlassLogo";
+import ChatFab from "./ChatFab";
 
 function navLinkClassName({ isActive }) {
   return isActive ? "nav-link active" : "nav-link";
@@ -77,77 +78,93 @@ function SiteHeader() {
   };
 
   return (
-    <header className="site-header" ref={headerRef}>
-      <nav className="main-nav">
-        <NavLink to="/" end className={navLinkClassName}>
-          Community
-        </NavLink>
-        <NavLink to="/journal" className={navLinkClassName}>
-          My Journal
-        </NavLink>
-      </nav>
+    <>
+      <header className="site-header" ref={headerRef}>
+        <nav className="main-nav">
+          <NavLink to="/" end className={navLinkClassName}>
+            Community
+          </NavLink>
+          <NavLink to="/journal" className={navLinkClassName}>
+            My Journal
+          </NavLink>
+        </nav>
 
-      <div className="site-header-logo">
-        <RoseGlassLogo />
-        <p className="site-header-title">SipLog</p>
-      </div>
+        <div className="site-header-logo">
+          <RoseGlassLogo />
+          <p className="site-header-title">SipLog</p>
+        </div>
 
-      <div className="site-header-right">
-        {user ? (
-          <div className="burger-menu" ref={menuRef}>
-            <button
-              type="button"
-              className="burger-button"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              aria-label="Open menu"
-            >
-              <span className="burger-bar" />
-              <span className="burger-bar" />
-              <span className="burger-bar" />
-            </button>
+        <div className="site-header-right">
+          {user ? (
+            <div className="burger-menu" ref={menuRef}>
+              <button
+                type="button"
+                className="burger-button"
+                onClick={() => setMenuOpen((open) => !open)}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                aria-label="Open menu"
+              >
+                <span className="burger-bar" />
+                <span className="burger-bar" />
+                <span className="burger-bar" />
+              </button>
 
-            {menuOpen && (
-              <div className="burger-dropdown" role="menu">
-                <Link
-                  to="/profile"
-                  className="burger-item"
-                  role="menuitem"
-                  onClick={closeMenu}
-                >
-                  My Profile
-                </Link>
-                <Link
-                  to="/settings"
-                  className="burger-item"
-                  role="menuitem"
-                  onClick={closeMenu}
-                >
-                  Settings
-                </Link>
-                <button
-                  type="button"
-                  className="burger-item"
-                  role="menuitem"
-                  onClick={handleLogout}
-                >
-                  Log out
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <Link to="/login" className="logout-button" data-tooltip="Come on in!">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M9 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9" />
-              <path d="M14 12H4m0 0 3-3m-3 3 3 3" />
-            </svg>
-            Log in
-          </Link>
-        )}
-      </div>
-    </header>
+              {menuOpen && (
+                <div className="burger-dropdown" role="menu">
+                  <Link
+                    to="/profile"
+                    className="burger-item"
+                    role="menuitem"
+                    onClick={closeMenu}
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="burger-item"
+                    role="menuitem"
+                    onClick={closeMenu}
+                  >
+                    Settings
+                  </Link>
+                  {user.isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="burger-item"
+                      role="menuitem"
+                      onClick={closeMenu}
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="burger-item"
+                    role="menuitem"
+                    onClick={handleLogout}
+                  >
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login" className="logout-button" data-tooltip="Come on in!">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9" />
+                <path d="M14 12H4m0 0 3-3m-3 3 3 3" />
+              </svg>
+              Log in
+            </Link>
+          )}
+        </div>
+      </header>
+      {/* Fixed in the same spot on every page (instead of a burger-menu
+          item) so chat is always one tap away -- hidden on the chat page
+          itself, see ChatFab. */}
+      <ChatFab />
+    </>
   );
 }
 

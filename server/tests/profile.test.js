@@ -22,6 +22,7 @@ async function registerAgent(overrides = {}) {
   const agent = request.agent(app);
   const res = await agent.post("/api/auth/register").send({
     name: `Taster ${userCounter}`,
+    username: `taster${userCounter}`,
     email: `taster${userCounter}@example.com`,
     password: "supersecret123",
     ...overrides,
@@ -99,6 +100,33 @@ describe("PATCH /api/users/me", () => {
     const { agent } = await registerAgent();
 
     const res = await agent.patch("/api/users/me").send({ name: "   " });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("updates your username", async () => {
+    const { agent } = await registerAgent();
+
+    const res = await agent.patch("/api/users/me").send({ username: "New_Handle" });
+
+    expect(res.status).toBe(200);
+    // Stored (and returned) lowercased, same as email.
+    expect(res.body.username).toBe("new_handle");
+  });
+
+  it("rejects a username already taken by someone else", async () => {
+    const { agent: alice } = await registerAgent();
+    const { user: bobUser } = await registerAgent();
+
+    const res = await alice.patch("/api/users/me").send({ username: bobUser.username });
+
+    expect(res.status).toBe(409);
+  });
+
+  it("rejects an invalid username", async () => {
+    const { agent } = await registerAgent();
+
+    const res = await agent.patch("/api/users/me").send({ username: "no spaces!" });
 
     expect(res.status).toBe(400);
   });
@@ -183,5 +211,52 @@ describe("PATCH /api/users/me/password", () => {
     });
 
     expect(res.status).toBe(400);
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  it("returns 404 for a username that doesn't exist", async () => {
+    const res = await request(app).get("/api/users/nobody-here");
+    expect(res.status).toBe(404);
+  });
+
+  it("returns public profile fields without leaking email, to a logged-out visitor", async () => {
+    const { user } = await registerAgent();
+
+    const res = await request(app).get(`/api/users/${user.username}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      username: user.username,
+      name: user.name,
+      followingCount: 0,
+      followersCount: 0,
+      isFollowing: false,
+      isOwnProfile: false,
+    });
+    expect(res.body.email).toBeUndefined();
+  });
+
+  it("reflects follow state and counts relative to the viewer", async () => {
+    const { agent: alice } = await registerAgent();
+    const { user: bobUser } = await registerAgent();
+
+    const before = await alice.get(`/api/users/${bobUser.username}`);
+    expect(before.body.isFollowing).toBe(false);
+    expect(before.body.followersCount).toBe(0);
+
+    await alice.post(`/api/users/${bobUser.id}/follow`);
+
+    const after = await alice.get(`/api/users/${bobUser.username}`);
+    expect(after.body.isFollowing).toBe(true);
+    expect(after.body.followersCount).toBe(1);
+  });
+
+  it("marks isOwnProfile when you view yourself", async () => {
+    const { agent, user } = await registerAgent();
+
+    const res = await agent.get(`/api/users/${user.username}`);
+
+    expect(res.body.isOwnProfile).toBe(true);
   });
 });

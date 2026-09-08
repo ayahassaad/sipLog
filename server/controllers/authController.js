@@ -8,14 +8,33 @@ function toPublicUser(user) {
     id: user._id,
     name: user.name,
     email: user.email,
+    username: user.username,
+    // isSuperAdmin implies admin access too (see requireAdmin) -- exposed
+    // alongside isAdmin so the client can also decide whether to show the
+    // "make admin" controls on top of just the admin tab itself.
+    isAdmin: Boolean(user.isAdmin || user.isSuperAdmin),
+    isSuperAdmin: Boolean(user.isSuperAdmin),
   };
 }
+
+const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
 
 function validateCredentialsShape(body, { requireName = false } = {}) {
   const errors = [];
 
   if (requireName && (typeof body.name !== "string" || !body.name.trim())) {
     errors.push("name is required");
+  }
+
+  if (requireName) {
+    const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : "";
+    if (!username) {
+      errors.push("username is required");
+    } else if (!USERNAME_PATTERN.test(username)) {
+      errors.push(
+        "username must be 3-20 characters, using only lowercase letters, numbers, and underscores"
+      );
+    }
   }
 
   if (typeof body.email !== "string" || !body.email.trim()) {
@@ -37,15 +56,23 @@ exports.register = async (req, res) => {
     }
 
     const email = req.body.email.trim().toLowerCase();
-    const existing = await User.findOne({ email });
-    if (existing) {
+    const username = req.body.username.trim().toLowerCase();
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(409).json({ message: "An account with that email already exists" });
+    }
+
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(409).json({ message: "That username is already taken" });
     }
 
     const passwordHash = await hashPassword(req.body.password);
     const user = await User.create({
       name: req.body.name.trim(),
       email,
+      username,
       passwordHash,
     });
 

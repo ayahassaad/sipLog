@@ -2,15 +2,20 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const { hashPassword, comparePassword } = require("../utils/password");
 
+const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
+
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
 // Minimal, non-sensitive shape for browsing other users (no email exposed).
+// username is what identifies someone to everyone else -- name is still
+// carried along as a friendlier label, but username is the public handle.
 function toDirectoryUser(user, followingIds) {
   return {
     id: user._id,
     name: user.name,
+    username: user.username,
     isFollowing: followingIds.has(user._id.toString()),
   };
 }
@@ -22,6 +27,7 @@ function toConnectionUser(user, followingIds) {
   return {
     id: user._id,
     name: user.name,
+    username: user.username,
     avatarUrl: user.avatarUrl || "",
     isFollowing: followingIds.has(user._id.toString()),
   };
@@ -31,6 +37,7 @@ function toOwnProfile(user) {
   return {
     id: user._id,
     name: user.name,
+    username: user.username,
     email: user.email,
     avatarUrl: user.avatarUrl || "",
   };
@@ -126,6 +133,23 @@ exports.updateMyProfile = async (req, res) => {
         return res.status(400).json({ message: "Name can't be empty" });
       }
       updates.name = trimmedName;
+    }
+
+    if (typeof req.body.username === "string") {
+      const username = req.body.username.trim().toLowerCase();
+      if (!USERNAME_PATTERN.test(username)) {
+        return res.status(400).json({
+          message:
+            "Username must be 3-20 characters, using only lowercase letters, numbers, and underscores",
+        });
+      }
+
+      const existing = await User.findOne({ username, _id: { $ne: req.user._id } });
+      if (existing) {
+        return res.status(409).json({ message: "That username is already taken" });
+      }
+
+      updates.username = username;
     }
 
     if (typeof req.body.avatarUrl === "string") {

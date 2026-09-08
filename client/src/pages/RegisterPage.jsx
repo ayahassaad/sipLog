@@ -5,7 +5,7 @@ import { useAuth } from "../context/useAuth";
 function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", username: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -50,6 +50,21 @@ function RegisterPage() {
                 value={form.name}
                 onChange={handleChange}
                 required
+              />
+            </label>
+            <label className="field field-full">
+              <span>Username</span>
+              <input
+                type="text"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                required
+                minLength={3}
+                maxLength={20}
+                pattern="[a-z0-9_]+"
+                title="Lowercase letters, numbers, and underscores only"
+                autoCapitalize="none"
               />
             </label>
             <label className="field field-full">

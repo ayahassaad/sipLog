@@ -109,7 +109,7 @@ function CommunityPage() {
 
                       {author && (
                         <div className="card-author-row">
-                          <span className="card-author">Posted by {author.name}</span>
+                          <span className="card-author">Posted by @{author.username}</span>
                           <button
                             type="button"
                             className={`button-gold ${isFollowing ? "is-following" : ""}`}

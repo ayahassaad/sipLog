@@ -35,7 +35,7 @@ const sampleTasting = {
     country: "Spain",
     vintage: 2018,
   },
-  userId: { _id: "bob-id", name: "Bob" },
+  userId: { _id: "bob-id", name: "Bob", username: "bob" },
 };
 
 function renderPage() {
@@ -66,7 +66,7 @@ describe("CommunityPage", () => {
     renderPage();
 
     expect(screen.getByText("Rioja Reserva")).toBeInTheDocument();
-    expect(screen.getByText("Posted by Bob")).toBeInTheDocument();
+    expect(screen.getByText("Posted by @bob")).toBeInTheDocument();
     expect(screen.queryByText(/tasted by/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/people to follow/i)).not.toBeInTheDocument();
   });

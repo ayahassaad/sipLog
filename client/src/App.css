@@ -1527,7 +1527,7 @@ textarea:focus {
   margin: 0 0 4px;
 }
 
-.profile-email {
+.profile-handle {
   color: var(--text-soft);
   margin: 0;
   font-size: 0.9rem;

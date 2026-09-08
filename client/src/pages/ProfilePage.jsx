@@ -15,7 +15,7 @@ function ProfilePage() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState("");
 
-  const [nameForm, setNameForm] = useState({ name: "" });
+  const [nameForm, setNameForm] = useState({ name: "", username: "" });
   const [nameStatus, setNameStatus] = useState(emptyStatus);
 
   const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
@@ -28,10 +28,10 @@ function ProfilePage() {
   });
   const [passwordStatus, setPasswordStatus] = useState(emptyStatus);
 
-  // Keep the name field in sync whenever the profile (re)loads.
+  // Keep the name/username fields in sync whenever the profile (re)loads.
   useEffect(() => {
     if (profile) {
-      setNameForm({ name: profile.name });
+      setNameForm({ name: profile.name, username: profile.username });
     }
   }, [profile]);
 
@@ -59,8 +59,8 @@ function ProfilePage() {
     setNameStatus({ error: "", success: "", saving: true });
 
     try {
-      await updateProfile({ name: nameForm.name });
-      setNameStatus({ error: "", success: "Name updated.", saving: false });
+      await updateProfile({ name: nameForm.name, username: nameForm.username });
+      setNameStatus({ error: "", success: "Profile updated.", saving: false });
     } catch (err) {
       setNameStatus({ error: err.message, success: "", saving: false });
     }
@@ -114,7 +114,7 @@ function ProfilePage() {
         {people.map((person) => (
           <div className="connection-row" key={person.id}>
             <Avatar url={person.avatarUrl} name={person.name} size="sm" />
-            <span className="connection-name">{person.name}</span>
+            <span className="connection-name">@{person.username}</span>
             <button
               type="button"
               className={`button-gold ${person.isFollowing ? "is-following" : ""}`}
@@ -180,25 +180,47 @@ function ProfilePage() {
                       {!nameStatus.error && nameStatus.success && (
                         <p className="status-message success form-status">{nameStatus.success}</p>
                       )}
-                      <label className="field field-full">
-                        <span>Name</span>
-                        <input
-                          type="text"
-                          value={nameForm.name}
-                          onChange={(event) => setNameForm({ name: event.target.value })}
-                          required
-                        />
-                      </label>
+                      <div className="field-grid">
+                        <label className="field">
+                          <span>Name</span>
+                          <input
+                            type="text"
+                            value={nameForm.name}
+                            onChange={(event) =>
+                              setNameForm((prev) => ({ ...prev, name: event.target.value }))
+                            }
+                            required
+                          />
+                        </label>
+                        <label className="field">
+                          <span>Username</span>
+                          <input
+                            type="text"
+                            value={nameForm.username}
+                            onChange={(event) =>
+                              setNameForm((prev) => ({ ...prev, username: event.target.value }))
+                            }
+                            required
+                            minLength={3}
+                            maxLength={20}
+                            pattern="[a-z0-9_]+"
+                            title="Lowercase letters, numbers, and underscores only"
+                            autoCapitalize="none"
+                          />
+                        </label>
+                      </div>
                       <div className="button-row form-buttons">
                         <button type="submit" className="button-primary" disabled={nameStatus.saving}>
-                          {nameStatus.saving ? "Saving..." : "Save name"}
+                          {nameStatus.saving ? "Saving..." : "Save profile"}
                         </button>
                       </div>
                     </form>
                   ) : (
-                    <h2 className="brand-highlight">{profile.name}</h2>
+                    <>
+                      <h2 className="brand-highlight">{profile.name}</h2>
+                      <p className="profile-handle">@{profile.username}</p>
+                    </>
                   )}
-                  <p className="profile-email">{profile.email}</p>
                 </div>
 
                 <div className="button-row profile-edit-toggle">

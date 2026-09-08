@@ -18,6 +18,7 @@ afterAll(async () => {
 
 const credentials = {
   name: "Test User",
+  username: "test_user",
   email: "test@example.com",
   password: "supersecret123",
 };
@@ -27,16 +28,39 @@ describe("POST /api/auth/register", () => {
     const res = await request(app).post("/api/auth/register").send(credentials);
 
     expect(res.status).toBe(201);
-    expect(res.body.user).toMatchObject({ name: credentials.name, email: credentials.email });
+    expect(res.body.user).toMatchObject({
+      name: credentials.name,
+      username: credentials.username,
+      email: credentials.email,
+    });
     expect(res.body.user.passwordHash).toBeUndefined();
     expect(res.headers["set-cookie"]).toBeDefined();
   });
 
   it("rejects a duplicate email", async () => {
     await request(app).post("/api/auth/register").send(credentials);
-    const res = await request(app).post("/api/auth/register").send(credentials);
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ ...credentials, username: "someone_else" });
 
     expect(res.status).toBe(409);
+  });
+
+  it("rejects a duplicate username", async () => {
+    await request(app).post("/api/auth/register").send(credentials);
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ ...credentials, email: "someone-else@example.com" });
+
+    expect(res.status).toBe(409);
+  });
+
+  it("rejects an invalid username", async () => {
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ ...credentials, username: "no spaces!" });
+
+    expect(res.status).toBe(400);
   });
 
   it("rejects a short password", async () => {

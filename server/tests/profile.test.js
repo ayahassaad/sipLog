@@ -22,6 +22,7 @@ async function registerAgent(overrides = {}) {
   const agent = request.agent(app);
   const res = await agent.post("/api/auth/register").send({
     name: `Taster ${userCounter}`,
+    username: `taster${userCounter}`,
     email: `taster${userCounter}@example.com`,
     password: "supersecret123",
     ...overrides,
@@ -99,6 +100,33 @@ describe("PATCH /api/users/me", () => {
     const { agent } = await registerAgent();
 
     const res = await agent.patch("/api/users/me").send({ name: "   " });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("updates your username", async () => {
+    const { agent } = await registerAgent();
+
+    const res = await agent.patch("/api/users/me").send({ username: "New_Handle" });
+
+    expect(res.status).toBe(200);
+    // Stored (and returned) lowercased, same as email.
+    expect(res.body.username).toBe("new_handle");
+  });
+
+  it("rejects a username already taken by someone else", async () => {
+    const { agent: alice } = await registerAgent();
+    const { user: bobUser } = await registerAgent();
+
+    const res = await alice.patch("/api/users/me").send({ username: bobUser.username });
+
+    expect(res.status).toBe(409);
+  });
+
+  it("rejects an invalid username", async () => {
+    const { agent } = await registerAgent();
+
+    const res = await agent.patch("/api/users/me").send({ username: "no spaces!" });
 
     expect(res.status).toBe(400);
   });

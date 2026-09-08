@@ -23,10 +23,15 @@ vi.mock("../../services/uploadService", () => ({
 const sampleProfile = {
   id: "me-id",
   name: "Ayah",
+  username: "ayah",
   email: "ayah@example.com",
   avatarUrl: "",
-  following: [{ id: "bob-id", name: "Bob", avatarUrl: "", isFollowing: true }],
-  followers: [{ id: "carla-id", name: "Carla", avatarUrl: "", isFollowing: false }],
+  following: [
+    { id: "bob-id", name: "Bob", username: "bob", avatarUrl: "", isFollowing: true },
+  ],
+  followers: [
+    { id: "carla-id", name: "Carla", username: "carla", avatarUrl: "", isFollowing: false },
+  ],
 };
 
 function renderPage() {
@@ -66,21 +71,25 @@ describe("ProfilePage", () => {
     renderPage();
 
     expect(screen.getByText("Ayah")).toBeInTheDocument();
-    expect(screen.getByText("ayah@example.com")).toBeInTheDocument();
+    expect(screen.getByText("@ayah")).toBeInTheDocument();
+    expect(screen.queryByText("ayah@example.com")).not.toBeInTheDocument();
     expect(screen.getByText("Following (1)")).toBeInTheDocument();
     expect(screen.getByText("Followers (1)")).toBeInTheDocument();
-    expect(screen.getByText("Bob")).toBeInTheDocument();
-    expect(screen.getByText("Carla")).toBeInTheDocument();
+    expect(screen.getByText("@bob")).toBeInTheDocument();
+    expect(screen.getByText("@carla")).toBeInTheDocument();
   });
 
-  it("saves a new name from edit mode", async () => {
+  it("saves a new name and username from edit mode", async () => {
     renderPage();
 
     fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
     fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: "Ayah A." } });
-    fireEvent.click(screen.getByRole("button", { name: /save name/i }));
+    fireEvent.change(screen.getByLabelText(/^username$/i), { target: { value: "ayah_a" } });
+    fireEvent.click(screen.getByRole("button", { name: /save profile/i }));
 
-    await waitFor(() => expect(updateProfile).toHaveBeenCalledWith({ name: "Ayah A." }));
+    await waitFor(() =>
+      expect(updateProfile).toHaveBeenCalledWith({ name: "Ayah A.", username: "ayah_a" })
+    );
   });
 
   it("submits an email change with the current password", async () => {

@@ -218,11 +218,14 @@ exports.getCommunityFeed = async (req, res) => {
 
     const total = await Tasting.countDocuments(query);
 
+    // Scoped to public-safe fields only -- this response goes out to anyone
+    // browsing the feed (logged in or not), so the author's email and
+    // following/favorites lists must never ride along on tasting.userId.
     const tastings = await Tasting.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("userId")
+      .populate("userId", "name username avatarUrl")
       .populate("wineId");
 
     const favoriteIdSet = buildFavoriteIdSet(req.user);
@@ -251,11 +254,13 @@ exports.getFavoriteTastings = async (req, res) => {
 
     const total = await Tasting.countDocuments(query);
 
+    // Same reasoning as the community feed above: a favorited tasting can
+    // belong to someone else, so only public-safe author fields are populated.
     const tastings = await Tasting.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("userId")
+      .populate("userId", "name username avatarUrl")
       .populate("wineId");
 
     const favoriteIdSet = buildFavoriteIdSet(req.user);

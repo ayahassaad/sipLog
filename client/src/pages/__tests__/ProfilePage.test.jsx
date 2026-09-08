@@ -68,13 +68,20 @@ describe("ProfilePage", () => {
   });
 
   it("shows the profile info and both connection lists", () => {
-    renderPage();
+    const { container } = renderPage();
 
     expect(screen.getByText("Ayah")).toBeInTheDocument();
     expect(screen.getByText("@ayah")).toBeInTheDocument();
     expect(screen.queryByText("ayah@example.com")).not.toBeInTheDocument();
-    expect(screen.getByText("Following (1)")).toBeInTheDocument();
-    expect(screen.getByText("Followers (1)")).toBeInTheDocument();
+
+    // Following/Followers counts now live in the header's stat row, not in
+    // the section headings below (which just say "Following"/"Followers").
+    const statNums = container.querySelectorAll(".profile-stat-num");
+    expect(statNums).toHaveLength(2);
+    expect(statNums[0]).toHaveTextContent("1");
+    expect(statNums[1]).toHaveTextContent("1");
+    expect(screen.getByRole("heading", { name: "Following" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Followers" })).toBeInTheDocument();
     expect(screen.getByText("@bob")).toBeInTheDocument();
     expect(screen.getByText("@carla")).toBeInTheDocument();
   });

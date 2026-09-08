@@ -365,14 +365,14 @@ function ProfilePage() {
           <>
             <section className="panel">
               <div className="section-heading">
-                <h2 className="brand-highlight">Following ({profile.following.length})</h2>
+                <h2 className="brand-highlight">Following</h2>
               </div>
               {renderConnectionList(profile.following, "You're not following anyone yet.")}
             </section>
 
             <section className="panel">
               <div className="section-heading">
-                <h2 className="brand-highlight">Followers ({profile.followers.length})</h2>
+                <h2 className="brand-highlight">Followers</h2>
               </div>
               {renderConnectionList(profile.followers, "No one is following you yet.")}
             </section>

@@ -34,3 +34,12 @@ export async function fetchAdminStats() {
     throw new Error(extractMessage(error, "Failed to load site stats"));
   }
 }
+
+export async function deleteAdminTasting(id) {
+  try {
+    const res = await api.delete(`/admin/tastings/${id}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to remove this tasting"));
+  }
+}

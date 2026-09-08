@@ -198,3 +198,30 @@ exports.getStats = async (_req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// DELETE /api/admin/tastings/:id -- lets any admin (not just the super
+// admin; this is content moderation, not access control) remove someone
+// else's post from Community, regardless of who posted it. Unlike the
+// regular delete (tastingController.deleteTasting), this never checks
+// ownership on purpose.
+exports.deleteTasting = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid tasting id" });
+    }
+
+    const deletedTasting = await Tasting.findByIdAndDelete(id);
+    if (!deletedTasting) {
+      return res.status(404).json({ message: "Tasting not found" });
+    }
+
+    // Same cleanup as scripts/removeSeedUsers.js -- anyone who'd favorited
+    // this tasting shouldn't keep a reference to something that's gone.
+    await User.updateMany({}, { $pull: { favorites: deletedTasting._id } });
+
+    res.json({ message: "Tasting removed" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

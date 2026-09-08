@@ -40,6 +40,27 @@ async function grantAdmin(userId, { superAdmin = false } = {}) {
   });
 }
 
+async function createWine(agent, overrides = {}) {
+  const res = await agent.post("/api/wines").send({
+    name: "Test Wine",
+    producer: "Test Producer",
+    country: "Testland",
+    grape: "Testgrape",
+    vintage: 2020,
+    ...overrides,
+  });
+  return res.body;
+}
+
+const baseTasting = {
+  appearance: "Ruby",
+  sweetness: 1,
+  acidity: 3,
+  body: 3,
+  tannin: 2,
+  rating: 4,
+};
+
 describe("Admin access control", () => {
   it("requires a session for the admin routes", async () => {
     const usersRes = await request(app).get("/api/admin/users");
@@ -210,5 +231,67 @@ describe("GET /api/admin/stats", () => {
     expect(res.body.newUsersThisWeek).toBe(2);
     expect(res.body.topByFollowers[0]).toMatchObject({ username: bob.username, followersCount: 1 });
     expect(res.body.topByTastings[0]).toMatchObject({ username: bob.username, tastingsCount: 1 });
+  });
+});
+
+describe("DELETE /api/admin/tastings/:id", () => {
+  it("requires a session and admin access", async () => {
+    const { agent: bobAgent } = await registerAgent();
+    const bobWine = await createWine(bobAgent);
+    const bobTasting = await bobAgent
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: bobWine._id });
+
+    const loggedOut = await request(app).delete(`/api/admin/tastings/${bobTasting.body._id}`);
+    const notAdmin = await bobAgent.delete(`/api/admin/tastings/${bobTasting.body._id}`);
+
+    expect(loggedOut.status).toBe(401);
+    expect(notAdmin.status).toBe(403);
+  });
+
+  it("lets any admin remove someone else's tasting, not just the super admin", async () => {
+    const { agent: adminAgent, user: admin } = await registerAgent();
+    await grantAdmin(admin.id);
+
+    const { agent: bobAgent } = await registerAgent();
+    const bobWine = await createWine(bobAgent);
+    const bobTasting = await bobAgent
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: bobWine._id });
+
+    const res = await adminAgent.delete(`/api/admin/tastings/${bobTasting.body._id}`);
+
+    expect(res.status).toBe(200);
+
+    const feed = await request(app).get("/api/tastings/feed");
+    expect(feed.body.tastings).toHaveLength(0);
+  });
+
+  it("also clears the tasting from anyone who'd favorited it", async () => {
+    const { agent: adminAgent, user: admin } = await registerAgent();
+    await grantAdmin(admin.id);
+
+    const { agent: bobAgent } = await registerAgent();
+    const bobWine = await createWine(bobAgent);
+    const bobTasting = await bobAgent
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: bobWine._id });
+
+    await adminAgent.post(`/api/tastings/${bobTasting.body._id}/favorite`);
+    await adminAgent.delete(`/api/admin/tastings/${bobTasting.body._id}`);
+
+    // toOwnProfile (GET /api/users/me) never exposes the raw favorites
+    // array, so check the document itself for the cleanup.
+    const adminDoc = await User.findById(admin.id);
+    expect(adminDoc.favorites.map(String)).not.toContain(bobTasting.body._id);
+  });
+
+  it("404s for a tasting id that doesn't exist", async () => {
+    const { agent: adminAgent, user: admin } = await registerAgent();
+    await grantAdmin(admin.id);
+
+    const res = await adminAgent.delete("/api/admin/tastings/000000000000000000000000");
+
+    expect(res.status).toBe(404);
   });
 });

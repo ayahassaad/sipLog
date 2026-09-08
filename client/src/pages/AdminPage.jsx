@@ -6,6 +6,7 @@ import FilterBar from "../components/FilterBar";
 import { useAuth } from "../context/useAuth";
 import { useAdminUsers } from "../hooks/useAdminUsers";
 import { useAdminStats } from "../hooks/useAdminStats";
+import { useAdminTastings } from "../hooks/useAdminTastings";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -50,6 +51,59 @@ function Leaderboard({ title, entries, countLabel }) {
   );
 }
 
+function RecentTastings() {
+  const { tastings, loading, error, removingId, removeTasting } = useAdminTastings();
+
+  const handleRemove = (tasting) => {
+    const wineName = tasting.wineId?.name || "this tasting";
+    if (!window.confirm(`Remove ${wineName} (posted by @${tasting.userId?.username})? This can't be undone.`)) {
+      return;
+    }
+    removeTasting(tasting._id);
+  };
+
+  return (
+    <div className="admin-recent-tastings">
+      <p className="admin-board-title">Recent Tastings</p>
+
+      {loading && <p className="feed-loading">Loading recent tastings...</p>}
+      {error && <p className="status-message error">{error}</p>}
+      {!loading && !error && tastings.length === 0 && (
+        <p className="feed-empty">No tastings yet.</p>
+      )}
+
+      {tastings.map((tasting) => (
+        <div className="admin-recent-row" key={tasting._id}>
+          <div className="admin-recent-info">
+            <p className="admin-recent-wine">{tasting.wineId?.name || "Untitled wine"}</p>
+            <p className="admin-recent-meta">
+              by{" "}
+              <Link to={`/users/${tasting.userId?.username}`} className="card-author-link">
+                @{tasting.userId?.username}
+              </Link>
+              {" · "}
+              {formatJoinDate(tasting.createdAt)}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="card-action"
+            onClick={() => handleRemove(tasting)}
+            disabled={removingId === tasting._id}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M19 6l-1 14H6L5 6" />
+            </svg>
+            {removingId === tasting._id ? "Removing..." : "Remove"}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AdminStats() {
   const { stats, loading, error } = useAdminStats();
 
@@ -79,17 +133,21 @@ function AdminStats() {
           ))}
         </div>
 
-        <div className="admin-boards-stack">
-          <Leaderboard
-            title="Most Followed"
-            entries={stats.topByFollowers}
-            countLabel="followers"
-          />
-          <Leaderboard
-            title="Most Tastings Posted"
-            entries={stats.topByTastings}
-            countLabel="tastings"
-          />
+        <div className="admin-stats-main">
+          <div className="admin-boards-stack">
+            <Leaderboard
+              title="Most Followed"
+              entries={stats.topByFollowers}
+              countLabel="followers"
+            />
+            <Leaderboard
+              title="Most Tastings Posted"
+              entries={stats.topByTastings}
+              countLabel="tastings"
+            />
+          </div>
+
+          <RecentTastings />
         </div>
       </div>
     </section>

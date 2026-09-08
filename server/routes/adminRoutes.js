@@ -11,6 +11,7 @@ router.use(requireAuth, requireAdmin);
 
 router.get("/users", adminController.listUsers);
 router.get("/stats", adminController.getStats);
+router.delete("/tastings/:id", adminController.deleteTasting);
 
 // Only the super admin can flip someone else's admin access -- a tighter
 // gate stacked on top of the router-level requireAdmin above.

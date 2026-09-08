@@ -1,10 +1,11 @@
 import { act, render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminPage from "../AdminPage";
 import { useAuth } from "../../context/useAuth";
 import { useAdminUsers } from "../../hooks/useAdminUsers";
 import { useAdminStats } from "../../hooks/useAdminStats";
+import { useAdminTastings } from "../../hooks/useAdminTastings";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
@@ -14,6 +15,9 @@ vi.mock("../../hooks/useAdminUsers", () => ({
 }));
 vi.mock("../../hooks/useAdminStats", () => ({
   useAdminStats: vi.fn(),
+}));
+vi.mock("../../hooks/useAdminTastings", () => ({
+  useAdminTastings: vi.fn(),
 }));
 
 const sampleStats = {
@@ -42,6 +46,22 @@ const baseAdminUsers = {
   runSearch: vi.fn(),
   toggleAdmin: vi.fn(),
 };
+
+const baseAdminTastings = {
+  tastings: [],
+  loading: false,
+  error: "",
+  removingId: "",
+  removeTasting: vi.fn(),
+};
+
+// RecentTastings always renders once AdminStats has stats, so every test
+// below needs *some* return value here or the destructure in the
+// component throws -- set a harmless default and let individual tests
+// override it.
+beforeEach(() => {
+  useAdminTastings.mockReturnValue(baseAdminTastings);
+});
 
 function renderPage() {
   render(
@@ -179,5 +199,79 @@ describe("AdminPage user directory", () => {
     expect(runSearch).toHaveBeenCalledWith("bob");
 
     vi.useRealTimers();
+  });
+});
+
+describe("AdminPage recent tastings", () => {
+  const sampleTasting = {
+    _id: "tasting-1",
+    createdAt: "2026-01-05T00:00:00.000Z",
+    wineId: { name: "Rioja Reserva" },
+    userId: { username: "bob" },
+  };
+
+  it("lists recent tastings with a link to the poster's profile", () => {
+    useAuth.mockReturnValue({ user: { id: "me", isSuperAdmin: true } });
+    useAdminStats.mockReturnValue({ stats: sampleStats, loading: false, error: "" });
+    useAdminUsers.mockReturnValue(baseAdminUsers);
+    useAdminTastings.mockReturnValue({ ...baseAdminTastings, tastings: [sampleTasting] });
+
+    renderPage();
+
+    expect(screen.getByText("Rioja Reserva")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /@bob/i })).toHaveAttribute("href", "/users/bob");
+    expect(screen.getByRole("button", { name: /remove/i })).toBeInTheDocument();
+  });
+
+  it("removes a tasting after the admin confirms", () => {
+    const removeTasting = vi.fn();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    useAuth.mockReturnValue({ user: { id: "me", isSuperAdmin: true } });
+    useAdminStats.mockReturnValue({ stats: sampleStats, loading: false, error: "" });
+    useAdminUsers.mockReturnValue(baseAdminUsers);
+    useAdminTastings.mockReturnValue({
+      ...baseAdminTastings,
+      tastings: [sampleTasting],
+      removeTasting,
+    });
+
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /remove/i }));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(removeTasting).toHaveBeenCalledWith("tasting-1");
+
+    confirmSpy.mockRestore();
+  });
+
+  it("does not remove a tasting when the admin cancels the confirm", () => {
+    const removeTasting = vi.fn();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    useAuth.mockReturnValue({ user: { id: "me", isSuperAdmin: true } });
+    useAdminStats.mockReturnValue({ stats: sampleStats, loading: false, error: "" });
+    useAdminUsers.mockReturnValue(baseAdminUsers);
+    useAdminTastings.mockReturnValue({
+      ...baseAdminTastings,
+      tastings: [sampleTasting],
+      removeTasting,
+    });
+
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /remove/i }));
+
+    expect(removeTasting).not.toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
+  });
+
+  it("shows an empty message when there are no tastings yet", () => {
+    useAuth.mockReturnValue({ user: { id: "me", isSuperAdmin: true } });
+    useAdminStats.mockReturnValue({ stats: sampleStats, loading: false, error: "" });
+    useAdminUsers.mockReturnValue(baseAdminUsers);
+    useAdminTastings.mockReturnValue(baseAdminTastings);
+
+    renderPage();
+
+    expect(screen.getByText(/no tastings yet/i)).toBeInTheDocument();
   });
 });

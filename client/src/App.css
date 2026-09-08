@@ -1789,10 +1789,53 @@ textarea:focus {
   opacity: 0.8;
 }
 
+/* Holds the two leaderboards (narrow, fixed-ish width) and the recent-
+   tastings moderation list (flexes to fill the rest of the row -- the
+   space that used to just sit empty next to the leaderboards). */
+.admin-stats-main {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
 .admin-boards-stack {
+  flex: 0 0 240px;
   display: flex;
   flex-direction: column;
   gap: 28px;
+}
+
+/* Capped rather than flex: 1 -- letting rows stretch to fill all the
+   remaining panel width would shove the Remove button just as far from
+   the text as the earlier leaderboard-count spacing bug. */
+.admin-recent-tastings {
+  flex: 0 1 460px;
+  min-width: 260px;
+}
+
+.admin-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.admin-recent-info {
+  min-width: 0;
+}
+
+.admin-recent-wine {
+  margin: 0;
+  color: var(--berry-dark);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.admin-recent-meta {
+  margin: 2px 0 0;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  opacity: 0.8;
 }
 
 .admin-board-title {

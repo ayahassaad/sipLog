@@ -49,7 +49,8 @@ function ProfilePage() {
 
     try {
       await updateProfile({ name: nameForm.name, username: nameForm.username });
-      setNameStatus({ error: "", success: "Profile updated.", saving: false });
+      setNameStatus(emptyStatus);
+      setEditing(false);
     } catch (err) {
       setNameStatus({ error: err.message, success: "", saving: false });
     }
@@ -104,9 +105,6 @@ function ProfilePage() {
                       {nameStatus.error && (
                         <p className="status-message error form-status">{nameStatus.error}</p>
                       )}
-                      {!nameStatus.error && nameStatus.success && (
-                        <p className="status-message success form-status">{nameStatus.success}</p>
-                      )}
                       <div className="field-grid">
                         <label className="field">
                           <span>Name</span>
@@ -138,7 +136,7 @@ function ProfilePage() {
                       </div>
                       <div className="button-row form-buttons">
                         <button type="submit" className="button-primary" disabled={nameStatus.saving}>
-                          {nameStatus.saving ? "Saving..." : "Save profile"}
+                          {nameStatus.saving ? "Saving..." : "Save changes"}
                         </button>
                       </div>
                     </form>
@@ -163,15 +161,17 @@ function ProfilePage() {
                   </div>
                 )}
 
-                <div className="button-row profile-edit-toggle">
-                  <button
-                    type="button"
-                    className="button-secondary"
-                    onClick={() => setEditing((prev) => !prev)}
-                  >
-                    {editing ? "Done editing" : "Edit Profile"}
-                  </button>
-                </div>
+                {!editing && (
+                  <div className="button-row profile-edit-toggle">
+                    <button
+                      type="button"
+                      className="button-primary"
+                      onClick={() => setEditing(true)}
+                    >
+                      Edit Profile
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           )}

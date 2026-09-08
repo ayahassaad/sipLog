@@ -73,17 +73,22 @@ describe("ProfilePage", () => {
     expect(screen.queryByText("@carla")).not.toBeInTheDocument();
   });
 
-  it("saves a new name and username from edit mode", async () => {
+  it("saves a new name and username from edit mode, then returns to the view", async () => {
     renderPage();
 
     fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
     fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: "Ayah A." } });
     fireEvent.change(screen.getByLabelText(/^username$/i), { target: { value: "ayah_a" } });
-    fireEvent.click(screen.getByRole("button", { name: /save profile/i }));
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() =>
       expect(updateProfile).toHaveBeenCalledWith({ name: "Ayah A.", username: "ayah_a" })
     );
+
+    // Saving drops you back into the read-only view rather than leaving the
+    // form (and its "Done editing" button) open.
+    expect(await screen.findByRole("button", { name: /edit profile/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /done editing/i })).not.toBeInTheDocument();
   });
 
   it("uploads and saves a new avatar photo", async () => {

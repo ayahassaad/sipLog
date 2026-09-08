@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 
 const User = require("../models/User");
 const Tasting = require("../models/Tasting");
+// Not used directly, but Tasting.wineId refs "Wine" -- populate() below
+// needs that schema registered on this connection first.
+require("../models/Wine");
 
 // Read-only -- prints every user and every tasting so we can see what's
 // actually in the database before deciding what (if anything) to remove.

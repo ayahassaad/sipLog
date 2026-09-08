@@ -5,20 +5,19 @@ const User = require("../models/User");
 const Tasting = require("../models/Tasting");
 
 // The placeholder accounts scripts/seed.js creates for local development --
-// never real signups. Deliberately does NOT touch "ayah"/"ayahassaad": that
-// seed account was later turned into a real login (see scripts/setUsername.js)
-// and should be left alone.
-const FAKE_USERNAMES = ["sara", "leila", "emma", "nora"];
-const PROTECTED_USERNAMES = ["ayah", "ayahassaad"];
+// never real signups. These predate the username field, so their username
+// is undefined in the database; matched by email instead. Deliberately does
+// NOT touch ayah@siplog.app: that seed account was later turned into a real
+// login (see scripts/setUsername.js) and should be left alone.
+const FAKE_EMAILS = ["sara@siplog.app", "leila@siplog.app", "emma@siplog.app", "nora@siplog.app"];
+const PROTECTED_EMAILS = ["ayah@siplog.app"];
 
 async function main() {
   await mongoose.connect(process.env.MONGO_URI);
 
-  const targetUsernames = FAKE_USERNAMES.filter(
-    (username) => !PROTECTED_USERNAMES.includes(username)
-  );
+  const targetEmails = FAKE_EMAILS.filter((email) => !PROTECTED_EMAILS.includes(email));
 
-  const fakeUsers = await User.find({ username: { $in: targetUsernames } });
+  const fakeUsers = await User.find({ email: { $in: targetEmails } });
 
   if (fakeUsers.length === 0) {
     console.log("No matching seed accounts found -- nothing to remove.");
@@ -27,7 +26,7 @@ async function main() {
   }
 
   console.log("Found these seed accounts to remove:");
-  fakeUsers.forEach((user) => console.log(`- @${user.username}  (${user.email})`));
+  fakeUsers.forEach((user) => console.log(`- ${user.name}  (${user.email})`));
 
   const fakeUserIds = fakeUsers.map((user) => user._id);
 

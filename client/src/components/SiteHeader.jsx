@@ -8,6 +8,17 @@ function navLinkClassName({ isActive }) {
   return isActive ? "nav-link active" : "nav-link";
 }
 
+function MenuIcon({ name }) {
+  const icons = {
+    profile: <><circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c0-3.9 3.4-6.2 7.5-6.2s7.5 2.3 7.5 6.2" /></>,
+    settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.1 2.1-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56v.1h-3v-.1a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.1-2.1.06-.06A1.7 1.7 0 0 0 7.06 15a1.7 1.7 0 0 0-1.56-1.03h-.1v-3h.1A1.7 1.7 0 0 0 7.06 9.94a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.1-2.1.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.56v-.1h3v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.1 2.1-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03h.1v3h-.1A1.7 1.7 0 0 0 19.4 15Z" /></>,
+    admin: <path d="M12 3.5 20 7.8v4.6c0 4.7-3.3 7.2-8 8.6-4.7-1.4-8-3.9-8-8.6V7.8l8-4.3Z" />,
+    logout: <><path d="M10.5 4.5H17a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-6.5" /><path d="M13 12H4m0 0 3-3m-3 3 3 3" /></>,
+  };
+
+  return <svg className="burger-icon" viewBox="0 0 24 24" aria-hidden="true">{icons[name]}</svg>;
+}
+
 function SiteHeader() {
   const { user, logout } = useAuth();
   const headerRef = useRef(null);
@@ -112,38 +123,56 @@ function SiteHeader() {
 
               {menuOpen && (
                 <div className="burger-dropdown" role="menu">
-                  <Link
-                    to="/profile"
-                    className="burger-item"
-                    role="menuitem"
-                    onClick={closeMenu}
-                  >
-                    My Profile
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className="burger-item"
-                    role="menuitem"
-                    onClick={closeMenu}
-                  >
-                    Settings
-                  </Link>
+                  <div className="burger-profile">
+                    <span className="burger-avatar" aria-hidden="true">
+                      {user.name?.charAt(0) || "S"}
+                    </span>
+                    <div>
+                      <p className="burger-profile-name">{user.name}</p>
+                      {user.username && <p className="burger-profile-handle">@{user.username}</p>}
+                    </div>
+                  </div>
+
+                  <div className="burger-group">
+                    <Link
+                      to="/profile"
+                      className="burger-item"
+                      role="menuitem"
+                      onClick={closeMenu}
+                    >
+                      <MenuIcon name="profile" />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="burger-item"
+                      role="menuitem"
+                      onClick={closeMenu}
+                    >
+                      <MenuIcon name="settings" />
+                      Settings
+                    </Link>
+                  </div>
                   {user.isAdmin && (
+                    <div className="burger-group burger-admin-group">
                     <Link
                       to="/admin"
                       className="burger-item"
                       role="menuitem"
                       onClick={closeMenu}
                     >
-                      Admin
+                      <MenuIcon name="admin" />
+                      Admin Panel
                     </Link>
+                    </div>
                   )}
                   <button
                     type="button"
-                    className="burger-item"
+                    className="burger-item burger-logout"
                     role="menuitem"
                     onClick={handleLogout}
                   >
+                    <MenuIcon name="logout" />
                     Log out
                   </button>
                 </div>

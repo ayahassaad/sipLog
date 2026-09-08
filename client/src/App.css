@@ -1445,6 +1445,14 @@ textarea:focus {
   display: none;
 }
 
+/* The wine search box at the top of Community -- reuses FilterBar's gold
+   underline look, just centered to match the rest of this panel. */
+.community-search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
 .community-feed-panel .tasting-card {
   background: transparent;
   border: none;

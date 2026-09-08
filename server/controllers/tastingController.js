@@ -9,6 +9,13 @@ function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
+// Turns free-text search input into a safe, case-insensitive regex --
+// escapes regex metacharacters so a search like "Chateau (2020)" doesn't
+// throw or behave unexpectedly.
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // A tasting can be favorited by any logged-in user, regardless of who
 // posted it, so "favorited" state lives on the viewer (req.user.favorites),
 // not on the Tasting document itself.
@@ -212,6 +219,17 @@ exports.getCommunityFeed = async (req, res) => {
     // in. Logged-in users never see their own tastings here (that's what
     // "My Journal" is for); a logged-out visitor sees everyone's.
     const query = req.user ? { userId: { $ne: req.user._id } } : {};
+
+    // Optional wine search -- match against the wine's name, producer, or
+    // grape, then scope the feed to tastings of those wines only.
+    const search = (req.query.search || "").trim();
+    if (search) {
+      const pattern = new RegExp(escapeRegex(search), "i");
+      const matchingWineIds = await Wine.find({
+        $or: [{ name: pattern }, { producer: pattern }, { grape: pattern }],
+      }).distinct("_id");
+      query.wineId = { $in: matchingWineIds };
+    }
 
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));

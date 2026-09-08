@@ -10,9 +10,11 @@ const PAGE_SIZE = 20;
 export function useCommunityFeed() {
   const [tastings, setTastings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
   const loadingMoreRef = useRef(false);
 
   const loadFirstPage = useCallback(async () => {
@@ -47,7 +49,7 @@ export function useCommunityFeed() {
     loadingMoreRef.current = true;
     try {
       const nextPage = page + 1;
-      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE });
+      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE, search });
       setTastings((prev) => [...prev, ...data.tastings]);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -56,7 +58,27 @@ export function useCommunityFeed() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [page, totalPages]);
+  }, [page, totalPages, search]);
+
+  // Runs (or clears, when term is empty) a wine search against the feed.
+  // A plain event-triggered action rather than an effect, so the caller
+  // decides when it fires (e.g. debounced as the user types).
+  const runSearch = useCallback(async (term) => {
+    const trimmed = term.trim();
+    setSearching(true);
+    setError("");
+    try {
+      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, search: trimmed });
+      setSearch(trimmed);
+      setTastings(data.tastings);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSearching(false);
+    }
+  }, []);
 
   // Optimistic toggle: flip the star instantly, roll back if the request fails.
   const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
@@ -85,10 +107,13 @@ export function useCommunityFeed() {
   return {
     tastings,
     loading,
+    searching,
     error,
     hasMore: page < totalPages,
     refresh: loadFirstPage,
     loadMore,
     toggleFavorite,
+    search,
+    runSearch,
   };
 }

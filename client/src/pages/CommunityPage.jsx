@@ -1,17 +1,38 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import BottleRating from "../components/BottleRating";
+import FilterBar from "../components/FilterBar";
 import { useAuth } from "../context/useAuth";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { useUsers } from "../hooks/useUsers";
 import { formatTimelineDate } from "../utils/formatTimelineDate";
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 function CommunityPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const feed = useCommunityFeed();
+  const { search: confirmedSearch, runSearch } = feed;
   const people = useUsers();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Debounce: wait for a pause in typing before actually querying the
+  // server, and skip firing again once the feed's confirmed search term
+  // already matches what's in the box (covers the initial mount, and
+  // avoids re-running for a value that already resolved).
+  useEffect(() => {
+    if (searchTerm === confirmedSearch) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => {
+      runSearch(searchTerm);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, confirmedSearch, runSearch]);
 
   // Browsing is public, but favoriting and following are personal actions --
   // send a logged-out visitor to log in instead of letting the request 401.
@@ -50,9 +71,22 @@ function CommunityPage() {
       <SiteHeader />
       <div className="app-shell">
         <section className="panel list-panel community-feed-panel">
+          <div className="community-search">
+            <FilterBar
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              placeholder="Search wines by name, producer, or grape..."
+            />
+          </div>
+
           {loading && <p className="feed-loading">Loading the community feed...</p>}
           {error && <p className="status-message error">{error}</p>}
-          {!loading && !error && feed.tastings.length === 0 && (
+          {!loading && !error && feed.tastings.length === 0 && feed.search && (
+            <p className="status-message">
+              No tastings found for &ldquo;{feed.search}&rdquo;.
+            </p>
+          )}
+          {!loading && !error && feed.tastings.length === 0 && !feed.search && (
             <p className="status-message">
               No tastings from other users yet - once people you know join in, their
               tastings will show up here.

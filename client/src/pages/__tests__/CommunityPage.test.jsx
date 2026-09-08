@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { act, render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import CommunityPage from "../CommunityPage";
@@ -61,6 +61,8 @@ describe("CommunityPage", () => {
       error: "",
       hasMore: false,
       loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
     });
 
     renderPage();
@@ -86,6 +88,8 @@ describe("CommunityPage", () => {
       error: "",
       hasMore: false,
       loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
     });
 
     renderPage();
@@ -110,6 +114,8 @@ describe("CommunityPage", () => {
       error: "",
       hasMore: false,
       loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
     });
 
     renderPage();
@@ -136,6 +142,8 @@ describe("CommunityPage", () => {
       hasMore: false,
       loadMore: vi.fn(),
       toggleFavorite,
+      search: "",
+      runSearch: vi.fn(),
     });
 
     renderPage();
@@ -143,5 +151,44 @@ describe("CommunityPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /add to favorites/i }));
     expect(toggleFavorite).not.toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith("/login", expect.anything());
+  });
+
+  it("debounces the wine search box before querying the feed", () => {
+    vi.useFakeTimers();
+
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [{ id: "bob-id", name: "Bob", isFollowing: false }],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    const runSearch = vi.fn();
+    useCommunityFeed.mockReturnValue({
+      tastings: [sampleTasting],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch,
+    });
+
+    renderPage();
+
+    fireEvent.change(screen.getByPlaceholderText(/search wines/i), {
+      target: { value: "rioja" },
+    });
+
+    // Nothing fires until the debounce window passes.
+    expect(runSearch).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    expect(runSearch).toHaveBeenCalledWith("rioja");
+
+    vi.useRealTimers();
   });
 });

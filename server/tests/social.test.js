@@ -254,4 +254,53 @@ describe("Community feed", () => {
     expect(feed.status).toBe(200);
     expect(feed.body.tastings).toHaveLength(0);
   });
+
+  it("filters the feed by wine name, producer, or grape when searching", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob } = await registerAgent();
+
+    const riojaWine = await createWine(bob, {
+      name: "Rioja Reserva",
+      producer: "Marques de Riscal",
+      grape: "Tempranillo",
+    });
+    const chiantiWine = await createWine(bob, {
+      name: "Chianti Classico",
+      producer: "Ruffino",
+      grape: "Sangiovese",
+    });
+
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: riojaWine._id });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: chiantiWine._id });
+
+    const byName = await alice.get("/api/tastings/feed").query({ search: "rioja" });
+    expect(byName.status).toBe(200);
+    expect(byName.body.tastings).toHaveLength(1);
+    expect(byName.body.tastings[0].wineId.name).toBe("Rioja Reserva");
+
+    // Case-insensitive, and matches on producer or grape too.
+    const byProducer = await alice.get("/api/tastings/feed").query({ search: "ruffino" });
+    expect(byProducer.body.tastings).toHaveLength(1);
+    expect(byProducer.body.tastings[0].wineId.name).toBe("Chianti Classico");
+
+    const byGrape = await alice.get("/api/tastings/feed").query({ search: "SANGIOVESE" });
+    expect(byGrape.body.tastings).toHaveLength(1);
+    expect(byGrape.body.tastings[0].wineId.name).toBe("Chianti Classico");
+
+    const noMatch = await alice.get("/api/tastings/feed").query({ search: "does-not-exist" });
+    expect(noMatch.body.tastings).toHaveLength(0);
+  });
+
+  it("treats search input safely even when it contains regex metacharacters", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob } = await registerAgent();
+
+    const wine = await createWine(bob, { name: "Chateau (Reserve)" });
+    await bob.post("/api/tastings").send({ ...baseTasting, wineId: wine._id });
+
+    const feed = await alice.get("/api/tastings/feed").query({ search: "Chateau (Reserve)" });
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(1);
+  });
 });

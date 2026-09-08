@@ -32,6 +32,8 @@ describe("POST /api/auth/register", () => {
       name: credentials.name,
       username: credentials.username,
       email: credentials.email,
+      isAdmin: false,
+      isSuperAdmin: false,
     });
     expect(res.body.user.passwordHash).toBeUndefined();
     expect(res.headers["set-cookie"]).toBeDefined();

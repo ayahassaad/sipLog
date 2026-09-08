@@ -30,4 +30,18 @@ const accountChangeLimiter = rateLimit({
   message: { message: "Too many attempts. Please try again in a few minutes." },
 });
 
-module.exports = { authLimiter, accountChangeLimiter };
+// The visit counter is hit by anyone, logged in or not, so it can't rely
+// on requireAuth's per-user identity the way the limiters above do -- this
+// is purely about stopping someone from scripting a loop against a public,
+// unauthenticated write endpoint to inflate the number. 30 per IP per
+// minute is far more than a real person opening the app could ever hit.
+const visitLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipInTests,
+  message: { message: "Too many requests." },
+});
+
+module.exports = { authLimiter, accountChangeLimiter, visitLimiter };

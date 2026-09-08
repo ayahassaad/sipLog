@@ -13,6 +13,8 @@ const tastingRoutes = require("./routes/tastingRoutes");
 const wineRoutes = require("./routes/wineRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -51,6 +53,10 @@ app.use("/api/tastings", tastingRoutes);
 app.use("/api/wines", requireAuth, wineRoutes);
 app.use("/api/uploads", requireAuth, uploadRoutes);
 app.use("/api/users", userRoutes);
+// Auth + admin checks happen inside adminRoutes itself (every route there
+// needs both), same pattern as tastings/users above.
+app.use("/api/admin", adminRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

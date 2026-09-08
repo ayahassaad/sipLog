@@ -45,6 +45,21 @@ const userSchema = new mongoose.Schema(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tasting" }],
       default: [],
     },
+    // Grants access to the admin tab (user directory + site stats).
+    // Anyone with isSuperAdmin is implicitly an admin too (see the
+    // requireAdmin middleware) even if this flag were somehow unset.
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    // The one account (ayahassaad, set via scripts/setSuperAdmin.js) that's
+    // allowed to grant or revoke isAdmin on other users. Never settable
+    // through the API -- only ever changed by running that script directly
+    // against the database.
+    isSuperAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

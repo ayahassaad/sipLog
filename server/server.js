@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
@@ -16,6 +17,20 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Render (and most hosts) put the app behind one reverse-proxy hop. Without
+// this, every request looks like it comes from that proxy's IP to Express,
+// which breaks both real client IPs in logs and the rate limiters below
+// (everyone would share one bucket). Only trusted in production, where
+// that single hop is actually true -- not in local dev, where there isn't
+// a proxy to trust.
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+// Sensible default security headers (X-Content-Type-Options, a baseline
+// Content-Security-Policy, no X-Powered-By, etc.) -- cheap, standard
+// hardening for an API that a browser talks to directly.
+app.use(helmet());
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",

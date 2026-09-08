@@ -87,7 +87,7 @@ function CommunityPage() {
             </p>
           )}
           {!loading && !error && feed.tastings.length === 0 && !feed.search && (
-            <p className="status-message">
+            <p className="feed-empty">
               No tastings from other users yet - once people you know join in, their
               tastings will show up here.
             </p>

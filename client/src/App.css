@@ -1493,7 +1493,8 @@ textarea:focus {
 /* Community feed's loading message -- text-only with a slow gold shimmer
    sweeping through it, instead of the plain solid status-message box used
    for errors/empty states elsewhere. */
-.feed-loading {
+.feed-loading,
+.feed-empty {
   text-align: center;
   font-family: var(--font-heading);
   font-size: 0.95rem;

@@ -44,4 +44,17 @@ const visitLimiter = rateLimit({
   message: { message: "Too many requests." },
 });
 
-module.exports = { authLimiter, accountChangeLimiter, visitLimiter };
+// Chat is open to any logged-in user, so a message-send endpoint needs its
+// own throttle the way the other write-heavy public-ish endpoints do --
+// generous enough for a real conversation, tight enough to stop a script
+// from hammering someone's inbox.
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipInTests,
+  message: { message: "You're sending messages too quickly. Please slow down." },
+});
+
+module.exports = { authLimiter, accountChangeLimiter, visitLimiter, chatLimiter };

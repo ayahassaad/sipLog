@@ -1,3 +1,4 @@
+const http = require("http");
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -7,6 +8,7 @@ require("dotenv").config();
 const connectDB = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 const { requireAuth } = require("./middleware/auth");
+const { initSocket } = require("./socket");
 
 const authRoutes = require("./routes/authRoutes");
 const tastingRoutes = require("./routes/tastingRoutes");
@@ -15,6 +17,7 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -57,15 +60,21 @@ app.use("/api/users", userRoutes);
 // needs both), same pattern as tastings/users above.
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
+
+// A plain http.Server wrapping the Express app -- needed so Socket.IO can
+// attach to the same underlying server instead of running on its own port.
+const server = http.createServer(app);
+initSocket(server);
 
 async function start() {
   try {
     await connectDB(process.env.MONGO_URI);
     console.log("MongoDB connected");
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {

@@ -5,6 +5,7 @@ import BottleRating from "../components/BottleRating";
 import { useAuth } from "../context/useAuth";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { useUsers } from "../hooks/useUsers";
+import { formatTimelineDate } from "../utils/formatTimelineDate";
 
 function CommunityPage() {
   const { user } = useAuth();
@@ -32,9 +33,12 @@ function CommunityPage() {
     feed.toggleFavorite(tastingId, isFavorited);
   };
 
+  // Still tracked (just not shown as its own "People to Follow" list for
+  // now) so the inline Follow button next to each post's author knows
+  // whether you already follow them.
   const followingStateById = useMemo(() => {
     const map = new Map();
-    people.users.forEach((user) => map.set(user.id, user.isFollowing));
+    people.users.forEach((person) => map.set(person.id, person.isFollowing));
     return map;
   }, [people.users]);
 
@@ -45,115 +49,90 @@ function CommunityPage() {
     <>
       <SiteHeader />
       <div className="app-shell">
-        <section className="panel">
-        <div className="section-heading">
-          <h2>People to Follow</h2>
-        </div>
+        <section className="panel list-panel">
+          {loading && <p className="status-message">Loading the community feed...</p>}
+          {error && <p className="status-message error">{error}</p>}
+          {!loading && !error && feed.tastings.length === 0 && (
+            <p className="status-message">
+              No tastings from other users yet - once people you know join in, their
+              tastings will show up here.
+            </p>
+          )}
 
-        {people.loading && <p className="status-message">Loading people...</p>}
-        {!people.loading && people.users.length === 0 && (
-          <p className="status-message">
-            No other tasters have joined yet - check back soon!
-          </p>
-        )}
+          {feed.tastings.length > 0 && (
+            <div className="feed-timeline">
+              {feed.tastings.map((tasting) => {
+                const author = tasting.userId;
+                const isFollowing = author ? followingStateById.get(author._id) : false;
 
-        <div className="people-row">
-          {people.users.map((user) => (
-            <article className="person-card" key={user.id}>
-              <span className="person-name">{user.name}</span>
-              <button
-                type="button"
-                className={user.isFollowing ? "button-secondary" : "button-primary"}
-                onClick={() => handleToggleFollow(user.id, user.isFollowing)}
-              >
-                {user.isFollowing ? "Following" : "Follow"}
+                return (
+                  <div className="feed-entry" key={tasting._id}>
+                    <span className="feed-dot" aria-hidden="true" />
+                    <p className="feed-timestamp">{formatTimelineDate(tasting.createdAt)}</p>
+
+                    <article className="tasting-card">
+                      <div className="card-top">
+                        <div>
+                          <p className="card-vintage">
+                            {tasting.wineId?.vintage || "Unknown vintage"}{" "}
+                            {tasting.wineId?.country || "Unknown country"}
+                          </p>
+                          <h3>{tasting.wineId?.name || "Untitled wine"}</h3>
+                          <p className="card-subtitle">
+                            {tasting.wineId?.producer || "Unknown producer"} ·{" "}
+                            {tasting.wineId?.grape || "Unknown grape"}
+                          </p>
+                        </div>
+                        <div className="card-top-actions">
+                          <button
+                            type="button"
+                            className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
+                            onClick={() => handleToggleFavorite(tasting._id, tasting.isFavorited)}
+                            aria-pressed={tasting.isFavorited}
+                            aria-label={
+                              tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
+                            }
+                          >
+                            {tasting.isFavorited ? "★" : "☆"}
+                          </button>
+                          <BottleRating rating={tasting.rating} />
+                        </div>
+                      </div>
+
+                      {tasting.imageUrl && (
+                        <img
+                          className="card-photo"
+                          src={tasting.imageUrl}
+                          alt={tasting.wineId?.name || "Wine tasting"}
+                        />
+                      )}
+
+                      {author && (
+                        <div className="card-author-row">
+                          <span className="card-author">Posted by {author.name}</span>
+                          <button
+                            type="button"
+                            className={`button-gold ${isFollowing ? "is-following" : ""}`}
+                            onClick={() => handleToggleFollow(author._id, isFollowing)}
+                          >
+                            {isFollowing ? "Following" : "Follow"}
+                          </button>
+                        </div>
+                      )}
+                    </article>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {feed.hasMore && (
+            <div className="button-row">
+              <button type="button" className="button-secondary" onClick={feed.loadMore}>
+                Load more tastings
               </button>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel list-panel">
-        <div className="section-heading timeline-heading">
-          <h2>Community Feed</h2>
-        </div>
-
-        {loading && <p className="status-message">Loading the community feed...</p>}
-        {error && <p className="status-message error">{error}</p>}
-        {!loading && !error && feed.tastings.length === 0 && (
-          <p className="status-message">
-            No tastings from other users yet - once people you know join in, their
-            tastings will show up here.
-          </p>
-        )}
-
-        <div className="card-stack">
-          {feed.tastings.map((tasting) => {
-            const author = tasting.userId;
-            const isFollowing = author ? followingStateById.get(author._id) : false;
-
-            return (
-              <article className="tasting-card" key={tasting._id}>
-                <div className="card-top">
-                  <div>
-                    <p className="card-vintage">
-                      {tasting.wineId?.vintage || "Unknown vintage"}{" "}
-                      {tasting.wineId?.country || "Unknown country"}
-                    </p>
-                    <h3>{tasting.wineId?.name || "Untitled wine"}</h3>
-                    <p className="card-subtitle">
-                      {tasting.wineId?.producer || "Unknown producer"} ·{" "}
-                      {tasting.wineId?.grape || "Unknown grape"}
-                    </p>
-                  </div>
-                  <div className="card-top-actions">
-                    <button
-                      type="button"
-                      className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
-                      onClick={() => handleToggleFavorite(tasting._id, tasting.isFavorited)}
-                      aria-pressed={tasting.isFavorited}
-                      aria-label={
-                        tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
-                      }
-                    >
-                      {tasting.isFavorited ? "\u2605" : "\u2606"}
-                    </button>
-                    <BottleRating rating={tasting.rating} />
-                  </div>
-                </div>
-
-                {tasting.imageUrl && (
-                  <img
-                    className="card-photo"
-                    src={tasting.imageUrl}
-                    alt={tasting.wineId?.name || "Wine tasting"}
-                  />
-                )}
-
-                {author && (
-                  <div className="card-author-row">
-                    <span className="card-author">Tasted by {author.name}</span>
-                    <button
-                      type="button"
-                      className={isFollowing ? "button-secondary" : "button-primary"}
-                      onClick={() => handleToggleFollow(author._id, isFollowing)}
-                    >
-                      {isFollowing ? "Following" : "Follow"}
-                    </button>
-                  </div>
-                )}
-              </article>
-            );
-          })}
-        </div>
-
-        {feed.hasMore && (
-          <div className="button-row">
-            <button type="button" className="button-secondary" onClick={feed.loadMore}>
-              Load more tastings
-            </button>
-          </div>
-        )}
+            </div>
+          )}
         </section>
       </div>
     </>

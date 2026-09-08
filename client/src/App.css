@@ -967,27 +967,6 @@ textarea:focus {
   transform: translateY(0) scale(1);
 }
 
-.people-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.person-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: 0;
-  border: 1px solid var(--line);
-  background: var(--panel-mid);
-}
-
-.person-name {
-  font-weight: 600;
-}
-
 .card-author-row {
   display: flex;
   align-items: center;
@@ -1293,4 +1272,85 @@ textarea:focus {
 .wine-form .button-secondary:hover {
   transform: scale(1.05);
   animation: wineButtonGlowPulse 1.3s ease-out infinite;
+}
+
+/* Same gold ghost-outline + pop/glow-pulse family as the wine-form buttons,
+   for buttons that live outside a .wine-form (Follow, on Community). */
+.button-gold {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 8px 16px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.button-gold.is-following {
+  background: rgba(216, 173, 95, 0.12);
+}
+
+.button-gold:hover {
+  background: var(--gold);
+  color: var(--page-top);
+  transform: scale(1.05);
+  animation: wineButtonGlowPulse 1.3s ease-out infinite;
+}
+
+/* Community feed as a timeline: a gold spine down the left with a dot and a
+   date/time stamp per entry, ahead of the usual tasting card. */
+.feed-timeline {
+  position: relative;
+  padding-left: 34px;
+}
+
+.feed-timeline::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 9px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--gold), rgba(216, 173, 95, 0.15));
+}
+
+.feed-entry {
+  position: relative;
+  margin-bottom: 26px;
+}
+
+.feed-entry:last-child {
+  margin-bottom: 0;
+}
+
+.feed-dot {
+  position: absolute;
+  top: 6px;
+  left: -34px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--page-top);
+  border: 2px solid var(--gold);
+}
+
+.feed-dot::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.feed-timestamp {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-soft);
+  opacity: 0.75;
+  margin: 0 0 8px;
 }

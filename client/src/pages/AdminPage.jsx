@@ -52,27 +52,49 @@ function Leaderboard({ title, entries, countLabel }) {
 }
 
 function RecentTastings() {
-  const { tastings, loading, error, removingId, removeTasting } = useAdminTastings();
+  const admin = useAdminTastings();
+  const { search: confirmedSearch, runSearch } = admin;
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    if (searchTerm === confirmedSearch) {
+      return undefined;
+    }
+    const timeoutId = setTimeout(() => {
+      runSearch(searchTerm);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, confirmedSearch, runSearch]);
 
   const handleRemove = (tasting) => {
     const wineName = tasting.wineId?.name || "this tasting";
     if (!window.confirm(`Remove ${wineName} (posted by @${tasting.userId?.username})? This can't be undone.`)) {
       return;
     }
-    removeTasting(tasting._id);
+    admin.removeTasting(tasting._id);
   };
 
   return (
     <div className="admin-recent-tastings">
       <p className="admin-board-title">Recent Tastings</p>
 
-      {loading && <p className="feed-loading">Loading recent tastings...</p>}
-      {error && <p className="status-message error">{error}</p>}
-      {!loading && !error && tastings.length === 0 && (
-        <p className="feed-empty">No tastings yet.</p>
+      <div className="admin-recent-search">
+        <FilterBar
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          placeholder="Search by wine or poster..."
+        />
+      </div>
+
+      {admin.loading && <p className="feed-loading">Loading recent tastings...</p>}
+      {admin.error && <p className="status-message error">{admin.error}</p>}
+      {!admin.loading && !admin.error && admin.tastings.length === 0 && (
+        <p className="feed-empty">
+          {admin.search ? `No tastings found for “${admin.search}”.` : "No tastings yet."}
+        </p>
       )}
 
-      {tastings.map((tasting) => (
+      {admin.tastings.map((tasting) => (
         <div className="admin-recent-row" key={tasting._id}>
           <div className="admin-recent-info">
             <p className="admin-recent-wine">{tasting.wineId?.name || "Untitled wine"}</p>
@@ -89,14 +111,14 @@ function RecentTastings() {
             type="button"
             className="card-action"
             onClick={() => handleRemove(tasting)}
-            disabled={removingId === tasting._id}
+            disabled={admin.removingId === tasting._id}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 6h18" />
               <path d="M8 6V4h8v2" />
               <path d="M19 6l-1 14H6L5 6" />
             </svg>
-            {removingId === tasting._id ? "Removing..." : "Remove"}
+            {admin.removingId === tasting._id ? "Removing..." : "Remove"}
           </button>
         </div>
       ))}

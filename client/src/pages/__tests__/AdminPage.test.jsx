@@ -50,7 +50,10 @@ const baseAdminUsers = {
 const baseAdminTastings = {
   tastings: [],
   loading: false,
+  searching: false,
   error: "",
+  search: "",
+  runSearch: vi.fn(),
   removingId: "",
   removeTasting: vi.fn(),
 };
@@ -207,7 +210,7 @@ describe("AdminPage recent tastings", () => {
     _id: "tasting-1",
     createdAt: "2026-01-05T00:00:00.000Z",
     wineId: { name: "Rioja Reserva" },
-    userId: { username: "bob" },
+    userId: { username: "dana" },
   };
 
   it("lists recent tastings with a link to the poster's profile", () => {
@@ -219,7 +222,10 @@ describe("AdminPage recent tastings", () => {
     renderPage();
 
     expect(screen.getByText("Rioja Reserva")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /@bob/i })).toHaveAttribute("href", "/users/bob");
+    expect(screen.getByRole("link", { name: /@dana/i })).toHaveAttribute(
+      "href",
+      "/users/dana"
+    );
     expect(screen.getByRole("button", { name: /remove/i })).toBeInTheDocument();
   });
 
@@ -273,5 +279,30 @@ describe("AdminPage recent tastings", () => {
     renderPage();
 
     expect(screen.getByText(/no tastings yet/i)).toBeInTheDocument();
+  });
+
+  it("debounces the recent-tastings search box before calling runSearch", () => {
+    vi.useFakeTimers();
+    const runSearch = vi.fn();
+    useAuth.mockReturnValue({ user: { id: "me", isSuperAdmin: true } });
+    useAdminStats.mockReturnValue({ stats: sampleStats, loading: false, error: "" });
+    useAdminUsers.mockReturnValue(baseAdminUsers);
+    useAdminTastings.mockReturnValue({ ...baseAdminTastings, runSearch });
+
+    renderPage();
+
+    fireEvent.change(screen.getByPlaceholderText(/search by wine or poster/i), {
+      target: { value: "rioja" },
+    });
+
+    expect(runSearch).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    expect(runSearch).toHaveBeenCalledWith("rioja");
+
+    vi.useRealTimers();
   });
 });

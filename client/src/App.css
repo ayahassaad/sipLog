@@ -1813,6 +1813,19 @@ textarea:focus {
   min-width: 260px;
 }
 
+/* A deliberately small search box -- this list is only ever a handful of
+   posts, so the search doesn't need Community's full-size treatment. */
+.admin-recent-search .filter-bar {
+  margin-bottom: 10px;
+}
+
+.admin-recent-search .filter-bar input {
+  width: 100%;
+  max-width: 220px;
+  font-size: 0.78rem;
+  padding: 6px 2px;
+}
+
 .admin-recent-row {
   display: flex;
   align-items: center;

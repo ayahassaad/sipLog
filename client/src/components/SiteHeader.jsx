@@ -101,21 +101,21 @@ function SiteHeader() {
           </NavLink>
         </nav>
 
-        <div className="site-header-logo">
+        <Link to="/" className="site-header-logo">
           <RoseGlassLogo />
           <p className="site-header-title">SipLog</p>
-        </div>
+        </Link>
 
         <div className="site-header-right">
           {user ? (
             <>
-              <div className="site-header-profile">
+              <Link to="/profile" className="site-header-profile">
                 <Avatar url={user.avatarUrl} name={user.name} size="sm" />
                 <div>
                   <p className="site-header-profile-name">{user.name}</p>
                   {user.username && <p className="site-header-profile-handle">@{user.username}</p>}
                 </div>
-              </div>
+              </Link>
 
               <div className="burger-menu" ref={menuRef}>
               <button

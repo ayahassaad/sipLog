@@ -833,6 +833,7 @@ textarea:focus {
   align-items: center;
   gap: 2px;
   justify-self: center;
+  text-decoration: none;
 }
 
 .site-header-title {
@@ -870,6 +871,7 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 11px;
+  text-decoration: none;
 }
 
 .site-header-profile-name,

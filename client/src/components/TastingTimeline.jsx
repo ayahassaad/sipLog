@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import UserHoverCard from "./UserHoverCard";
 import BottleRating from "./BottleRating";
 import FilterBar from "./FilterBar";
 
@@ -185,13 +185,13 @@ function TastingTimeline({
                   {showAuthor && tasting.userId && (
                     <p className="card-author">
                       Tasted by:{" "}
-                      <Link
-                        to={`/users/${tasting.userId.username}`}
+                      <UserHoverCard
+                        username={tasting.userId.username}
                         className="card-author-link"
                         onClick={(event) => event.stopPropagation()}
                       >
                         @{tasting.userId.username}
-                      </Link>
+                      </UserHoverCard>
                     </p>
                   )}
 

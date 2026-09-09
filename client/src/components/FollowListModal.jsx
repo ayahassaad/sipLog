@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import UserHoverCard from "./UserHoverCard";
 import Avatar from "./Avatar";
 import FilterBar from "./FilterBar";
 
@@ -51,15 +51,15 @@ function FollowListModal({ title, users, onClose }) {
         ) : (
           <div className="follow-list-results">
             {filteredUsers.map((person) => (
-              <Link
+              <UserHoverCard
                 key={person.id}
-                to={`/users/${person.username}`}
+                username={person.username}
                 className="chat-search-result"
                 onClick={onClose}
               >
                 <Avatar url={person.avatarUrl} name={person.name} size="sm" />
                 <span className="chat-conversation-name">{person.name}</span>
-              </Link>
+              </UserHoverCard>
             ))}
           </div>
         )}

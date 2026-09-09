@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import UserHoverCard from "../components/UserHoverCard";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
 import BottleRating from "../components/BottleRating";
@@ -93,10 +94,10 @@ function CommunityPage() {
 
                   return (
                     <div className="connection-row" key={person.id}>
-                      <Link to={`/users/${person.username}`} className="connection-link">
+                      <UserHoverCard username={person.username} className="connection-link">
                         <Avatar url={person.avatarUrl} name={person.name} size="sm" />
                         <span className="connection-name">@{person.username}</span>
-                      </Link>
+                      </UserHoverCard>
                       {!isSelf && (
                         <button
                           type="button"
@@ -178,9 +179,9 @@ function CommunityPage() {
                           ) : (
                             <span className="card-author">
                               Posted by{" "}
-                              <Link to={`/users/${author.username}`} className="card-author-link">
+                              <UserHoverCard username={author.username} className="card-author-link">
                                 @{author.username}
-                              </Link>
+                              </UserHoverCard>
                             </span>
                           )}
                           {!isOwnPost && (

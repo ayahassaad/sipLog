@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import UserHoverCard from "../components/UserHoverCard";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
 import FilterBar from "../components/FilterBar";
@@ -35,8 +35,8 @@ function Leaderboard({ title, entries, countLabel }) {
     <div>
       <p className="admin-board-title">{title}</p>
       {entries.map((person) => (
-        <Link
-          to={`/users/${person.username}`}
+        <UserHoverCard
+          username={person.username}
           className="admin-board-person"
           key={person.id}
         >
@@ -45,7 +45,7 @@ function Leaderboard({ title, entries, countLabel }) {
           <span className="admin-board-count">
             {person.followersCount ?? person.tastingsCount} {countLabel}
           </span>
-        </Link>
+        </UserHoverCard>
       ))}
     </div>
   );
@@ -100,9 +100,9 @@ function RecentTastings() {
             <p className="admin-recent-wine">{tasting.wineId?.name || "Untitled wine"}</p>
             <p className="admin-recent-meta">
               by{" "}
-              <Link to={`/users/${tasting.userId?.username}`} className="card-author-link">
+              <UserHoverCard username={tasting.userId?.username} className="card-author-link">
                 @{tasting.userId?.username}
-              </Link>
+              </UserHoverCard>
               {" · "}
               {formatJoinDate(tasting.createdAt)}
             </p>
@@ -217,7 +217,7 @@ function AdminUserDirectory() {
 
             return (
               <div className="connection-row" key={person.id}>
-                <Link to={`/users/${person.username}`} className="connection-link">
+                <UserHoverCard username={person.username} className="connection-link">
                   <Avatar url={person.avatarUrl} name={person.name} size="sm" />
                   <div>
                     <span className="connection-name">{person.name}</span>
@@ -225,7 +225,7 @@ function AdminUserDirectory() {
                       @{person.username} · Joined {formatJoinDate(person.createdAt)}
                     </p>
                   </div>
-                </Link>
+                </UserHoverCard>
 
                 {person.isSuperAdmin ? (
                   <span className="admin-badge admin-badge-super">Super Admin</span>

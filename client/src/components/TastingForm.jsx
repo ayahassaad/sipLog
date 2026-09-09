@@ -1,3 +1,5 @@
+import { WINE_TYPES } from "../constants";
+
 const scoreOptions = [1, 2, 3, 4, 5];
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
 
@@ -119,6 +121,16 @@ function TastingForm({
               value={tastingForm.price}
               onChange={onTastingChange}
             />
+          </label>
+          <label className="field">
+            <span>Type</span>
+            <select name="type" value={wineForm.type} onChange={onWineChange}>
+              {WINE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 

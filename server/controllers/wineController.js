@@ -6,6 +6,8 @@ function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
+const WINE_TYPES = ["red", "white", "sparkling", "sweet"];
+
 function validateWinePayload(body) {
   const errors = [];
 
@@ -30,6 +32,11 @@ function validateWinePayload(body) {
     errors.push("vintage must be a realistic year");
   }
 
+  const type = typeof body.type === "string" ? body.type.trim().toLowerCase() : "red";
+  if (!WINE_TYPES.includes(type)) {
+    errors.push(`type must be one of: ${WINE_TYPES.join(", ")}`);
+  }
+
   return {
     errors,
     payload: {
@@ -39,6 +46,7 @@ function validateWinePayload(body) {
       region: typeof body.region === "string" ? body.region.trim() : "",
       grape: body.grape?.trim(),
       vintage,
+      type,
     },
   };
 }

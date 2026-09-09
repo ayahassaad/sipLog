@@ -198,6 +198,7 @@ function JournalPage() {
       region: tasting.wineId?.region || "",
       grape: tasting.wineId?.grape || "",
       vintage: tasting.wineId?.vintage || "",
+      type: tasting.wineId?.type || "red",
     });
     setTastingForm({
       wineId: tasting.wineId?._id || "",

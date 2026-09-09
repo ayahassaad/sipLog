@@ -9,6 +9,8 @@ export const MOOD_TAGS = [
   "Summer patio",
 ];
 
+export const WINE_TYPES = ["red", "white", "sparkling", "sweet"];
+
 export const initialWineForm = {
   name: "",
   producer: "",
@@ -16,6 +18,7 @@ export const initialWineForm = {
   region: "",
   grape: "",
   vintage: 2020,
+  type: "red",
 };
 
 // No userId here anymore - the backend always stamps tastings with the logged

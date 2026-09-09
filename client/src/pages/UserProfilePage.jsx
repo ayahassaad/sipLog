@@ -133,7 +133,7 @@ function UserProfilePageContent({ username }) {
                           >
                             {tasting.isFavorited ? "★" : "☆"}
                           </button>
-                          <BottleRating rating={tasting.rating} />
+                          <BottleRating rating={tasting.rating} type={tasting.wineId?.type} />
                         </div>
                       </div>
 

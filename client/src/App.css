@@ -470,7 +470,45 @@ textarea:focus {
 .bottle-fill {
   width: 100%;
   background: linear-gradient(180deg, #c54c73, #8d1738 75%);
-  transition: height 0.3s ease;
+  transition: height 0.3s ease, background 0.3s ease;
+}
+
+/* Wine-type variants -- red (above) is the default look. White and
+   sparkling share the same faint yellow liquid; sparkling also gets a
+   taller, narrower champagne-style bottle. Sweet (port-style) gets a
+   short, rounded bottle with a very deep red liquid. */
+.bottle-rating--white .bottle-fill {
+  background: linear-gradient(180deg, #f6ecc4, #e2cd82 75%);
+}
+
+.bottle-rating--sparkling .bottle-fill {
+  background: linear-gradient(180deg, #f6ecc4, #e2cd82 75%);
+}
+
+.bottle-rating--sparkling .bottle-neck {
+  height: 42px;
+  width: 12px;
+}
+
+.bottle-rating--sparkling .bottle-body {
+  width: 42px;
+  height: 104px;
+  border-radius: 10px 10px 18px 18px;
+}
+
+.bottle-rating--sweet .bottle-fill {
+  background: linear-gradient(180deg, #5c0f22, #2c0710 75%);
+}
+
+.bottle-rating--sweet .bottle-neck {
+  height: 20px;
+  width: 16px;
+}
+
+.bottle-rating--sweet .bottle-body {
+  width: 58px;
+  height: 82px;
+  border-radius: 26px 26px 20px 20px;
 }
 
 .bottle-rating span {

@@ -1752,6 +1752,16 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+}
+
+.profile-stat:hover .profile-stat-num {
+  color: var(--text);
 }
 
 .profile-stat-num {
@@ -2328,10 +2338,89 @@ textarea:focus {
   background: none;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
   width: 100%;
   color: inherit;
 }
 
 .chat-search-result:hover {
   background: rgba(255, 228, 233, 0.06);
+}
+
+/* Following/Followers pop-up (FollowListModal) -- a dark overlay with a
+   centered panel, reusing .chat-search-result/.feed-empty so the list
+   items and empty state match the same look used in Messages search. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 0, 3, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 24px;
+}
+
+.modal-panel {
+  background: var(--panel-mid);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 36px rgba(14, 0, 4, 0.35);
+  width: 100%;
+  max-width: 360px;
+  max-height: 80vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.modal-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.modal-close:hover {
+  border-color: var(--gold);
+  background: rgba(216, 173, 95, 0.1);
+}
+
+.modal-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-soft);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.follow-list-modal .filter-bar input {
+  width: 100%;
+}
+
+.follow-list-results {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }

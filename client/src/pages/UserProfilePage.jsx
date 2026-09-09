@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
 import BottleRating from "../components/BottleRating";
+import FollowListModal from "../components/FollowListModal";
 import { useAuth } from "../context/useAuth";
 import { usePublicProfile } from "../hooks/usePublicProfile";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
@@ -17,6 +19,9 @@ function UserProfilePageContent({ username }) {
   const navigate = useNavigate();
   const { profile, loading, error, toggleFollow } = usePublicProfile(username);
   const feed = useCommunityFeed({ author: username });
+  // null, "following", or "followers" -- which list (if any) is open in
+  // the pop-up right now.
+  const [followListOpen, setFollowListOpen] = useState(null);
 
   const requireLogin = () => navigate("/login", { state: { from: { pathname: `/users/${username}` } } });
 
@@ -61,14 +66,22 @@ function UserProfilePageContent({ username }) {
               </div>
 
               <div className="profile-stats">
-                <div className="profile-stat">
+                <button
+                  type="button"
+                  className="profile-stat"
+                  onClick={() => setFollowListOpen("following")}
+                >
                   <span className="profile-stat-num">{profile.followingCount}</span>
                   <span className="profile-stat-label">Following</span>
-                </div>
-                <div className="profile-stat">
+                </button>
+                <button
+                  type="button"
+                  className="profile-stat"
+                  onClick={() => setFollowListOpen("followers")}
+                >
                   <span className="profile-stat-num">{profile.followersCount}</span>
                   <span className="profile-stat-label">Followers</span>
-                </div>
+                </button>
               </div>
 
               {!profile.isOwnProfile && (
@@ -160,6 +173,14 @@ function UserProfilePageContent({ username }) {
           </section>
         )}
       </div>
+
+      {followListOpen && profile && (
+        <FollowListModal
+          title={followListOpen === "following" ? "Following" : "Followers"}
+          users={profile[followListOpen]}
+          onClose={() => setFollowListOpen(null)}
+        />
+      )}
     </>
   );
 }

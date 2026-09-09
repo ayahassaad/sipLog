@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
+import FollowListModal from "../components/FollowListModal";
 import { useProfile } from "../hooks/useProfile";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
@@ -11,6 +12,9 @@ function ProfilePage() {
   const { profile, loading, error, updateProfile } = useProfile();
 
   const [editing, setEditing] = useState(false);
+  // null, "following", or "followers" -- which list (if any) is open in
+  // the pop-up right now.
+  const [followListOpen, setFollowListOpen] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState("");
 
@@ -150,14 +154,22 @@ function ProfilePage() {
 
                 {!editing && (
                   <div className="profile-stats">
-                    <div className="profile-stat">
+                    <button
+                      type="button"
+                      className="profile-stat"
+                      onClick={() => setFollowListOpen("following")}
+                    >
                       <span className="profile-stat-num">{profile.following.length}</span>
                       <span className="profile-stat-label">Following</span>
-                    </div>
-                    <div className="profile-stat">
+                    </button>
+                    <button
+                      type="button"
+                      className="profile-stat"
+                      onClick={() => setFollowListOpen("followers")}
+                    >
                       <span className="profile-stat-num">{profile.followers.length}</span>
                       <span className="profile-stat-label">Followers</span>
-                    </div>
+                    </button>
                   </div>
                 )}
 
@@ -177,6 +189,14 @@ function ProfilePage() {
           )}
         </section>
       </div>
+
+      {followListOpen && profile && (
+        <FollowListModal
+          title={followListOpen === "following" ? "Following" : "Followers"}
+          users={profile[followListOpen]}
+          onClose={() => setFollowListOpen(null)}
+        />
+      )}
     </>
   );
 }

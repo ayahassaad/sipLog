@@ -55,9 +55,9 @@ exports.getUserProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const [followingCount, followersCount] = await Promise.all([
-      User.countDocuments({ _id: { $in: user.following } }),
-      User.countDocuments({ following: user._id }),
+    const [followingUsers, followersUsers] = await Promise.all([
+      User.find({ _id: { $in: user.following } }).sort({ name: 1 }),
+      User.find({ following: user._id }).sort({ name: 1 }),
     ]);
 
     const viewerFollowingIds = new Set((req.user?.following || []).map((id) => id.toString()));
@@ -68,8 +68,12 @@ exports.getUserProfile = async (req, res) => {
       name: user.name,
       username: user.username,
       avatarUrl: user.avatarUrl || "",
-      followingCount,
-      followersCount,
+      followingCount: followingUsers.length,
+      followersCount: followersUsers.length,
+      // Full lists, same shape as getMyProfile's, so the Following/Followers
+      // pop-up works the same way on anyone's profile, not just your own.
+      following: followingUsers.map((u) => toConnectionUser(u, viewerFollowingIds)),
+      followers: followersUsers.map((u) => toConnectionUser(u, viewerFollowingIds)),
       isFollowing: viewerFollowingIds.has(user._id.toString()),
       isOwnProfile,
     });

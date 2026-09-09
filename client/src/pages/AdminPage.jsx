@@ -7,6 +7,7 @@ import { useAuth } from "../context/useAuth";
 import { useAdminUsers } from "../hooks/useAdminUsers";
 import { useAdminStats } from "../hooks/useAdminStats";
 import { useAdminTastings } from "../hooks/useAdminTastings";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -87,7 +88,7 @@ function RecentTastings() {
       </div>
 
       {admin.loading && <p className="feed-loading">Loading recent tastings...</p>}
-      {admin.error && <p className="status-message error">{admin.error}</p>}
+      {admin.error && <p className="status-message error" role="alert">{admin.error}</p>}
       {!admin.loading && !admin.error && admin.tastings.length === 0 && (
         <p className="feed-empty">
           {admin.search ? `No tastings found for “${admin.search}”.` : "No tastings yet."}
@@ -133,7 +134,7 @@ function AdminStats() {
     return <p className="feed-loading">Loading site stats...</p>;
   }
   if (error) {
-    return <p className="status-message error">{error}</p>;
+    return <p className="status-message error" role="alert">{error}</p>;
   }
   if (!stats) {
     return null;
@@ -205,7 +206,7 @@ function AdminUserDirectory() {
       />
 
       {admin.loading && <p className="feed-loading">Loading users...</p>}
-      {admin.error && <p className="status-message error">{admin.error}</p>}
+      {admin.error && <p className="status-message error" role="alert">{admin.error}</p>}
       {!admin.loading && !admin.error && admin.users.length === 0 && (
         <p className="feed-empty">No users found.</p>
       )}
@@ -258,13 +259,15 @@ function AdminUserDirectory() {
 }
 
 function AdminPage() {
+  usePageTitle("Admin");
   return (
     <>
       <SiteHeader />
-      <div className="app-shell">
+      <main className="app-shell">
+        <h1 className="sr-only">Admin</h1>
         <AdminStats />
         <AdminUserDirectory />
-      </div>
+      </main>
     </>
   );
 }

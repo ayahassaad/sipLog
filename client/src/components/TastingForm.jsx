@@ -18,9 +18,9 @@ function TastingForm({
 }) {
   return (
     <section className="panel form-panel wine-form">
-      {error && <p className="status-message error form-status">{error}</p>}
+      {error && <p className="status-message error form-status" role="alert">{error}</p>}
       {!error && successMessage && (
-        <p className="status-message success form-status">{successMessage}</p>
+        <p className="status-message success form-status" role="status">{successMessage}</p>
       )}
 
       <form className="tasting-form ledger-form" onSubmit={onSubmit}>

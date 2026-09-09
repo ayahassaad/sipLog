@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function LoginPage() {
+  usePageTitle("Log In");
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,13 +34,13 @@ function LoginPage() {
   };
 
   return (
-    <div className="app-shell auth-shell">
+    <main className="app-shell auth-shell">
       <section className="auth-panel">
         <div className="section-heading">
-          <h2 className="brand-highlight">Log in to SipLog</h2>
+          <h1 className="brand-highlight">Log in to SipLog</h1>
         </div>
 
-        {error && <p className="status-message error form-status">{error}</p>}
+        {error && <p className="status-message error form-status" role="alert">{error}</p>}
 
         <form className="tasting-form wine-form" onSubmit={handleSubmit}>
           <div className="field-grid">
@@ -76,7 +78,7 @@ function LoginPage() {
           Don&apos;t have an account? <Link to="/register">Create one</Link>
         </p>
       </section>
-    </div>
+    </main>
   );
 }
 

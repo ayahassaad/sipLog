@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function RegisterPage() {
+  usePageTitle("Sign Up");
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "" });
@@ -30,15 +32,15 @@ function RegisterPage() {
   };
 
   return (
-    <div className="app-shell auth-shell">
+    <main className="app-shell auth-shell">
       <section className="auth-panel">
         <div className="section-heading">
-          <h2>
+          <h1>
             Create your <span className="brand-highlight">SipLog</span> account
-          </h2>
+          </h1>
         </div>
 
-        {error && <p className="status-message error form-status">{error}</p>}
+        {error && <p className="status-message error form-status" role="alert">{error}</p>}
 
         <form className="tasting-form wine-form" onSubmit={handleSubmit}>
           <div className="field-grid">
@@ -101,7 +103,7 @@ function RegisterPage() {
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </section>
-    </div>
+    </main>
   );
 }
 

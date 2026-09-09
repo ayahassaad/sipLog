@@ -58,6 +58,7 @@
   color: var(--gold);
 }
 
+.section-heading h1,
 .section-heading h2,
 .tasting-card h3 {
   margin: 0;
@@ -922,8 +923,25 @@ textarea:focus {
 
 /* .section-heading h2 sets its own color, so beat it here when the
    whole heading (not just an inline word) should be gold. */
+.section-heading h1.brand-highlight,
 .section-heading h2.brand-highlight {
   color: var(--gold);
+}
+
+/* Visually hidden but still readable by screen readers -- used for the
+   page-level <h1> on pages whose visual design doesn't call for a big
+   printed title (Community, My Journal, Admin), so there's still a real
+   heading in the accessibility tree without changing how the page looks. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .main-nav {
@@ -1705,6 +1723,7 @@ textarea:focus {
   min-width: 180px;
 }
 
+.profile-identity h1,
 .profile-identity h2 {
   margin: 0 0 4px;
 }
@@ -2473,4 +2492,18 @@ textarea:focus {
 .user-hover-stats strong {
   color: var(--gold);
   font-weight: 700;
+}
+
+/* Respect a person's OS-level request for less motion: stop the shimmer,
+   pulse and other decorative animations/transitions from running instead
+   of leaving them going indefinitely with no way to turn them off. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

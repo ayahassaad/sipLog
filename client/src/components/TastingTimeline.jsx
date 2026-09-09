@@ -70,9 +70,9 @@ function TastingTimeline({
       </div>
 
       {loading && <p className="feed-loading">Loading tastings...</p>}
-      {error && <p className="status-message error">{error}</p>}
+      {error && <p className="status-message error" role="alert">{error}</p>}
       {!loading && !error && successMessage && (
-        <p className="status-message success">{successMessage}</p>
+        <p className="status-message success" role="status">{successMessage}</p>
       )}
       {!loading && !error && filteredCount === 0 && (
         onCreateFirst && !searchTerm ? (
@@ -125,6 +125,19 @@ function TastingTimeline({
                     pointerEvents: abs > 2 ? "none" : "auto",
                   }}
                   onClick={() => !isActive && goTo(index)}
+                  role={isActive ? undefined : "button"}
+                  tabIndex={isActive ? undefined : 0}
+                  aria-label={isActive ? undefined : `Show ${tasting.wineId?.name || "this wine"}`}
+                  onKeyDown={
+                    isActive
+                      ? undefined
+                      : (event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            goTo(index);
+                          }
+                        }
+                  }
                 >
                   <div className="card-top">
                     <div className="card-heading-row">

@@ -8,6 +8,7 @@ import { useAuth } from "../context/useAuth";
 import { usePublicProfile } from "../hooks/usePublicProfile";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { formatTimelineDate } from "../utils/formatTimelineDate";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 // Someone's public profile at /users/:username -- a read-only header (photo,
 // name, handle, Following/Followers counts, a Follow button) plus a
@@ -18,6 +19,7 @@ function UserProfilePageContent({ username }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { profile, loading, error, toggleFollow } = usePublicProfile(username);
+  usePageTitle(profile?.name || "Profile");
   const feed = useCommunityFeed({ author: username });
   // null, "following", or "followers" -- which list (if any) is open in
   // the pop-up right now.
@@ -52,16 +54,16 @@ function UserProfilePageContent({ username }) {
   return (
     <>
       <SiteHeader />
-      <div className="app-shell">
+      <main className="app-shell">
         <section className="panel profile-panel">
           {loading && <p className="feed-loading">Loading profile...</p>}
-          {error && <p className="status-message error">{error}</p>}
+          {error && <p className="status-message error" role="alert">{error}</p>}
 
           {!loading && !error && profile && (
             <div className="profile-header profile-header-view">
               <Avatar url={profile.avatarUrl} name={profile.name} size="lg" />
               <div className="profile-identity">
-                <h2 className="brand-highlight">{profile.name}</h2>
+                <h1 className="brand-highlight">{profile.name}</h1>
                 <p className="profile-handle">@{profile.username}</p>
               </div>
 
@@ -109,7 +111,7 @@ function UserProfilePageContent({ username }) {
             </div>
 
             {feed.loading && <p className="feed-loading">Loading tastings...</p>}
-            {feed.error && <p className="status-message error">{feed.error}</p>}
+            {feed.error && <p className="status-message error" role="alert">{feed.error}</p>}
             {!feed.loading && !feed.error && feed.tastings.length === 0 && (
               <p className="feed-empty">No tastings yet.</p>
             )}
@@ -172,7 +174,7 @@ function UserProfilePageContent({ username }) {
             )}
           </section>
         )}
-      </div>
+      </main>
 
       {followListOpen && profile && (
         <FollowListModal

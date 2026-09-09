@@ -6,7 +6,7 @@ function ProtectedRoute({ children }) {
   const location = useLocation();
 
   if (loading) {
-    return <p className="status-message">Loading...</p>;
+    return <p className="status-message" role="status">Loading...</p>;
   }
 
   if (!user) {

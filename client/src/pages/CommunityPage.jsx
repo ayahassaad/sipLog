@@ -9,10 +9,12 @@ import { useAuth } from "../context/useAuth";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { useUsers } from "../hooks/useUsers";
 import { formatTimelineDate } from "../utils/formatTimelineDate";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
 function CommunityPage() {
+  usePageTitle("Community");
   const { user } = useAuth();
   const navigate = useNavigate();
   const feed = useCommunityFeed();
@@ -71,7 +73,8 @@ function CommunityPage() {
   return (
     <>
       <SiteHeader />
-      <div className="app-shell">
+      <main className="app-shell">
+        <h1 className="sr-only">Community</h1>
         <section className="panel list-panel community-feed-panel">
           <div className="community-search">
             <FilterBar
@@ -82,7 +85,7 @@ function CommunityPage() {
           </div>
 
           {loading && <p className="feed-loading">Loading the community feed...</p>}
-          {error && <p className="status-message error">{error}</p>}
+          {error && <p className="status-message error" role="alert">{error}</p>}
 
           {!loading && !error && feed.search && feed.matchedUsers.length > 0 && (
             <div className="community-people">
@@ -115,7 +118,7 @@ function CommunityPage() {
           )}
 
           {!loading && !error && feed.tastings.length === 0 && feed.search && (
-            <p className="status-message">
+            <p className="status-message" role="status">
               No tastings found for &ldquo;{feed.search}&rdquo;.
             </p>
           )}
@@ -210,7 +213,7 @@ function CommunityPage() {
             </div>
           )}
         </section>
-      </div>
+      </main>
     </>
   );
 }

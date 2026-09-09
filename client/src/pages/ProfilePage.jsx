@@ -5,10 +5,12 @@ import FollowListModal from "../components/FollowListModal";
 import { useProfile } from "../hooks/useProfile";
 import { compressImage } from "../utils/compressImage";
 import { uploadImage } from "../services/uploadService";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const emptyStatus = { error: "", success: "", saving: false };
 
 function ProfilePage() {
+  usePageTitle("Profile");
   const { profile, loading, error, updateProfile } = useProfile();
 
   const [editing, setEditing] = useState(false);
@@ -63,10 +65,10 @@ function ProfilePage() {
   return (
     <>
       <SiteHeader />
-      <div className="app-shell">
+      <main className="app-shell">
         <section className="panel profile-panel">
           {loading && <p className="feed-loading">Loading your profile...</p>}
-          {error && <p className="status-message error">{error}</p>}
+          {error && <p className="status-message error" role="alert">{error}</p>}
 
           {!loading && !error && profile && (
             <>
@@ -97,7 +99,7 @@ function ProfilePage() {
                     <span className="photo-caption">
                       {uploadingPhoto ? "Uploading..." : "Click to change photo"}
                     </span>
-                    {photoError && <p className="status-message error form-status">{photoError}</p>}
+                    {photoError && <p className="status-message error form-status" role="alert">{photoError}</p>}
                   </div>
                 ) : (
                   <Avatar url={profile.avatarUrl} name={profile.name} size="lg" />
@@ -107,7 +109,7 @@ function ProfilePage() {
                   {editing ? (
                     <form className="tasting-form wine-form" onSubmit={handleSaveName}>
                       {nameStatus.error && (
-                        <p className="status-message error form-status">{nameStatus.error}</p>
+                        <p className="status-message error form-status" role="alert">{nameStatus.error}</p>
                       )}
                       <div className="field-grid">
                         <label className="field">
@@ -146,7 +148,7 @@ function ProfilePage() {
                     </form>
                   ) : (
                     <>
-                      <h2 className="brand-highlight">{profile.name}</h2>
+                      <h1 className="brand-highlight">{profile.name}</h1>
                       <p className="profile-handle">@{profile.username}</p>
                     </>
                   )}
@@ -188,7 +190,7 @@ function ProfilePage() {
             </>
           )}
         </section>
-      </div>
+      </main>
 
       {followListOpen && profile && (
         <FollowListModal

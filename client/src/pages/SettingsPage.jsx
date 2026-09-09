@@ -1,10 +1,12 @@
 import { useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import { useProfile } from "../hooks/useProfile";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const emptyStatus = { error: "", success: "", saving: false };
 
 function SettingsPage() {
+  usePageTitle("Settings");
   const { loading, error, updateEmail, updatePassword } = useProfile();
 
   const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
@@ -58,24 +60,24 @@ function SettingsPage() {
   return (
     <>
       <SiteHeader />
-      <div className="app-shell">
+      <main className="app-shell">
         <section className="panel">
           <div className="section-heading">
-            <h2 className="brand-highlight">Settings</h2>
+            <h1 className="brand-highlight">Settings</h1>
           </div>
 
           {loading && <p className="feed-loading">Loading your account...</p>}
-          {error && <p className="status-message error">{error}</p>}
+          {error && <p className="status-message error" role="alert">{error}</p>}
 
           {!loading && !error && (
             <div className="profile-edit-forms">
               <form className="tasting-form wine-form" onSubmit={handleChangeEmail}>
                 <p className="section-kicker">Change email</p>
                 {emailStatus.error && (
-                  <p className="status-message error form-status">{emailStatus.error}</p>
+                  <p className="status-message error form-status" role="alert">{emailStatus.error}</p>
                 )}
                 {!emailStatus.error && emailStatus.success && (
-                  <p className="status-message success form-status">{emailStatus.success}</p>
+                  <p className="status-message success form-status" role="status">{emailStatus.success}</p>
                 )}
                 <div className="field-grid">
                   <label className="field field-full">
@@ -114,10 +116,10 @@ function SettingsPage() {
               <form className="tasting-form wine-form" onSubmit={handleChangePassword}>
                 <p className="section-kicker">Change password</p>
                 {passwordStatus.error && (
-                  <p className="status-message error form-status">{passwordStatus.error}</p>
+                  <p className="status-message error form-status" role="alert">{passwordStatus.error}</p>
                 )}
                 {!passwordStatus.error && passwordStatus.success && (
-                  <p className="status-message success form-status">{passwordStatus.success}</p>
+                  <p className="status-message success form-status" role="status">{passwordStatus.success}</p>
                 )}
                 <div className="field-grid">
                   <label className="field field-full">
@@ -178,7 +180,7 @@ function SettingsPage() {
             </div>
           )}
         </section>
-      </div>
+      </main>
     </>
   );
 }

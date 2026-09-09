@@ -13,10 +13,12 @@ import {
   favoriteTasting as favoriteTastingRequest,
   unfavoriteTasting as unfavoriteTastingRequest,
 } from "../services/tastingService";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const AUTO_REFRESH_MS = 30000;
 
 function JournalPage() {
+  usePageTitle("My Journal");
   const tastings = useTastings();
   const favorites = useFavoriteTastings();
   const wines = useWines();
@@ -270,7 +272,8 @@ function JournalPage() {
   return (
     <>
       <SiteHeader />
-        <div className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
+        <main className={`app-shell ${saveSplash ? "save-splash" : ""}`}>
+        <h1 className="sr-only">My Journal</h1>
         <div className="mode-toggle">
           <label className={`toggle-chip ${view === "mine" ? "active" : ""}`}>
             <input
@@ -343,7 +346,7 @@ function JournalPage() {
             )}
           </section>
         )}
-      </div>
+      </main>
     </>
   );
 }

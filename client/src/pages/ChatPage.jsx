@@ -8,6 +8,7 @@ import { useConversations } from "../hooks/useConversations";
 import { useChatThread } from "../hooks/useChatThread";
 import { useUsers } from "../hooks/useUsers";
 import { fetchUserProfile } from "../services/userService";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getOrCreateConversation } from "../services/chatService";
 import { formatTimelineDate } from "../utils/formatTimelineDate";
 
@@ -71,7 +72,7 @@ function ChatThread({ conversation, onRead }) {
       </div>
 
       <div className="chat-messages">
-        {thread.error && <p className="status-message error">{thread.error}</p>}
+        {thread.error && <p className="status-message error" role="alert">{thread.error}</p>}
         {!thread.loading && !thread.error && thread.messages.length === 0 && (
           <p className="feed-empty">No messages yet -- say hello!</p>
         )}
@@ -112,6 +113,7 @@ function ChatThread({ conversation, onRead }) {
 // resolves that person to a conversation, selects it, then swaps the URL
 // back to the plain /chat so refreshing doesn't repeat the lookup.
 function ChatPage() {
+  usePageTitle("Messages");
   const { user } = useAuth();
   const { username } = useParams();
   const navigate = useNavigate();
@@ -182,10 +184,10 @@ function ChatPage() {
   return (
     <>
       <SiteHeader />
-      <div className="app-shell chat-layout">
+      <main className="app-shell chat-layout">
         <section className="panel chat-list-panel">
           <div className="section-heading chat-list-heading">
-            <h2 className="brand-highlight">Messages</h2>
+            <h1 className="brand-highlight">Messages</h1>
           </div>
 
           <div className="chat-search-panel">
@@ -225,7 +227,7 @@ function ChatPage() {
           </div>
 
           {conversationsState.error && (
-            <p className="status-message error">{conversationsState.error}</p>
+            <p className="status-message error" role="alert">{conversationsState.error}</p>
           )}
           {!conversationsState.loading &&
             !conversationsState.error &&
@@ -246,7 +248,7 @@ function ChatPage() {
         </section>
 
         <section className="panel chat-thread-panel">
-          {startError && <p className="status-message error">{startError}</p>}
+          {startError && <p className="status-message error" role="alert">{startError}</p>}
           {!startError && !activeConversation && (
             <p className="feed-empty">Select a conversation to start chatting.</p>
           )}
@@ -254,7 +256,7 @@ function ChatPage() {
             <ChatThread key={activeConversation.id} conversation={activeConversation} onRead={handleRead} />
           )}
         </section>
-      </div>
+      </main>
     </>
   );
 }

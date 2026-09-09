@@ -14,6 +14,7 @@ import SettingsPage from "./pages/SettingsPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import ChatPage from "./pages/ChatPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import { recordVisit } from "./services/analyticsService";
 
 function App() {
@@ -94,6 +95,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

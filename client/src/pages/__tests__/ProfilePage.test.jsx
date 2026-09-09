@@ -6,12 +6,20 @@ import { useAuth } from "../../context/useAuth";
 import { useProfile } from "../../hooks/useProfile";
 import { compressImage } from "../../utils/compressImage";
 import { uploadImage } from "../../services/uploadService";
+import { useConversations } from "../../hooks/useConversations";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 vi.mock("../../hooks/useProfile", () => ({
   useProfile: vi.fn(),
+}));
+// SiteHeader always renders ChatFab, which calls useConversations
+// (for its unread badge) unconditionally per the rules of hooks --
+// mocked here so these tests don't need a real SocketProvider/backend
+// just to render the page.
+vi.mock("../../hooks/useConversations", () => ({
+  useConversations: vi.fn(),
 }));
 vi.mock("../../utils/compressImage", () => ({
   compressImage: vi.fn(),
@@ -45,6 +53,7 @@ describe("ProfilePage", () => {
 
   beforeEach(() => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    useConversations.mockReturnValue({ totalUnread: 0 });
 
     updateProfile = vi.fn().mockResolvedValue({ ...sampleProfile, name: "Ayah A." });
 

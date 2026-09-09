@@ -6,9 +6,17 @@ import { useAuth } from "../../context/useAuth";
 import { useAdminUsers } from "../../hooks/useAdminUsers";
 import { useAdminStats } from "../../hooks/useAdminStats";
 import { useAdminTastings } from "../../hooks/useAdminTastings";
+import { useConversations } from "../../hooks/useConversations";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
+}));
+// SiteHeader always renders ChatFab, which calls useConversations
+// (for its unread badge) unconditionally per the rules of hooks --
+// mocked here so these tests don't need a real SocketProvider/backend
+// just to render the page.
+vi.mock("../../hooks/useConversations", () => ({
+  useConversations: vi.fn(),
 }));
 vi.mock("../../hooks/useAdminUsers", () => ({
   useAdminUsers: vi.fn(),
@@ -64,6 +72,7 @@ const baseAdminTastings = {
 // override it.
 beforeEach(() => {
   useAdminTastings.mockReturnValue(baseAdminTastings);
+  useConversations.mockReturnValue({ totalUnread: 0 });
 });
 
 function renderPage() {

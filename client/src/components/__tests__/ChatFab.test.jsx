@@ -1,11 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import ChatFab from "../ChatFab";
 import { useAuth } from "../../context/useAuth";
+import { useConversations } from "../../hooks/useConversations";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
+}));
+
+vi.mock("../../hooks/useConversations", () => ({
+  useConversations: vi.fn(),
 }));
 
 function renderAt(path) {
@@ -19,6 +24,10 @@ function renderAt(path) {
 }
 
 describe("ChatFab", () => {
+  beforeEach(() => {
+    useConversations.mockReturnValue({ totalUnread: 0 });
+  });
+
   it("shows a link to /chat when logged in", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" } });
 
@@ -41,5 +50,32 @@ describe("ChatFab", () => {
     renderAt("/chat");
 
     expect(screen.queryByRole("link", { name: /messages/i })).not.toBeInTheDocument();
+  });
+
+  it("shows no badge when there are no unread messages", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" } });
+    useConversations.mockReturnValue({ totalUnread: 0 });
+
+    const { container } = renderAt("/");
+
+    expect(container.querySelector(".chat-fab-badge")).not.toBeInTheDocument();
+  });
+
+  it("shows the unread count on the badge", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" } });
+    useConversations.mockReturnValue({ totalUnread: 3 });
+
+    renderAt("/");
+
+    expect(screen.getByText("3")).toBeInTheDocument();
+  });
+
+  it("caps the badge at 10+ once unread messages pass ten", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" } });
+    useConversations.mockReturnValue({ totalUnread: 14 });
+
+    renderAt("/");
+
+    expect(screen.getByText("10+")).toBeInTheDocument();
   });
 });

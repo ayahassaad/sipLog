@@ -1,13 +1,21 @@
 import { act, render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import CommunityPage from "../CommunityPage";
 import { useAuth } from "../../context/useAuth";
 import { useCommunityFeed } from "../../hooks/useCommunityFeed";
 import { useUsers } from "../../hooks/useUsers";
+import { useConversations } from "../../hooks/useConversations";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
+}));
+// SiteHeader always renders ChatFab, which calls useConversations
+// (for its unread badge) unconditionally per the rules of hooks --
+// mocked here so these tests don't need a real SocketProvider/backend
+// just to render the page.
+vi.mock("../../hooks/useConversations", () => ({
+  useConversations: vi.fn(),
 }));
 vi.mock("../../hooks/useCommunityFeed", () => ({
   useCommunityFeed: vi.fn(),
@@ -47,6 +55,10 @@ function renderPage() {
 }
 
 describe("CommunityPage", () => {
+  beforeEach(() => {
+    useConversations.mockReturnValue({ totalUnread: 0 });
+  });
+
   it("shows the feed as a timeline, with each post's author and no dropdown of people to follow", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
     useUsers.mockReturnValue({

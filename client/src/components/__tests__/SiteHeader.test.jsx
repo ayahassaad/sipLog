@@ -1,14 +1,27 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import SiteHeader from "../SiteHeader";
 import { useAuth } from "../../context/useAuth";
+import { useConversations } from "../../hooks/useConversations";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
+// SiteHeader always renders ChatFab, which calls useConversations (for its
+// unread badge) unconditionally per the rules of hooks -- mocked here so
+// these tests don't need a real SocketProvider/backend just to render the
+// header.
+vi.mock("../../hooks/useConversations", () => ({
+  useConversations: vi.fn(),
+}));
+
 describe("SiteHeader", () => {
+  beforeEach(() => {
+    useConversations.mockReturnValue({ totalUnread: 0 });
+  });
+
   it("shows both nav links and a burger menu button when logged in, with no bare log out button", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
 

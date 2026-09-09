@@ -2258,6 +2258,9 @@ textarea:focus {
   width: 52px;
   height: 52px;
   border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: grid;
   place-items: center;
   background: linear-gradient(180deg, var(--accent-strong), var(--accent));
@@ -2595,6 +2598,12 @@ textarea:focus {
   cursor: pointer;
 }
 
+/* In the full-history list (.notification-history-list) this is the
+   true last item and its own border-bottom would otherwise trail off
+   with nothing after it. In the dropdown, a "View all" button always
+   follows the last item, so this selector simply doesn't match there --
+   that item's border-bottom stays, which reads fine as a divider before
+   the "View all" row rather than a redundant line at the very bottom. */
 .notification-item:last-child {
   border-bottom: none;
 }
@@ -2633,6 +2642,36 @@ textarea:focus {
   font-size: 0.72rem;
   color: var(--text-soft);
   white-space: nowrap;
+}
+
+/* Sits under the dropdown's (already-capped) notification list, linking
+   out to the full /notifications history. */
+.notification-view-all {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 18px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.notification-view-all:hover,
+.notification-view-all:focus-visible {
+  background: rgba(216, 173, 95, 0.1);
+}
+
+/* The full-page notification history (/notifications) -- reuses
+   .notification-item exactly as the dropdown does, just full-width in a
+   plain list rather than inside a floating panel. */
+.notification-history-list {
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---------- Floating chat popup (opened from the header's chat button) ---------- */

@@ -16,7 +16,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["follow", "unfollow", "favorite", "message"],
+      enum: ["follow", "unfollow", "favorite", "message", "comment"],
       required: true,
     },
     // Only set for "message" notifications -- lets a click jump straight

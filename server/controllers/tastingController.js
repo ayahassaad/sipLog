@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Tasting = require("../models/Tasting");
 const Wine = require("../models/Wine");
 const User = require("../models/User");
+const Comment = require("../models/Comment");
 const { notify } = require("../notifications");
 
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
@@ -29,6 +30,44 @@ function attachFavoriteFlag(tastings, favoriteIdSet) {
     const plain = typeof tasting.toObject === "function" ? tasting.toObject() : tasting;
     return { ...plain, isFavorited: favoriteIdSet.has(String(plain._id)) };
   });
+}
+
+// Batches "how many people favorited this" and "how many comments does
+// this have" across a whole page of tastings at once (two aggregations
+// total, not two per tasting) -- used by the public community feed so
+// each card can show a favorite count and a comment count without an
+// extra request per card.
+async function attachSocialCounts(tastings) {
+  const tastingIds = tastings.map((tasting) => tasting._id);
+  if (tastingIds.length === 0) {
+    return tastings;
+  }
+
+  const [favoriteCounts, commentCounts] = await Promise.all([
+    User.aggregate([
+      { $match: { favorites: { $in: tastingIds } } },
+      { $unwind: "$favorites" },
+      { $match: { favorites: { $in: tastingIds } } },
+      { $group: { _id: "$favorites", count: { $sum: 1 } } },
+    ]),
+    Comment.aggregate([
+      { $match: { tastingId: { $in: tastingIds } } },
+      { $group: { _id: "$tastingId", count: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const favoriteCountById = new Map(
+    favoriteCounts.map((entry) => [entry._id.toString(), entry.count])
+  );
+  const commentCountById = new Map(
+    commentCounts.map((entry) => [entry._id.toString(), entry.count])
+  );
+
+  return tastings.map((tasting) => ({
+    ...tasting,
+    favoritesCount: favoriteCountById.get(String(tasting._id)) || 0,
+    commentsCount: commentCountById.get(String(tasting._id)) || 0,
+  }));
 }
 
 function parseScore(value, fieldName, errors) {
@@ -231,6 +270,20 @@ exports.getCommunityFeed = async (req, res) => {
       query.userId = authorUser ? authorUser._id : new mongoose.Types.ObjectId();
     }
 
+    // Optional "just the people I follow" toggle on the main Community
+    // feed. Doesn't try to combine with the author filter above (that's
+    // used for a single person's public profile, not the main feed the
+    // toggle lives on) -- an empty following list is a perfectly valid
+    // query that just yields an empty feed, not an error.
+    if (String(req.query.followingOnly) === "true") {
+      if (!req.user) {
+        return res.status(401).json({ message: "Log in to filter by who you follow" });
+      }
+      if (!authorUsername) {
+        query.userId = { $in: req.user.following || [] };
+      }
+    }
+
     // Optional search -- match against the wine's name, producer, or grape,
     // OR the author's username/name, then scope the feed to tastings of
     // whichever wines or people matched. Matching users are also returned
@@ -277,9 +330,10 @@ exports.getCommunityFeed = async (req, res) => {
       .populate("wineId");
 
     const favoriteIdSet = buildFavoriteIdSet(req.user);
+    const tastingsWithCounts = await attachSocialCounts(attachFavoriteFlag(tastings, favoriteIdSet));
 
     res.json({
-      tastings: attachFavoriteFlag(tastings, favoriteIdSet),
+      tastings: tastingsWithCounts,
       matchedUsers,
       page,
       limit,
@@ -360,6 +414,32 @@ exports.unfavoriteTasting = async (req, res) => {
     await User.updateOne({ _id: req.user._id }, { $pull: { favorites: id } });
 
     res.json({ message: "Unfavorited successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Public: who has favorited a given tasting -- shown in the "N favorites"
+// pop-up on the community feed, the same list-of-users pattern as the
+// Following/Followers modal.
+exports.getFavoritedBy = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid tasting id" });
+    }
+
+    const users = await User.find({ favorites: id }).select("name username avatarUrl");
+
+    res.json({
+      users: users.map((user) => ({
+        id: user._id.toString(),
+        name: user.name,
+        username: user.username,
+        avatarUrl: user.avatarUrl || "",
+      })),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

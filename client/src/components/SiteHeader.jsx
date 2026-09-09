@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import Avatar from "./Avatar";
+import RoseGlassLogo from "./RoseGlassLogo";
 import ChatFab from "./ChatFab";
 
 function navLinkClassName({ isActive }) {
@@ -101,12 +102,22 @@ function SiteHeader() {
         </nav>
 
         <div className="site-header-logo">
+          <RoseGlassLogo />
           <p className="site-header-title">SipLog</p>
         </div>
 
         <div className="site-header-right">
           {user ? (
-            <div className="burger-menu" ref={menuRef}>
+            <>
+              <div className="site-header-profile">
+                <Avatar url={user.avatarUrl} name={user.name} size="sm" />
+                <div>
+                  <p className="site-header-profile-name">{user.name}</p>
+                  {user.username && <p className="site-header-profile-handle">@{user.username}</p>}
+                </div>
+              </div>
+
+              <div className="burger-menu" ref={menuRef}>
               <button
                 type="button"
                 className="burger-button"
@@ -122,14 +133,6 @@ function SiteHeader() {
 
               {menuOpen && (
                 <div className="burger-dropdown" role="menu">
-                  <div className="burger-profile">
-                    <Avatar url={user.avatarUrl} name={user.name} size="sm" />
-                    <div>
-                      <p className="burger-profile-name">{user.name}</p>
-                      {user.username && <p className="burger-profile-handle">@{user.username}</p>}
-                    </div>
-                  </div>
-
                   <div className="burger-group">
                     <Link
                       to="/profile"
@@ -174,7 +177,8 @@ function SiteHeader() {
                   </button>
                 </div>
               )}
-            </div>
+              </div>
+            </>
           ) : (
             <Link to="/login" className="logout-button" data-tooltip="Come on in!">
               <svg viewBox="0 0 24 24" aria-hidden="true">

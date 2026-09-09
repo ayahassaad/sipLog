@@ -862,7 +862,31 @@ textarea:focus {
 .site-header-right {
   display: flex;
   align-items: center;
+  gap: 16px;
   justify-self: end;
+}
+
+.site-header-profile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.site-header-profile-name,
+.site-header-profile-handle {
+  margin: 0;
+}
+
+.site-header-profile-name {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.site-header-profile-handle {
+  margin-top: 2px;
+  color: var(--berry-mid);
+  font-size: 0.7rem;
 }
 
 .burger-menu {
@@ -906,30 +930,6 @@ textarea:focus {
   overflow: hidden;
   z-index: 200;
   box-shadow: 0 18px 36px rgba(14, 0, 4, 0.35);
-}
-
-.burger-profile {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 22px 36px 33px;
-}
-
-.burger-profile-name,
-.burger-profile-handle {
-  margin: 0;
-}
-
-.burger-profile-name {
-  color: var(--text);
-  font-size: 0.86rem;
-  font-weight: 700;
-}
-
-.burger-profile-handle {
-  margin-top: 2px;
-  color: var(--berry-mid);
-  font-size: 0.7rem;
 }
 
 .burger-group {

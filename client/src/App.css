@@ -481,6 +481,10 @@ textarea:focus {
   background: linear-gradient(180deg, #f6ecc4, #e2cd82 75%);
 }
 
+.bottle-rating--rose .bottle-fill {
+  background: linear-gradient(180deg, #f6b8cd, #e0678f 75%);
+}
+
 .bottle-rating--sparkling .bottle-fill {
   background: linear-gradient(180deg, #f6ecc4, #e2cd82 75%);
 }

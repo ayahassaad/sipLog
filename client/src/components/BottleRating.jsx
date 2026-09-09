@@ -1,6 +1,7 @@
 const WINE_TYPE_LABELS = {
   red: "Red",
   white: "White",
+  rose: "Rose",
   sparkling: "Sparkling",
   sweet: "Sweet",
 };

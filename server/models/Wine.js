@@ -34,7 +34,7 @@ const wineSchema = new mongoose.Schema({
   // BottleRating.jsx): liquid color and bottle silhouette both vary by type.
   type: {
     type: String,
-    enum: ["red", "white", "sparkling", "sweet"],
+    enum: ["red", "white", "rose", "sparkling", "sweet"],
     default: "red",
     required: true,
   },

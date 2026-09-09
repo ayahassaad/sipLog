@@ -9,7 +9,7 @@ export const MOOD_TAGS = [
   "Summer patio",
 ];
 
-export const WINE_TYPES = ["red", "white", "sparkling", "sweet"];
+export const WINE_TYPES = ["red", "white", "rose", "sparkling", "sweet"];
 
 export const initialWineForm = {
   name: "",

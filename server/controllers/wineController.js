@@ -6,7 +6,7 @@ function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
-const WINE_TYPES = ["red", "white", "sparkling", "sweet"];
+const WINE_TYPES = ["red", "white", "rose", "sparkling", "sweet"];
 
 function validateWinePayload(body) {
   const errors = [];

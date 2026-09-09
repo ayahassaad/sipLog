@@ -2724,3 +2724,280 @@ textarea:focus {
   min-height: 0;
   padding: 0 16px 16px;
 }
+
+/* Read more link under a Community card's wine info -- opens
+   TastingDetailModal with everything the compact card doesn't have room
+   for (structure scores, full notes, personal thoughts). */
+.card-read-more {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.card-read-more:hover,
+.card-read-more:focus-visible {
+  color: var(--accent);
+}
+
+/* Favorite + comment-count row on a Community card -- the favorite star
+   used to sit up in .card-top-actions next to the rating bottle; it now
+   lives here, right beside the comment thread it and comments both hang
+   off of. */
+.card-social-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.card-social-row .favorite-star {
+  font-size: 1.3rem;
+}
+
+.social-count-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.social-count-link:hover,
+.social-count-link:focus-visible {
+  color: var(--gold);
+}
+
+.social-count-static {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  opacity: 0.7;
+}
+
+.social-comments-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.social-comments-toggle:hover,
+.social-comments-toggle:focus-visible,
+.social-comments-toggle[aria-expanded="true"] {
+  color: var(--gold);
+}
+
+.social-comments-toggle svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+/* Inline comment thread under a Community card, shown once its
+   "Comments" toggle is opened. */
+.comment-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.comment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 2px;
+}
+
+.comment-author-link {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.comment-author-link:hover {
+  color: var(--gold);
+}
+
+.comment-time {
+  font-size: 0.7rem;
+  color: var(--text-soft);
+  opacity: 0.6;
+}
+
+.comment-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-delete {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.16s ease;
+}
+
+.comment-delete:hover,
+.comment-delete:focus-visible {
+  opacity: 1;
+}
+
+.comment-delete svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--text-soft);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.comment-composer {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.comment-composer textarea {
+  flex: 1;
+  resize: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--text-soft);
+  padding: 8px 10px;
+}
+
+.comment-composer textarea:focus-visible {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* "Following only" toggle next to the Community search box. */
+.following-only-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.following-only-toggle input {
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+/* Read-more pop-up (TastingDetailModal) -- reuses the same overlay/panel
+   as the Following/Followers modal, just wider and left-aligned since
+   it's read-only prose rather than a list of people to click through. */
+.tasting-detail-modal {
+  max-width: 460px;
+  text-align: left;
+}
+
+.tasting-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.tasting-detail-subtitle {
+  margin: 0;
+  color: var(--text-soft);
+  opacity: 0.85;
+}
+
+.tasting-detail-rating {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.tasting-detail-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.tasting-detail-score {
+  font-size: 0.8rem;
+}
+
+.tasting-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mood-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tasting-detail-thoughts {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}

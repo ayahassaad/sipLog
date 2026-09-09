@@ -13,7 +13,13 @@ export async function fetchTastings({ page = 1, limit = 50 } = {}) {
   }
 }
 
-export async function fetchCommunityFeed({ page = 1, limit = 50, search = "", author = "" } = {}) {
+export async function fetchCommunityFeed({
+  page = 1,
+  limit = 50,
+  search = "",
+  author = "",
+  followingOnly = false,
+} = {}) {
   try {
     const params = { page, limit };
     if (search) {
@@ -21,6 +27,9 @@ export async function fetchCommunityFeed({ page = 1, limit = 50, search = "", au
     }
     if (author) {
       params.author = author;
+    }
+    if (followingOnly) {
+      params.followingOnly = true;
     }
     const res = await api.get("/tastings/feed", { params });
     return res.data;
@@ -53,6 +62,15 @@ export async function unfavoriteTasting(id) {
     return res.data;
   } catch (error) {
     throw new Error(extractMessage(error, "Failed to unfavorite tasting"));
+  }
+}
+
+export async function fetchFavoritedBy(id) {
+  try {
+    const res = await api.get(`/tastings/${id}/favorited-by`);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractMessage(error, "Failed to load who favorited this"));
   }
 }
 

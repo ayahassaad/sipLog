@@ -5,11 +5,15 @@ import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
 import BottleRating from "../components/BottleRating";
 import FilterBar from "../components/FilterBar";
+import CommentSection from "../components/CommentSection";
+import TastingDetailModal from "../components/TastingDetailModal";
+import FollowListModal from "../components/FollowListModal";
 import { useAuth } from "../context/useAuth";
 import { useCommunityFeed } from "../hooks/useCommunityFeed";
 import { useUsers } from "../hooks/useUsers";
 import { formatTimelineDate } from "../utils/formatTimelineDate";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { fetchFavoritedBy } from "../services/tastingService";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -21,6 +25,15 @@ function CommunityPage() {
   const { search: confirmedSearch, runSearch } = feed;
   const people = useUsers();
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Per-tasting UI state -- which comment threads are expanded, the live
+  // comment count for each (starts from the feed's batched commentsCount,
+  // then tracks whatever CommentSection reports once opened), and which
+  // pop-up (if any) is currently showing.
+  const [openCommentIds, setOpenCommentIds] = useState(() => new Set());
+  const [commentCounts, setCommentCounts] = useState({});
+  const [favoritedByModal, setFavoritedByModal] = useState(null);
+  const [detailTasting, setDetailTasting] = useState(null);
 
   // Debounce: wait for a pause in typing before actually querying the
   // server, and skip firing again once the feed's confirmed search term
@@ -38,8 +51,9 @@ function CommunityPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, confirmedSearch, runSearch]);
 
-  // Browsing is public, but favoriting and following are personal actions --
-  // send a logged-out visitor to log in instead of letting the request 401.
+  // Browsing is public, but favoriting, following, commenting, and the
+  // following-only toggle are personal actions -- send a logged-out
+  // visitor to log in instead of letting the request 401.
   const requireLogin = () => navigate("/login", { state: { from: { pathname: "/" } } });
 
   const handleToggleFollow = (userId, isFollowing) => {
@@ -56,6 +70,55 @@ function CommunityPage() {
       return;
     }
     feed.toggleFavorite(tastingId, isFavorited);
+  };
+
+  const handleToggleFollowingOnly = () => {
+    if (!user) {
+      requireLogin();
+      return;
+    }
+    feed.setFollowingOnly(!feed.followingOnly);
+  };
+
+  const toggleComments = (tastingId) => {
+    setOpenCommentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(tastingId)) {
+        next.delete(tastingId);
+      } else {
+        next.add(tastingId);
+      }
+      return next;
+    });
+  };
+
+  const handleCommentsCountChange = (tastingId, count) => {
+    setCommentCounts((prev) => ({ ...prev, [tastingId]: count }));
+  };
+
+  const getCommentsCount = (tasting) => commentCounts[tasting._id] ?? tasting.commentsCount ?? 0;
+
+  const openFavoritedBy = async (tasting) => {
+    const wineName = tasting.wineId?.name || "this wine";
+    setFavoritedByModal({ title: `Favorited by`, wineName, users: [], loading: true, error: "" });
+    try {
+      const data = await fetchFavoritedBy(tasting._id);
+      setFavoritedByModal({
+        title: `Who favorited ${wineName}`,
+        wineName,
+        users: data.users,
+        loading: false,
+        error: "",
+      });
+    } catch (err) {
+      setFavoritedByModal({
+        title: `Couldn't load who favorited ${wineName}`,
+        wineName,
+        users: [],
+        loading: false,
+        error: err.message,
+      });
+    }
   };
 
   // Still tracked (just not shown as its own "People to Follow" list for
@@ -82,6 +145,14 @@ function CommunityPage() {
               onSearchTermChange={setSearchTerm}
               placeholder="Search for a wine or a user..."
             />
+            <label className="following-only-toggle">
+              <input
+                type="checkbox"
+                checked={feed.followingOnly}
+                onChange={handleToggleFollowingOnly}
+              />
+              Following only
+            </label>
           </div>
 
           {loading && <p className="feed-loading">Loading the community feed...</p>}
@@ -122,7 +193,12 @@ function CommunityPage() {
               No tastings found for &ldquo;{feed.search}&rdquo;.
             </p>
           )}
-          {!loading && !error && feed.tastings.length === 0 && !feed.search && (
+          {!loading && !error && feed.tastings.length === 0 && !feed.search && feed.followingOnly && (
+            <p className="feed-empty">
+              No tastings yet from people you follow -- try following someone first.
+            </p>
+          )}
+          {!loading && !error && feed.tastings.length === 0 && !feed.search && !feed.followingOnly && (
             <p className="feed-empty">No tastings yet.</p>
           )}
 
@@ -132,6 +208,9 @@ function CommunityPage() {
                 const author = tasting.userId;
                 const isFollowing = author ? followingStateById.get(author._id) : false;
                 const isOwnPost = Boolean(user && author && author._id === user.id);
+                const favoritesCount = tasting.favoritesCount || 0;
+                const commentsCount = getCommentsCount(tasting);
+                const commentsOpen = openCommentIds.has(tasting._id);
 
                 return (
                   <div className="feed-entry" key={tasting._id}>
@@ -150,19 +229,15 @@ function CommunityPage() {
                             {tasting.wineId?.producer || "Unknown producer"} ·{" "}
                             {tasting.wineId?.grape || "Unknown grape"}
                           </p>
-                        </div>
-                        <div className="card-top-actions">
                           <button
                             type="button"
-                            className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
-                            onClick={() => handleToggleFavorite(tasting._id, tasting.isFavorited)}
-                            aria-pressed={tasting.isFavorited}
-                            aria-label={
-                              tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
-                            }
+                            className="card-read-more"
+                            onClick={() => setDetailTasting(tasting)}
                           >
-                            {tasting.isFavorited ? "★" : "☆"}
+                            Read more
                           </button>
+                        </div>
+                        <div className="card-top-actions">
                           <BottleRating rating={tasting.rating} type={tasting.wineId?.type} />
                         </div>
                       </div>
@@ -172,6 +247,54 @@ function CommunityPage() {
                           className="card-photo"
                           src={tasting.imageUrl}
                           alt={tasting.wineId?.name || "Wine tasting"}
+                        />
+                      )}
+
+                      <div className="card-social-row">
+                        <button
+                          type="button"
+                          className={`favorite-star ${tasting.isFavorited ? "active" : ""}`}
+                          onClick={() => handleToggleFavorite(tasting._id, tasting.isFavorited)}
+                          aria-pressed={tasting.isFavorited}
+                          aria-label={
+                            tasting.isFavorited ? "Remove from favorites" : "Add to favorites"
+                          }
+                        >
+                          {tasting.isFavorited ? "★" : "☆"}
+                        </button>
+                        {favoritesCount > 0 ? (
+                          <button
+                            type="button"
+                            className="social-count-link"
+                            onClick={() => openFavoritedBy(tasting)}
+                          >
+                            {favoritesCount} {favoritesCount === 1 ? "favorite" : "favorites"}
+                          </button>
+                        ) : (
+                          <span className="social-count-static">Be the first to favorite</span>
+                        )}
+
+                        <button
+                          type="button"
+                          className="social-comments-toggle"
+                          aria-expanded={commentsOpen}
+                          onClick={() => toggleComments(tasting._id)}
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 4h16v11H9l-5 4V4Z" />
+                          </svg>
+                          {commentsCount > 0
+                            ? `${commentsCount} comment${commentsCount === 1 ? "" : "s"}`
+                            : "Comment"}
+                        </button>
+                      </div>
+
+                      {commentsOpen && (
+                        <CommentSection
+                          tastingId={tasting._id}
+                          currentUser={user}
+                          onRequireLogin={requireLogin}
+                          onCountChange={(count) => handleCommentsCountChange(tasting._id, count)}
                         />
                       )}
 
@@ -214,6 +337,18 @@ function CommunityPage() {
           )}
         </section>
       </main>
+
+      {detailTasting && (
+        <TastingDetailModal tasting={detailTasting} onClose={() => setDetailTasting(null)} />
+      )}
+
+      {favoritedByModal && (
+        <FollowListModal
+          title={favoritedByModal.title}
+          users={favoritedByModal.users}
+          onClose={() => setFavoritedByModal(null)}
+        />
+      )}
     </>
   );
 }

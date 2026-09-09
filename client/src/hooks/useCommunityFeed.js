@@ -16,11 +16,12 @@ export function useCommunityFeed({ author = "" } = {}) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [followingOnly, setFollowingOnlyState] = useState(false);
   const loadingMoreRef = useRef(false);
 
   const loadFirstPage = useCallback(async () => {
     try {
-      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, author });
+      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, author, followingOnly });
       setTastings(data.tastings);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -28,6 +29,10 @@ export function useCommunityFeed({ author = "" } = {}) {
     } catch (err) {
       setError(err.message);
     }
+    // followingOnly is intentionally left out here -- toggling it goes
+    // through setFollowingOnly below (which does its own fetch), not this
+    // mount-time loader, so it shouldn't also fire this effect again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [author]);
 
   useEffect(() => {
@@ -50,7 +55,13 @@ export function useCommunityFeed({ author = "" } = {}) {
     loadingMoreRef.current = true;
     try {
       const nextPage = page + 1;
-      const data = await fetchCommunityFeed({ page: nextPage, limit: PAGE_SIZE, search, author });
+      const data = await fetchCommunityFeed({
+        page: nextPage,
+        limit: PAGE_SIZE,
+        search,
+        author,
+        followingOnly,
+      });
       setTastings((prev) => [...prev, ...data.tastings]);
       setPage(data.page);
       setTotalPages(data.totalPages);
@@ -59,7 +70,7 @@ export function useCommunityFeed({ author = "" } = {}) {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [page, totalPages, search, author]);
+  }, [page, totalPages, search, author, followingOnly]);
 
   // Runs (or clears, when term is empty) a wine search against the feed.
   // A plain event-triggered action rather than an effect, so the caller
@@ -69,7 +80,13 @@ export function useCommunityFeed({ author = "" } = {}) {
     setSearching(true);
     setError("");
     try {
-      const data = await fetchCommunityFeed({ page: 1, limit: PAGE_SIZE, search: trimmed, author });
+      const data = await fetchCommunityFeed({
+        page: 1,
+        limit: PAGE_SIZE,
+        search: trimmed,
+        author,
+        followingOnly,
+      });
       setSearch(trimmed);
       setTastings(data.tastings);
       setMatchedUsers(data.matchedUsers || []);
@@ -80,7 +97,33 @@ export function useCommunityFeed({ author = "" } = {}) {
     } finally {
       setSearching(false);
     }
-  }, [author]);
+  }, [author, followingOnly]);
+
+  // Flips the "just the people I follow" toggle and re-fetches the first
+  // page under it -- keeps whatever search term is already active, the
+  // same way runSearch keeps the toggle active.
+  const setFollowingOnly = useCallback(async (value) => {
+    setSearching(true);
+    setError("");
+    try {
+      const data = await fetchCommunityFeed({
+        page: 1,
+        limit: PAGE_SIZE,
+        search,
+        author,
+        followingOnly: value,
+      });
+      setFollowingOnlyState(value);
+      setTastings(data.tastings);
+      setMatchedUsers(data.matchedUsers || []);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSearching(false);
+    }
+  }, [search, author]);
 
   // Optimistic toggle: flip the star instantly, roll back if the request fails.
   const toggleFavorite = useCallback(async (tastingId, currentlyFavorited) => {
@@ -118,5 +161,7 @@ export function useCommunityFeed({ author = "" } = {}) {
     toggleFavorite,
     search,
     runSearch,
+    followingOnly,
+    setFollowingOnly,
   };
 }

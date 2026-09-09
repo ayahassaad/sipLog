@@ -7,6 +7,8 @@ import { useCommunityFeed } from "../../hooks/useCommunityFeed";
 import { useUsers } from "../../hooks/useUsers";
 import { useConversations } from "../../hooks/useConversations";
 import { useNotifications } from "../../hooks/useNotifications";
+import { fetchComments, postComment } from "../../services/commentService";
+import { fetchFavoritedBy } from "../../services/tastingService";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
@@ -30,6 +32,14 @@ vi.mock("../../hooks/useCommunityFeed", () => ({
 }));
 vi.mock("../../hooks/useUsers", () => ({
   useUsers: vi.fn(),
+}));
+vi.mock("../../services/commentService", () => ({
+  fetchComments: vi.fn(),
+  postComment: vi.fn(),
+  deleteComment: vi.fn(),
+}));
+vi.mock("../../services/tastingService", () => ({
+  fetchFavoritedBy: vi.fn(),
 }));
 
 const mockNavigate = vi.fn();
@@ -77,6 +87,8 @@ describe("CommunityPage", () => {
       toggleFollow: vi.fn(),
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [sampleTasting],
       loading: false,
       error: "",
@@ -106,6 +118,8 @@ describe("CommunityPage", () => {
       toggleFollow,
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [sampleTasting],
       loading: false,
       error: "",
@@ -133,6 +147,8 @@ describe("CommunityPage", () => {
       toggleFollow,
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [sampleTasting],
       loading: false,
       error: "",
@@ -161,6 +177,8 @@ describe("CommunityPage", () => {
       toggleFollow: vi.fn(),
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [sampleTasting],
       loading: false,
       error: "",
@@ -188,6 +206,8 @@ describe("CommunityPage", () => {
       toggleFollow: vi.fn(),
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [sampleTasting],
       loading: false,
       error: "",
@@ -217,6 +237,8 @@ describe("CommunityPage", () => {
     });
     const runSearch = vi.fn();
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [sampleTasting],
       loading: false,
       error: "",
@@ -254,6 +276,8 @@ describe("CommunityPage", () => {
       toggleFollow: vi.fn(),
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [],
       loading: false,
       error: "",
@@ -285,6 +309,8 @@ describe("CommunityPage", () => {
       toggleFollow: vi.fn(),
     });
     useCommunityFeed.mockReturnValue({
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
       tastings: [],
       loading: false,
       error: "",
@@ -301,5 +327,157 @@ describe("CommunityPage", () => {
 
     expect(screen.getByRole("link", { name: /@ayahassaad/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^follow$/i })).not.toBeInTheDocument();
+  });
+
+  it("toggles the following-only filter when the checkbox is checked", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    const setFollowingOnly = vi.fn();
+    useUsers.mockReturnValue({ users: [], loading: false, error: "", toggleFollow: vi.fn() });
+    useCommunityFeed.mockReturnValue({
+      tastings: [],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+      matchedUsers: [],
+      followingOnly: false,
+      setFollowingOnly,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /following only/i }));
+    expect(setFollowingOnly).toHaveBeenCalledWith(true);
+  });
+
+  it("sends a logged-out visitor to log in instead of toggling following-only", () => {
+    mockNavigate.mockClear();
+    useAuth.mockReturnValue({ user: null, logout: vi.fn() });
+    const setFollowingOnly = vi.fn();
+    useUsers.mockReturnValue({ users: [], loading: false, error: "", toggleFollow: vi.fn() });
+    useCommunityFeed.mockReturnValue({
+      tastings: [],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+      matchedUsers: [],
+      followingOnly: false,
+      setFollowingOnly,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /following only/i }));
+    expect(setFollowingOnly).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/login", expect.anything());
+  });
+
+  it("opens the tasting detail pop-up from Read more, and closes it again", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [{ id: "bob-id", name: "Bob", isFollowing: false }],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [sampleTasting],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+      matchedUsers: [],
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /read more/i }));
+    expect(screen.getByRole("dialog", { name: /rioja reserva/i })).toBeInTheDocument();
+    expect(screen.getByText(/lovely with dinner/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /close/i }));
+    expect(screen.queryByRole("dialog", { name: /rioja reserva/i })).not.toBeInTheDocument();
+  });
+
+  it("expands the comment thread and posts a new comment", async () => {
+    useAuth.mockReturnValue({ user: { id: "ayah-id", name: "Ayah" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [{ id: "bob-id", name: "Bob", isFollowing: false }],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [sampleTasting],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+      matchedUsers: [],
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
+    });
+    fetchComments.mockResolvedValue({ comments: [] });
+    postComment.mockResolvedValue({
+      id: "comment-1",
+      text: "Great pick!",
+      createdAt: "2026-09-09T10:00:00.000Z",
+      author: { id: "ayah-id", name: "Ayah", username: "ayahassaad", avatarUrl: "" },
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /comment/i }));
+    expect(await screen.findByText(/no comments yet/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText(/add a comment/i), {
+      target: { value: "Great pick!" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^post$/i }));
+
+    expect(await screen.findByText("Great pick!")).toBeInTheDocument();
+    expect(postComment).toHaveBeenCalledWith("tasting-1", "Great pick!");
+  });
+
+  it("shows who favorited a tasting when the favorites count is clicked", async () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    useUsers.mockReturnValue({
+      users: [{ id: "bob-id", name: "Bob", isFollowing: false }],
+      loading: false,
+      error: "",
+      toggleFollow: vi.fn(),
+    });
+    useCommunityFeed.mockReturnValue({
+      tastings: [{ ...sampleTasting, favoritesCount: 2 }],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+      matchedUsers: [],
+      followingOnly: false,
+      setFollowingOnly: vi.fn(),
+    });
+    fetchFavoritedBy.mockResolvedValue({
+      users: [{ id: "carla-id", name: "Carla", username: "carla", avatarUrl: "" }],
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /2 favorites/i }));
+    expect(await screen.findByText("Carla")).toBeInTheDocument();
+    expect(fetchFavoritedBy).toHaveBeenCalledWith("tasting-1");
   });
 });

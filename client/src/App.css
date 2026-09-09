@@ -2260,7 +2260,7 @@ textarea:focus {
   display: grid;
   place-items: center;
   background: linear-gradient(180deg, var(--accent-strong), var(--accent));
-  box-shadow: 0 10px 22px rgba(83, 4, 23, 0.32);
+  box-shadow: 0 0 16px rgba(83, 4, 23, 0.35);
   transition: transform 0.16s ease, filter 0.16s ease;
 }
 

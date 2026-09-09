@@ -2444,15 +2444,14 @@ textarea:focus {
   overflow-y: auto;
 }
 
-.user-hover-anchor {
-  position: relative;
-}
-
+/* Rendered through a portal straight into document.body (see
+   UserHoverCard.jsx) and positioned in JS via the top/left inline style,
+   so it always floats above the rest of the page -- including anything
+   with its own z-index or overflow/scroll -- no matter which scrollable
+   list or panel the link it belongs to happens to live inside. */
 .user-hover-card {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 250;
+  position: fixed;
+  z-index: 9999;
   width: 220px;
   background: var(--panel-mid);
   border: 1px solid var(--line);

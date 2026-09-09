@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import SiteHeader from "../SiteHeader";
 import { useAuth } from "../../context/useAuth";
 import { useConversations } from "../../hooks/useConversations";
+import { useNotifications } from "../../hooks/useNotifications";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
@@ -17,9 +18,18 @@ vi.mock("../../hooks/useConversations", () => ({
   useConversations: vi.fn(),
 }));
 
+// SiteHeader also always renders NotificationBell when logged in, which
+// calls useNotifications (and, through it, the same real useSocket() that
+// throws outside a SocketProvider) -- mocked for the same reason as
+// useConversations above.
+vi.mock("../../hooks/useNotifications", () => ({
+  useNotifications: vi.fn(),
+}));
+
 describe("SiteHeader", () => {
   beforeEach(() => {
     useConversations.mockReturnValue({ totalUnread: 0 });
+    useNotifications.mockReturnValue({ notifications: [], unreadCount: 0, markAllRead: vi.fn() });
   });
 
   it("shows both nav links and a burger menu button when logged in, with no bare log out button", () => {

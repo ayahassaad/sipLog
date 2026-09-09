@@ -6,6 +6,7 @@ import { useAuth } from "../../context/useAuth";
 import { useCommunityFeed } from "../../hooks/useCommunityFeed";
 import { useUsers } from "../../hooks/useUsers";
 import { useConversations } from "../../hooks/useConversations";
+import { useNotifications } from "../../hooks/useNotifications";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
@@ -16,6 +17,13 @@ vi.mock("../../context/useAuth", () => ({
 // just to render the page.
 vi.mock("../../hooks/useConversations", () => ({
   useConversations: vi.fn(),
+}));
+// SiteHeader also always renders NotificationBell when logged in, which
+// calls useNotifications (and, through it, the same real useSocket() that
+// throws outside a SocketProvider) -- mocked for the same reason as
+// useConversations above.
+vi.mock("../../hooks/useNotifications", () => ({
+  useNotifications: vi.fn(),
 }));
 vi.mock("../../hooks/useCommunityFeed", () => ({
   useCommunityFeed: vi.fn(),
@@ -57,6 +65,7 @@ function renderPage() {
 describe("CommunityPage", () => {
   beforeEach(() => {
     useConversations.mockReturnValue({ totalUnread: 0 });
+    useNotifications.mockReturnValue({ notifications: [], unreadCount: 0, markAllRead: vi.fn() });
   });
 
   it("shows the feed as a timeline, with each post's author and no dropdown of people to follow", () => {

@@ -7,6 +7,7 @@ import { useAdminUsers } from "../../hooks/useAdminUsers";
 import { useAdminStats } from "../../hooks/useAdminStats";
 import { useAdminTastings } from "../../hooks/useAdminTastings";
 import { useConversations } from "../../hooks/useConversations";
+import { useNotifications } from "../../hooks/useNotifications";
 
 vi.mock("../../context/useAuth", () => ({
   useAuth: vi.fn(),
@@ -17,6 +18,14 @@ vi.mock("../../context/useAuth", () => ({
 // just to render the page.
 vi.mock("../../hooks/useConversations", () => ({
   useConversations: vi.fn(),
+}));
+
+// SiteHeader also always renders NotificationBell when logged in, which
+// calls useNotifications (and, through it, the same real useSocket() that
+// throws outside a SocketProvider) -- mocked for the same reason as
+// useConversations above.
+vi.mock("../../hooks/useNotifications", () => ({
+  useNotifications: vi.fn(),
 }));
 vi.mock("../../hooks/useAdminUsers", () => ({
   useAdminUsers: vi.fn(),
@@ -73,6 +82,7 @@ const baseAdminTastings = {
 beforeEach(() => {
   useAdminTastings.mockReturnValue(baseAdminTastings);
   useConversations.mockReturnValue({ totalUnread: 0 });
+  useNotifications.mockReturnValue({ notifications: [], unreadCount: 0, markAllRead: vi.fn() });
 });
 
 function renderPage() {

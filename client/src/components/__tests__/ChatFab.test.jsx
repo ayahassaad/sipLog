@@ -28,12 +28,15 @@ describe("ChatFab", () => {
     useConversations.mockReturnValue({ totalUnread: 0 });
   });
 
-  it("shows a link to /chat when logged in", () => {
+  it("shows a button to open the chat popup when logged in", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" } });
 
     renderAt("/");
 
-    expect(screen.getByRole("link", { name: /messages/i })).toHaveAttribute("href", "/chat");
+    expect(screen.getByRole("button", { name: /messages/i })).toHaveAttribute(
+      "aria-haspopup",
+      "true"
+    );
   });
 
   it("renders nothing when logged out", () => {
@@ -41,7 +44,7 @@ describe("ChatFab", () => {
 
     renderAt("/");
 
-    expect(screen.queryByRole("link", { name: /messages/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /messages/i })).not.toBeInTheDocument();
   });
 
   it("renders nothing while already on the chat page", () => {
@@ -49,7 +52,7 @@ describe("ChatFab", () => {
 
     renderAt("/chat");
 
-    expect(screen.queryByRole("link", { name: /messages/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /messages/i })).not.toBeInTheDocument();
   });
 
   it("shows no badge when there are no unread messages", () => {

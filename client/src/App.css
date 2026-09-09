@@ -2245,11 +2245,15 @@ textarea:focus {
 
 /* A persistent shortcut to Messages, fixed in the same screen spot on
    every page regardless of scroll position -- see ChatFab. */
-.chat-fab {
+.chat-fab-root {
   position: fixed;
   right: 28px;
   bottom: 28px;
   z-index: 40;
+}
+
+.chat-fab {
+  position: relative;
   width: 52px;
   height: 52px;
   border-radius: 50%;
@@ -2627,4 +2631,96 @@ textarea:focus {
   font-size: 0.72rem;
   color: var(--text-soft);
   white-space: nowrap;
+}
+
+/* ---------- Floating chat popup (opened from the header's chat button) ---------- */
+
+.chat-popup {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 16px);
+  width: 360px;
+  height: 480px;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  background: var(--page-top);
+  border: 1px solid var(--gold);
+  box-shadow: 0 18px 36px rgba(14, 0, 4, 0.35);
+  z-index: 220;
+  overflow: hidden;
+}
+
+.chat-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+
+.chat-popup-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--gold);
+  font-size: 1rem;
+}
+
+.chat-popup-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-popup-back,
+.chat-popup-expand,
+.chat-popup-close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 0;
+}
+
+.chat-popup-back:hover,
+.chat-popup-expand:hover,
+.chat-popup-close:hover,
+.chat-popup-back:focus-visible,
+.chat-popup-expand:focus-visible,
+.chat-popup-close:focus-visible {
+  color: var(--gold);
+}
+
+.chat-popup-back svg,
+.chat-popup-expand svg,
+.chat-popup-close svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-popup-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+}
+
+.chat-popup > .chat-thread {
+  flex: 1;
+  min-height: 0;
+  padding: 0 16px 16px;
 }

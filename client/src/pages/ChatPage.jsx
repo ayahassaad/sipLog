@@ -1,111 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import Avatar from "../components/Avatar";
 import FilterBar from "../components/FilterBar";
+import ConversationRow from "../components/ConversationRow";
+import ChatThread from "../components/ChatThread";
 import { useAuth } from "../context/useAuth";
 import { useConversations } from "../hooks/useConversations";
-import { useChatThread } from "../hooks/useChatThread";
 import { useUsers } from "../hooks/useUsers";
 import { fetchUserProfile } from "../services/userService";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { getOrCreateConversation } from "../services/chatService";
-import { formatTimelineDate } from "../utils/formatTimelineDate";
-
-function ConversationRow({ conversation, isActive, onSelect }) {
-  const { otherUser, lastMessageText, lastMessageAt, unreadCount } = conversation;
-
-  return (
-    <button
-      type="button"
-      className={`chat-conversation-row ${isActive ? "active" : ""}`}
-      onClick={() => onSelect(conversation)}
-    >
-      <Avatar url={otherUser?.avatarUrl} name={otherUser?.name} size="sm" />
-      <div className="chat-conversation-info">
-        <p className="chat-conversation-name">{otherUser?.name || "Unknown"}</p>
-        <p className="chat-conversation-preview">{lastMessageText || "Say hello!"}</p>
-      </div>
-      <div className="chat-conversation-meta">
-        {lastMessageAt && (
-          <span className="chat-conversation-time">{formatTimelineDate(lastMessageAt)}</span>
-        )}
-        {unreadCount > 0 && <span className="chat-unread-badge">{unreadCount}</span>}
-      </div>
-    </button>
-  );
-}
-
-function ChatThread({ conversation, onRead }) {
-  const thread = useChatThread(conversation.id, { onRead });
-  const [draft, setDraft] = useState("");
-  const messagesEndRef = useRef(null);
-
-  // The composer stays fixed in place (see .chat-messages' bounded height
-  // in App.css) -- this is what keeps the newest message in view instead,
-  // scrolling the messages list itself rather than the whole page.
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ block: "end" });
-  }, [thread.messages]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const text = draft.trim();
-    if (!text) {
-      return;
-    }
-
-    setDraft("");
-    try {
-      await thread.send(text);
-    } catch {
-      // thread.error already carries the message for display below --
-      // nothing else to do here besides not clearing a message that failed.
-    }
-  };
-
-  return (
-    <div className="chat-thread">
-      <div className="chat-thread-header">
-        <Avatar url={conversation.otherUser?.avatarUrl} name={conversation.otherUser?.name} size="sm" />
-        <p className="chat-thread-name">{conversation.otherUser?.name}</p>
-      </div>
-
-      <div className="chat-messages">
-        {thread.error && <p className="status-message error" role="alert">{thread.error}</p>}
-        {!thread.loading && !thread.error && thread.messages.length === 0 && (
-          <p className="feed-empty">No messages yet -- say hello!</p>
-        )}
-
-        {thread.messages.map((message) => (
-          <div
-            key={message.id}
-            className={`chat-message ${
-              message.senderId === conversation.otherUser?.id ? "theirs" : "own"
-            }`}
-          >
-            <p>{message.text}</p>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <form className="chat-composer" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="Write a message..."
-          maxLength={2000}
-          aria-label="Message"
-        />
-        <button type="submit" className="button-gold" disabled={thread.sending || !draft.trim()}>
-          Send
-        </button>
-      </form>
-    </div>
-  );
-}
 
 // Direct messages: an inbox on the left (with an always-visible search to
 // find someone new to message), the selected conversation's thread on the

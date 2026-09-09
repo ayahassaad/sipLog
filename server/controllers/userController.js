@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const { hashPassword, comparePassword } = require("../utils/password");
+const { notify } = require("../notifications");
 
 const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
 
@@ -116,6 +117,8 @@ exports.followUser = async (req, res) => {
 
     await User.updateOne({ _id: req.user._id }, { $addToSet: { following: id } });
 
+    notify({ userId: id, actorId: req.user._id, type: "follow" });
+
     res.json({ message: "Followed successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -131,6 +134,8 @@ exports.unfollowUser = async (req, res) => {
     }
 
     await User.updateOne({ _id: req.user._id }, { $pull: { following: id } });
+
+    notify({ userId: id, actorId: req.user._id, type: "unfollow" });
 
     res.json({ message: "Unfollowed successfully" });
   } catch (error) {

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Tasting = require("../models/Tasting");
 const Wine = require("../models/Wine");
 const User = require("../models/User");
+const { notify } = require("../notifications");
 
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
 
@@ -333,12 +334,14 @@ exports.favoriteTasting = async (req, res) => {
       return res.status(400).json({ message: "Invalid tasting id" });
     }
 
-    const tastingExists = await Tasting.exists({ _id: id });
-    if (!tastingExists) {
+    const tasting = await Tasting.findById(id).select("userId");
+    if (!tasting) {
       return res.status(404).json({ message: "Tasting not found" });
     }
 
     await User.updateOne({ _id: req.user._id }, { $addToSet: { favorites: id } });
+
+    notify({ userId: tasting.userId, actorId: req.user._id, type: "favorite" });
 
     res.json({ message: "Favorited successfully" });
   } catch (error) {

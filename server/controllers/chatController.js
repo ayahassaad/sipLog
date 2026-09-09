@@ -3,6 +3,7 @@ const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const User = require("../models/User");
 const { emitToUser } = require("../socket");
+const { notify } = require("../notifications");
 
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
@@ -215,6 +216,12 @@ exports.sendMessage = async (req, res) => {
       .find((id) => id.toString() !== req.user._id.toString())
       .toString();
     emitToUser(otherUserId, "message:new", payload);
+    notify({
+      userId: otherUserId,
+      actorId: req.user._id,
+      type: "message",
+      conversationId: conversation._id,
+    });
 
     res.status(201).json(payload);
   } catch (error) {

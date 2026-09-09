@@ -485,19 +485,37 @@ textarea:focus {
   background: linear-gradient(180deg, #f6b8cd, #e0678f 75%);
 }
 
-.bottle-rating--sparkling .bottle-fill {
+/* Sparkling uses a single clipped shape instead of the neck/body boxes
+   (see BottleRating.jsx) -- a thin neck swooping out to a fat base,
+   like a real champagne bottle. The clip-path also clips .bottle-fill,
+   so the liquid follows the same silhouette automatically. */
+.bottle-shape--sparkling {
+  width: 50px;
+  height: 134px;
+  background: linear-gradient(180deg, #355845, #1f352b 30%, rgba(27, 48, 38, 0.94));
+  clip-path: polygon(
+    42% 0%, 58% 0%,
+    58% 10%, 60% 14%,
+    68% 24%, 78% 34%,
+    88% 46%, 94% 58%,
+    97% 70%, 98% 82%,
+    98% 100%,
+    2% 100%,
+    2% 82%, 3% 70%,
+    6% 58%, 12% 46%,
+    22% 34%, 32% 24%,
+    40% 14%, 42% 10%
+  );
+  overflow: hidden;
+  position: relative;
+}
+
+.bottle-shape--sparkling .bottle-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: linear-gradient(180deg, #f6ecc4, #e2cd82 75%);
-}
-
-.bottle-rating--sparkling .bottle-neck {
-  height: 42px;
-  width: 12px;
-}
-
-.bottle-rating--sparkling .bottle-body {
-  width: 42px;
-  height: 104px;
-  border-radius: 10px 10px 18px 18px;
 }
 
 .bottle-rating--sweet .bottle-fill {

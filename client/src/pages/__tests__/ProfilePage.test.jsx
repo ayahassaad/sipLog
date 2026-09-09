@@ -68,7 +68,9 @@ describe("ProfilePage", () => {
   it("shows the profile info and the following/followers counts", () => {
     const { container } = renderPage();
 
-    expect(screen.getByText("Ayah")).toBeInTheDocument();
+    // Ayah's own name/header profile chip also renders "Ayah" in
+    // SiteHeader now, so scope this to the profile page's own heading.
+    expect(screen.getByRole("heading", { name: "Ayah" })).toBeInTheDocument();
     expect(screen.getByText("@ayah")).toBeInTheDocument();
     expect(screen.queryByText("ayah@example.com")).not.toBeInTheDocument();
 

@@ -900,35 +900,84 @@ textarea:focus {
   position: absolute;
   top: calc(100% + 16px);
   right: 0;
-  min-width: 190px;
+  min-width: 236px;
   background: var(--page-top);
   border: 1px solid var(--gold);
-  padding: 8px 0;
+  overflow: hidden;
   z-index: 200;
   box-shadow: 0 18px 36px rgba(14, 0, 4, 0.35);
 }
 
+.burger-profile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 22px 36px 33px;
+}
+
+.burger-profile-name,
+.burger-profile-handle {
+  margin: 0;
+}
+
+.burger-profile-name {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.burger-profile-handle {
+  margin-top: 2px;
+  color: var(--berry-mid);
+  font-size: 0.7rem;
+}
+
+.burger-group {
+  padding: 0;
+}
+
+.burger-admin-group {
+  padding-top: 0;
+}
+
 .burger-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 22px;
   width: 100%;
   text-align: left;
   background: none;
   border: none;
-  padding: 11px 18px;
+  padding: 25px 36px;
   color: var(--text-soft);
   font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   text-decoration: none;
   cursor: pointer;
   transition: color 0.16s ease, background 0.16s ease;
+}
+
+.burger-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .burger-item:hover,
 .burger-item:focus-visible {
   color: var(--gold);
   background: rgba(216, 173, 95, 0.08);
+}
+
+.burger-logout {
+  margin-top: 0;
 }
 
 .nav-link {
@@ -1522,8 +1571,9 @@ textarea:focus {
    a clickable shimmering prompt (same gold sweep as .feed-loading/
    .feed-empty above) with a small arrow, that jumps straight into the
    Add New Wine tab. Only shown when there's no search term narrowing
-   things down; a search with zero matches still gets the plain
-   "No entries match your current filters." message above. */
+   things down; a search with zero matches instead gets the plain (not
+   clickable) "No entries match your current filters." text, styled with
+   the same .feed-empty shimmer above it. */
 .empty-state-cta {
   display: flex;
   align-items: center;

@@ -775,19 +775,30 @@ textarea:focus {
   border-radius: 0;
 }
 
+/* Same slow gold-shimmer sweep as the community feed's loading/empty text
+   (see .feed-loading/.feed-empty) -- every status message across the app
+   (form errors, success confirmations, loading states) shares this one
+   "sparkle" look now instead of the old solid maroon box. Error keeps a
+   warm rose tint in its sweep so it still reads as bad news at a glance. */
 .status-message {
-  padding: 18px;
-  border-radius: 0;
-  background: #8c2140;
+  margin: 10px 0;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  background-image: linear-gradient(90deg, var(--text-soft) 30%, var(--gold) 50%, var(--text-soft) 70%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: feedLoadingShimmer 2.2s ease-in-out infinite;
 }
 
 .status-message.error {
-  border: 1px solid rgba(255, 221, 228, 0.16);
+  background-image: linear-gradient(90deg, var(--text-soft) 30%, #e8697e 50%, var(--text-soft) 70%);
 }
 
 .status-message.success {
-  border: 1px solid rgba(255, 226, 233, 0.18);
-  background: rgba(120, 31, 54, 0.96);
+  background-image: linear-gradient(90deg, var(--text-soft) 30%, var(--gold) 50%, var(--text-soft) 70%);
 }
 
 @media (max-width: 980px) {

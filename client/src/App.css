@@ -2176,6 +2176,28 @@ textarea:focus {
   stroke-linejoin: round;
 }
 
+/* Unread-message notification dot, overlaid on the FAB's top-right edge --
+   same gold/dark pairing as .chat-unread-badge for visual consistency,
+   sized and positioned like a typical app notification badge instead of
+   sitting inline in a row. Count is capped at "10+" by ChatFab itself. */
+.chat-fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--gold);
+  color: var(--page-top);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 0 0 2px var(--accent-strong);
+}
+
 .chat-list-heading {
   display: flex;
   align-items: center;

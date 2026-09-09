@@ -1,17 +1,28 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchConversations } from "../services/chatService";
 import { useSocket } from "../context/useSocket";
+import { useAuth } from "../context/useAuth";
 
 // The chat inbox: every conversation the signed-in user is part of, kept
 // live via the socket -- an incoming message bumps that conversation to
 // the top and updates its preview/unread count without a manual refresh.
+//
+// Gated on `user` so this is safe to call unconditionally from anywhere --
+// notably ChatFab, which renders (and needs an unread count) on every page
+// including ones a logged-out visitor can see. Without the guard, a
+// logged-out mount would still fire an authenticated-only request and get
+// a 401 for no reason.
 export function useConversations() {
+  const { user } = useAuth();
   const { socket } = useSocket();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const loadConversations = useCallback(async () => {
+    if (!user) {
+      return;
+    }
     try {
       const data = await fetchConversations();
       setConversations(data);
@@ -19,10 +30,17 @@ export function useConversations() {
     } catch (err) {
       setError(err.message);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    if (!user) {
+      setConversations([]);
+      setLoading(false);
+      return undefined;
+    }
+
     let ignore = false;
+    setLoading(true);
     loadConversations().finally(() => {
       if (!ignore) {
         setLoading(false);
@@ -31,7 +49,7 @@ export function useConversations() {
     return () => {
       ignore = true;
     };
-  }, [loadConversations]);
+  }, [loadConversations, user]);
 
   useEffect(() => {
     if (!socket) {

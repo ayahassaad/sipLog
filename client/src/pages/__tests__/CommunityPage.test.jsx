@@ -329,7 +329,7 @@ describe("CommunityPage", () => {
     expect(screen.queryByRole("button", { name: /^follow$/i })).not.toBeInTheDocument();
   });
 
-  it("toggles the following-only filter when the checkbox is checked", () => {
+  it("switches to the Following scope when its segmented button is clicked", () => {
     useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
     const setFollowingOnly = vi.fn();
     useUsers.mockReturnValue({ users: [], loading: false, error: "", toggleFollow: vi.fn() });
@@ -348,11 +348,34 @@ describe("CommunityPage", () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByRole("checkbox", { name: /following only/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^following$/i }));
     expect(setFollowingOnly).toHaveBeenCalledWith(true);
   });
 
-  it("sends a logged-out visitor to log in instead of toggling following-only", () => {
+  it("switches back to All from the Following scope", () => {
+    useAuth.mockReturnValue({ user: { name: "Ayah" }, logout: vi.fn() });
+    const setFollowingOnly = vi.fn();
+    useUsers.mockReturnValue({ users: [], loading: false, error: "", toggleFollow: vi.fn() });
+    useCommunityFeed.mockReturnValue({
+      tastings: [],
+      loading: false,
+      error: "",
+      hasMore: false,
+      loadMore: vi.fn(),
+      search: "",
+      runSearch: vi.fn(),
+      matchedUsers: [],
+      followingOnly: true,
+      setFollowingOnly,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /^all$/i }));
+    expect(setFollowingOnly).toHaveBeenCalledWith(false);
+  });
+
+  it("sends a logged-out visitor to log in instead of switching to Following", () => {
     mockNavigate.mockClear();
     useAuth.mockReturnValue({ user: null, logout: vi.fn() });
     const setFollowingOnly = vi.fn();
@@ -372,7 +395,7 @@ describe("CommunityPage", () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByRole("checkbox", { name: /following only/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^following$/i }));
     expect(setFollowingOnly).not.toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith("/login", expect.anything());
   });

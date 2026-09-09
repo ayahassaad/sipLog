@@ -72,12 +72,15 @@ function CommunityPage() {
     feed.toggleFavorite(tastingId, isFavorited);
   };
 
-  const handleToggleFollowingOnly = () => {
-    if (!user) {
+  const handleSetFollowingOnly = (value) => {
+    if (value === feed.followingOnly) {
+      return;
+    }
+    if (value && !user) {
       requireLogin();
       return;
     }
-    feed.setFollowingOnly(!feed.followingOnly);
+    feed.setFollowingOnly(value);
   };
 
   const toggleComments = (tastingId) => {
@@ -145,14 +148,24 @@ function CommunityPage() {
               onSearchTermChange={setSearchTerm}
               placeholder="Search for a wine or a user..."
             />
-            <label className="following-only-toggle">
-              <input
-                type="checkbox"
-                checked={feed.followingOnly}
-                onChange={handleToggleFollowingOnly}
-              />
-              Following only
-            </label>
+            <div className="feed-scope-toggle" role="group" aria-label="Feed scope">
+              <button
+                type="button"
+                className={`feed-scope-option ${feed.followingOnly ? "" : "active"}`}
+                aria-pressed={!feed.followingOnly}
+                onClick={() => handleSetFollowingOnly(false)}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`feed-scope-option ${feed.followingOnly ? "active" : ""}`}
+                aria-pressed={feed.followingOnly}
+                onClick={() => handleSetFollowingOnly(true)}
+              >
+                Following
+              </button>
+            </div>
           </div>
 
           {loading && <p className="feed-loading">Loading the community feed...</p>}

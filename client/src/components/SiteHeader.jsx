@@ -4,6 +4,7 @@ import { useAuth } from "../context/useAuth";
 import Avatar from "./Avatar";
 import RoseGlassLogo from "./RoseGlassLogo";
 import ChatFab from "./ChatFab";
+import NotificationBell from "./NotificationBell";
 
 function navLinkClassName({ isActive }) {
   return isActive ? "nav-link active" : "nav-link";
@@ -99,6 +100,9 @@ function SiteHeader() {
           <NavLink to="/journal" className={navLinkClassName}>
             My Journal
           </NavLink>
+          <NavLink to="/chat" className={navLinkClassName}>
+            Messages
+          </NavLink>
         </nav>
 
         <Link to="/" className="site-header-logo">
@@ -116,6 +120,8 @@ function SiteHeader() {
                   {user.username && <p className="site-header-profile-handle">@{user.username}</p>}
                 </div>
               </Link>
+
+              <NotificationBell />
 
               <div className="burger-menu" ref={menuRef}>
               <button

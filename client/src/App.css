@@ -2264,12 +2264,13 @@ textarea:focus {
   transition: transform 0.16s ease, filter 0.16s ease;
 }
 
-/* Same gold ghost-outline "pop" family as .button-gold -- scale up and
-   pulse a gold glow on hover instead of just nudging upward. */
+/* Just a scale-up + brightness pop on hover, no glow-pulse ring like
+   .button-gold's -- the pulsing ring looked broken/half-circle here since
+   the unread badge sits right on the button's corner and blocks part of
+   it every cycle. */
 .chat-fab:hover {
   transform: scale(1.12);
   filter: brightness(1.08);
-  animation: wineButtonGlowPulse 1.3s ease-out infinite;
 }
 
 .chat-fab svg {

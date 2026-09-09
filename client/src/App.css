@@ -2267,35 +2267,38 @@ textarea:focus {
   gap: 12px;
 }
 
-.chat-search-toggle {
+.chat-search-panel {
+  margin-bottom: 6px;
+}
+
+.chat-search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-search-row .filter-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-search-icon {
   width: 30px;
   height: 30px;
   border-radius: 50%;
   border: 1px solid var(--line);
-  background: none;
   display: grid;
   place-items: center;
-  cursor: pointer;
   flex-shrink: 0;
-  transition: border-color 0.16s ease, background 0.16s ease;
 }
 
-.chat-search-toggle:hover {
-  border-color: var(--gold);
-  background: rgba(216, 173, 95, 0.1);
-}
-
-.chat-search-toggle svg {
+.chat-search-icon svg {
   width: 15px;
   height: 15px;
   stroke: var(--text-soft);
   fill: none;
   stroke-width: 1.8;
   stroke-linecap: round;
-}
-
-.chat-search-panel {
-  margin-bottom: 6px;
 }
 
 .chat-search-results {

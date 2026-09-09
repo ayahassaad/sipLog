@@ -195,7 +195,6 @@ describe("ChatPage search for someone to message", () => {
     });
 
     renderChatPage();
-    fireEvent.click(screen.getByRole("button", { name: /find someone to message/i }));
     fireEvent.change(screen.getByPlaceholderText(/find someone to message/i), {
       target: { value: "dan" },
     });
@@ -211,7 +210,6 @@ describe("ChatPage search for someone to message", () => {
     useUsers.mockReturnValue({ ...baseUsersState, users: [{ id: "me-id", name: "Ayah", username: "ayah" }] });
 
     renderChatPage();
-    fireEvent.click(screen.getByRole("button", { name: /find someone to message/i }));
     fireEvent.change(screen.getByPlaceholderText(/find someone to message/i), {
       target: { value: "ayah" },
     });

@@ -106,8 +106,8 @@ function ChatThread({ conversation, onRead }) {
   );
 }
 
-// Direct messages: an inbox on the left (plus a small search toggle to find
-// someone new to message), the selected conversation's thread on the
+// Direct messages: an inbox on the left (with an always-visible search to
+// find someone new to message), the selected conversation's thread on the
 // right. Visiting /chat/:username (from a profile's "Message" button)
 // resolves that person to a conversation, selects it, then swaps the URL
 // back to the plain /chat so refreshing doesn't repeat the lookup.
@@ -119,7 +119,6 @@ function ChatPage() {
   const people = useUsers();
   const [activeConversation, setActiveConversation] = useState(null);
   const [startError, setStartError] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -170,7 +169,6 @@ function ChatPage() {
   }, [people.users, searchTerm, user]);
 
   const handleStartFromSearch = async (person) => {
-    setSearchOpen(false);
     setSearchTerm("");
     try {
       const conversation = await getOrCreateConversation(person.id);
@@ -188,48 +186,43 @@ function ChatPage() {
         <section className="panel chat-list-panel">
           <div className="section-heading chat-list-heading">
             <h2 className="brand-highlight">Messages</h2>
-            <button
-              type="button"
-              className="chat-search-toggle"
-              aria-label={searchOpen ? "Close search" : "Find someone to message"}
-              onClick={() => setSearchOpen((open) => !open)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-            </button>
           </div>
 
-          {searchOpen && (
-            <div className="chat-search-panel">
+          <div className="chat-search-panel">
+            <div className="chat-search-row">
+              <span className="chat-search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+              </span>
               <FilterBar
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
                 placeholder="Find someone to message..."
               />
-
-              {searchTerm.trim() && matchedUsers.length === 0 && (
-                <p className="feed-empty">No users found.</p>
-              )}
-
-              {matchedUsers.length > 0 && (
-                <div className="chat-search-results">
-                  {matchedUsers.map((person) => (
-                    <button
-                      type="button"
-                      key={person.id}
-                      className="chat-search-result"
-                      onClick={() => handleStartFromSearch(person)}
-                    >
-                      <Avatar url={person.avatarUrl} name={person.name} size="sm" />
-                      <span className="chat-conversation-name">{person.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
-          )}
+
+            {searchTerm.trim() && matchedUsers.length === 0 && (
+              <p className="feed-empty">No users found.</p>
+            )}
+
+            {matchedUsers.length > 0 && (
+              <div className="chat-search-results">
+                {matchedUsers.map((person) => (
+                  <button
+                    type="button"
+                    key={person.id}
+                    className="chat-search-result"
+                    onClick={() => handleStartFromSearch(person)}
+                  >
+                    <Avatar url={person.avatarUrl} name={person.name} size="sm" />
+                    <span className="chat-conversation-name">{person.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {conversationsState.error && (
             <p className="status-message error">{conversationsState.error}</p>

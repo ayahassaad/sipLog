@@ -48,6 +48,27 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
+// TEMPORARY diagnostic route -- confirms which database this running
+// server is actually connected to, and how many users it sees there.
+// Added to resolve a same-name-different-casing database mix-up during
+// deployment. Safe to remove once login is confirmed working end to end.
+app.get("/api/debug/db-info", async (_req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    const User = require("./models/User");
+    const userCount = await User.countDocuments();
+    const sampleUsers = await User.find().select("email username").limit(10);
+    res.json({
+      connectedDatabase: mongoose.connection.name,
+      connectedHost: mongoose.connection.host,
+      userCount,
+      sampleUsers,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.use("/api/auth", authRoutes);
 // Tastings and users each have a couple of public read routes (the
 // community feed, the user directory), so they apply requireAuth per-route

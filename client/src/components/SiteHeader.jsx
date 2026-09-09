@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import Avatar from "./Avatar";
-import RoseGlassLogo from "./RoseGlassLogo";
 import ChatFab from "./ChatFab";
 
 function navLinkClassName({ isActive }) {
@@ -102,7 +101,6 @@ function SiteHeader() {
         </nav>
 
         <div className="site-header-logo">
-          <RoseGlassLogo />
           <p className="site-header-title">SipLog</p>
         </div>
 

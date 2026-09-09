@@ -83,7 +83,7 @@ function TastingTimeline({
             </svg>
           </button>
         ) : (
-          <p className="status-message">No entries match your current filters.</p>
+          <p className="feed-empty">No entries match your current filters.</p>
         )
       )}
 

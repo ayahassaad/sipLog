@@ -1571,8 +1571,9 @@ textarea:focus {
    a clickable shimmering prompt (same gold sweep as .feed-loading/
    .feed-empty above) with a small arrow, that jumps straight into the
    Add New Wine tab. Only shown when there's no search term narrowing
-   things down; a search with zero matches still gets the plain
-   "No entries match your current filters." message above. */
+   things down; a search with zero matches instead gets the plain (not
+   clickable) "No entries match your current filters." text, styled with
+   the same .feed-empty shimmer above it. */
 .empty-state-cta {
   display: flex;
   align-items: center;

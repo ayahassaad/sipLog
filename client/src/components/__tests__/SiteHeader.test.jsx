@@ -62,6 +62,7 @@ describe("SiteHeader", () => {
     // overrides its implicit link/button role, so that's what to query by.
     expect(screen.getByRole("menuitem", { name: /my profile/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /^about$/i })).toHaveAttribute("href", "/about");
     expect(screen.getByRole("menuitem", { name: /^log out$/i })).toBeInTheDocument();
   });
 

@@ -15,6 +15,7 @@ import UserProfilePage from "./pages/UserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import ChatPage from "./pages/ChatPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import AboutPage from "./pages/AboutPage";
 import { recordVisit } from "./services/analyticsService";
 
 function App() {
@@ -106,6 +107,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Public -- no need to be logged in to read about the project. */}
+          <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </SocketProvider>

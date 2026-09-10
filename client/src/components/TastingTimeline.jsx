@@ -61,6 +61,34 @@ function TastingTimeline({
     setActiveIndex(((index % count) + count) % count);
   };
 
+  // Left/Right arrow keys step through the carousel, same as clicking the
+  // arrow buttons -- skipped while typing in the search box or any other
+  // field, and skipped entirely when there is nothing to step through.
+  useEffect(() => {
+    if (count <= 1) return undefined;
+
+    const handleKeyDown = (event) => {
+      const target = event.target;
+      const isTypingTarget =
+        target instanceof HTMLElement &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+      if (isTypingTarget) return;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setActiveIndex((current) => ((current - 1 + count) % count + count) % count);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveIndex((current) => ((current + 1) % count + count) % count);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [count]);
+
   return (
     <>
       <div className="section-heading timeline-heading" id="timeline-section">

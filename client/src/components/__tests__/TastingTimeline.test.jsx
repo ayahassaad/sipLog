@@ -89,3 +89,49 @@ describe("TastingTimeline author link (Favorites tab)", () => {
     expect(link).toHaveAttribute("href", "/users/bob");
   });
 });
+
+describe("TastingTimeline keyboard navigation", () => {
+  const tastingAt = (index) => ({
+    _id: `tasting-${index}`,
+    rating: 4,
+    appearance: "Deep ruby",
+    noseNotes: [],
+    palateNotes: [],
+    sweetness: 2,
+    acidity: 3,
+    body: 4,
+    tannin: 3,
+    wineId: {
+      name: `Wine ${index}`,
+      producer: "Bodega Test",
+      grape: "Tempranillo",
+      country: "Spain",
+      vintage: 2018,
+    },
+  });
+
+  it("moves to the next and previous card with the arrow keys", () => {
+    const tastings = [tastingAt(0), tastingAt(1), tastingAt(2)];
+    render(<TastingTimeline {...baseProps} filteredCount={3} tastings={tastings} />);
+
+    const dots = screen.getAllByRole("button", { name: /go to/i });
+    expect(dots[0]).toHaveClass("is-active");
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(dots[1]).toHaveClass("is-active");
+
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(dots[0]).toHaveClass("is-active");
+  });
+
+  it("ignores arrow keys while typing in the search box", () => {
+    const tastings = [tastingAt(0), tastingAt(1)];
+    render(<TastingTimeline {...baseProps} filteredCount={2} tastings={tastings} />);
+
+    const searchInput = screen.getByPlaceholderText(/search wine/i);
+    fireEvent.keyDown(searchInput, { key: "ArrowRight" });
+
+    const dots = screen.getAllByRole("button", { name: /go to/i });
+    expect(dots[0]).toHaveClass("is-active");
+  });
+});

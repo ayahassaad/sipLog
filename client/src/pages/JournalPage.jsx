@@ -217,6 +217,7 @@ function JournalPage() {
       moodTags: tasting.moodTags || [],
       personalThoughts: tasting.personalThoughts || "",
       imageUrl: tasting.imageUrl || "",
+      visibility: tasting.visibility || "public",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

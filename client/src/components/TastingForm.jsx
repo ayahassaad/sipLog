@@ -1,4 +1,4 @@
-import { WINE_TYPES } from "../constants";
+import { VISIBILITY_OPTIONS, WINE_TYPES } from "../constants";
 
 const scoreOptions = [1, 2, 3, 4, 5];
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
@@ -211,6 +211,32 @@ function TastingForm({
               rows="2"
             />
           </label>
+
+          <div className="field field-full">
+            <span>Who can see this</span>
+            <div className="visibility-toggle" role="radiogroup" aria-label="Who can see this entry">
+              {VISIBILITY_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`visibility-option ${
+                    tastingForm.visibility === option.value ? "active" : ""
+                  }`}
+                  aria-pressed={tastingForm.visibility === option.value}
+                  onClick={() =>
+                    onTastingChange({
+                      target: { name: "visibility", value: option.value, type: "text" },
+                    })
+                  }
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <p className="visibility-hint">
+              {VISIBILITY_OPTIONS.find((option) => option.value === tastingForm.visibility)?.hint}
+            </p>
+          </div>
         </div>
 
         <div className="button-row form-buttons">

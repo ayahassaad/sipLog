@@ -2999,6 +2999,97 @@ textarea:focus {
   color: var(--gold);
 }
 
+/* Public / Followers / Private selector on the tasting form -- same
+   segmented pill treatment as the Community feed's All/Following switch,
+   just with a third option and a small hint line underneath explaining
+   the current choice. */
+.visibility-toggle {
+  display: inline-flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.visibility-option {
+  border: none;
+  background: none;
+  color: var(--text-soft);
+  padding: 7px 16px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.visibility-option.active {
+  background: var(--gold);
+  color: var(--page-top);
+}
+
+.visibility-option:not(.active):hover,
+.visibility-option:not(.active):focus-visible {
+  color: var(--gold);
+}
+
+.visibility-hint {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+/* About page -- plain prose sections inside the standard panel, styled
+   with the same gold section-kicker labels used elsewhere rather than a
+   whole new set of heading styles. */
+.about-page {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.about-intro {
+  margin-top: 18px;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.about-section {
+  margin-top: 32px;
+}
+
+.about-section p {
+  margin-top: 10px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.about-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.about-list li {
+  margin-bottom: 10px;
+}
+
+.about-section a {
+  color: var(--gold);
+}
+
+.about-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
 /* Read-more pop-up (TastingDetailModal) -- reuses the same overlay/panel
    as the Following/Followers modal, just wider and left-aligned since
    it's read-only prose rather than a list of people to click through. */

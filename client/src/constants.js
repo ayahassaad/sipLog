@@ -11,6 +11,15 @@ export const MOOD_TAGS = [
 
 export const WINE_TYPES = ["red", "white", "rose", "sparkling", "sweet"];
 
+// Who can see a tasting on the Community feed. Your own My Journal always
+// shows all of your entries no matter which of these is chosen; this only
+// controls what other people can see.
+export const VISIBILITY_OPTIONS = [
+  { value: "public", label: "Community", hint: "Visible to everyone" },
+  { value: "followers", label: "Followers", hint: "Visible to people who follow you" },
+  { value: "private", label: "Private", hint: "Visible only to you" },
+];
+
 export const initialWineForm = {
   name: "",
   producer: "",
@@ -38,4 +47,5 @@ export const initialTastingForm = {
   moodTags: [],
   personalThoughts: "",
   imageUrl: "",
+  visibility: "public",
 };

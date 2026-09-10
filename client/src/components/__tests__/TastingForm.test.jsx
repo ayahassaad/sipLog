@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import TastingForm from "../TastingForm";
 import { initialTastingForm, initialWineForm } from "../../constants";
@@ -53,5 +53,21 @@ describe("TastingForm", () => {
     const { onSubmit } = renderForm();
     fireEvent.submit(screen.getByRole("button", { name: /save wine/i }).closest("form"));
     expect(onSubmit).toHaveBeenCalled();
+  });
+
+  it("defaults to the Community visibility option and reports a change when another is picked", () => {
+    const { onTastingChange } = renderForm();
+
+    const group = screen.getByRole("radiogroup", { name: /who can see this entry/i });
+    expect(within(group).getByRole("button", { name: /community/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+
+    fireEvent.click(within(group).getByRole("button", { name: /private/i }));
+
+    expect(onTastingChange).toHaveBeenCalledWith(
+      expect.objectContaining({ target: expect.objectContaining({ name: "visibility", value: "private" }) })
+    );
   });
 });

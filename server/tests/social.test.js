@@ -370,3 +370,77 @@ describe("Community feed", () => {
     expect(feed.body.tastings).toHaveLength(0);
   });
 });
+
+describe("Tasting visibility", () => {
+  it("shows a public tasting (the default) to everyone", async () => {
+    const { agent: alice, user: aliceUser } = await registerAgent();
+    const wine = await createWine(alice);
+    await alice.post("/api/tastings").send({ ...baseTasting, wineId: wine._id });
+
+    const feed = await request(app).get("/api/tastings/feed");
+
+    expect(feed.status).toBe(200);
+    expect(feed.body.tastings).toHaveLength(1);
+    expect(feed.body.tastings[0].userId.username).toBe(aliceUser.username);
+  });
+
+  it("hides a private tasting from everyone else, but the journal still shows it to its author", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob } = await registerAgent();
+    const wine = await createWine(alice);
+    await alice
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: wine._id, visibility: "private" });
+
+    const bobFeed = await bob.get("/api/tastings/feed");
+    const loggedOutFeed = await request(app).get("/api/tastings/feed");
+    const aliceJournal = await alice.get("/api/tastings");
+
+    expect(bobFeed.body.tastings).toHaveLength(0);
+    expect(loggedOutFeed.body.tastings).toHaveLength(0);
+    expect(aliceJournal.body.tastings).toHaveLength(1);
+  });
+
+  it("shows a followers-only tasting to a follower but not to a non-follower", async () => {
+    const { agent: alice } = await registerAgent();
+    const { agent: bob, user: bobUser } = await registerAgent();
+    const { agent: carol } = await registerAgent();
+    const wine = await createWine(bob);
+    await bob
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: wine._id, visibility: "followers" });
+
+    await alice.post(`/api/users/${bobUser.id}/follow`);
+
+    const aliceFeed = await alice.get("/api/tastings/feed");
+    const carolFeed = await carol.get("/api/tastings/feed");
+    const loggedOutFeed = await request(app).get("/api/tastings/feed");
+
+    expect(aliceFeed.body.tastings).toHaveLength(1);
+    expect(carolFeed.body.tastings).toHaveLength(0);
+    expect(loggedOutFeed.body.tastings).toHaveLength(0);
+  });
+
+  it("always shows the author their own tasting on the feed, regardless of visibility", async () => {
+    const { agent: alice } = await registerAgent();
+    const wine = await createWine(alice);
+    await alice
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: wine._id, visibility: "private" });
+
+    const aliceFeed = await alice.get("/api/tastings/feed");
+
+    expect(aliceFeed.body.tastings).toHaveLength(1);
+  });
+
+  it("rejects an invalid visibility value", async () => {
+    const { agent: alice } = await registerAgent();
+    const wine = await createWine(alice);
+
+    const res = await alice
+      .post("/api/tastings")
+      .send({ ...baseTasting, wineId: wine._id, visibility: "friends-only" });
+
+    expect(res.status).toBe(400);
+  });
+});

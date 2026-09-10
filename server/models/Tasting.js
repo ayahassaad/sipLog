@@ -77,6 +77,16 @@ const tastingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    // Controls who can see this tasting on the Community feed. "public"
+    // shows to everyone, "followers" shows only to people who follow the
+    // author (plus the author themselves), "private" shows only to the
+    // author. My Journal always shows all of a user's own tastings
+    // regardless of this value -- it only affects the shared feed.
+    visibility: {
+      type: String,
+      enum: ["public", "followers", "private"],
+      default: "public",
+    },
   },
   { timestamps: true }
 );

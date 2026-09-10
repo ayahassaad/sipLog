@@ -6,6 +6,7 @@ const Comment = require("../models/Comment");
 const { notify } = require("../notifications");
 
 const scoreFields = ["sweetness", "acidity", "body", "tannin", "rating"];
+const VISIBILITY_VALUES = ["public", "followers", "private"];
 
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
@@ -174,6 +175,14 @@ function buildValidatedPayload(body, { partial = false } = {}) {
     }
   }
 
+  if (body.visibility !== undefined) {
+    if (!VISIBILITY_VALUES.includes(body.visibility)) {
+      errors.push("visibility must be public, followers, or private");
+    } else {
+      payload.visibility = body.visibility;
+    }
+  }
+
   return { errors, payload };
 }
 
@@ -289,6 +298,9 @@ exports.getCommunityFeed = async (req, res) => {
     // whichever wines or people matched. Matching users are also returned
     // on their own (as `matchedUsers`) so someone who hasn't posted yet
     // still turns up as a result, not just their tastings.
+    const andConditions = [];
+    const viewerFollowingIds = req.user?.following || [];
+
     const search = (req.query.search || "").trim();
     let matchedUsers = [];
     if (search) {
@@ -302,16 +314,38 @@ exports.getCommunityFeed = async (req, res) => {
         }),
       ]);
       const matchingUserIds = matchingUserDocs.map((user) => user._id);
-      query.$or = [{ wineId: { $in: matchingWineIds } }, { userId: { $in: matchingUserIds } }];
+      andConditions.push({
+        $or: [{ wineId: { $in: matchingWineIds } }, { userId: { $in: matchingUserIds } }],
+      });
 
-      const viewerFollowingIds = new Set((req.user?.following || []).map((id) => id.toString()));
+      const viewerFollowingIdStrings = new Set(viewerFollowingIds.map((id) => id.toString()));
       matchedUsers = matchingUserDocs.map((user) => ({
         id: user._id,
         name: user.name,
         username: user.username,
         avatarUrl: user.avatarUrl || "",
-        isFollowing: viewerFollowingIds.has(user._id.toString()),
+        isFollowing: viewerFollowingIdStrings.has(user._id.toString()),
       }));
+    }
+
+    // Visibility gate, applied no matter which other filters are active. A
+    // "public" tasting (or one saved before this field existed) shows to
+    // everyone, a "followers" tasting shows only to the author and people
+    // who follow them, and a "private" tasting shows only to the author.
+    // This is combined with the other filters through $and rather than a
+    // second top level $or, since a single query object can only carry one
+    // $or key of its own.
+    const visibilityOr = [{ visibility: "public" }, { visibility: { $exists: false } }];
+    if (req.user) {
+      visibilityOr.push({ userId: req.user._id });
+    }
+    if (viewerFollowingIds.length > 0) {
+      visibilityOr.push({ visibility: "followers", userId: { $in: viewerFollowingIds } });
+    }
+    andConditions.push({ $or: visibilityOr });
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
     }
 
     const page = Math.max(1, Number(req.query.page) || 1);

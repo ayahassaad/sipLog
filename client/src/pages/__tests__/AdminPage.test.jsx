@@ -172,7 +172,10 @@ describe("AdminPage user directory", () => {
     renderPage();
 
     expect(screen.queryByRole("button", { name: /remove admin/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/^admin$/i)).toBeInTheDocument();
+    // Scoped to the badge itself -- the page also has a screen-reader-only
+    // "Admin" heading elsewhere on the page, so a plain text match here
+    // would find both.
+    expect(screen.getByText(/^admin$/i, { selector: ".admin-badge" })).toBeInTheDocument();
   });
 
   it("shows a Super Admin badge (no toggle) for the super admin account itself", () => {

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import ChatPage from "../ChatPage";
 import { useAuth } from "../../context/useAuth";
 import { useConversations } from "../../hooks/useConversations";
+import { useNotifications } from "../../hooks/useNotifications";
 import { useChatThread } from "../../hooks/useChatThread";
 import { useUsers } from "../../hooks/useUsers";
 import { fetchUserProfile } from "../../services/userService";
@@ -17,6 +18,13 @@ vi.mock("../../context/useAuth", () => ({
 }));
 vi.mock("../../hooks/useConversations", () => ({
   useConversations: vi.fn(),
+}));
+// SiteHeader also always renders NotificationBell when logged in, which
+// calls useNotifications (and, through it, the same real useSocket() that
+// throws outside a SocketProvider) -- mocked for the same reason as
+// useConversations above.
+vi.mock("../../hooks/useNotifications", () => ({
+  useNotifications: vi.fn(),
 }));
 vi.mock("../../hooks/useChatThread", () => ({
   useChatThread: vi.fn(),
@@ -83,6 +91,7 @@ beforeEach(() => {
   mockNavigate.mockClear();
   useAuth.mockReturnValue({ user: { id: "me-id", name: "Ayah" }, logout: vi.fn() });
   useConversations.mockReturnValue(baseConversationsState);
+  useNotifications.mockReturnValue({ notifications: [], unreadCount: 0, markAllRead: vi.fn() });
   useChatThread.mockReturnValue(baseThreadState);
   useUsers.mockReturnValue(baseUsersState);
 });
